@@ -73,7 +73,7 @@ footer{font-size:.82rem;color:var(--muted);border-top:1px solid var(--line);padd
     <ul class="facts">
       <li>d20 + d6 / d4</li>
       <li>3 players + an Operator (game master)</li>
-      <li>9 classes, Tiers 1 to 10</li>
+      <li>9 classes, Levels 1 to 10</li>
       <li>Version: 18 Nov 2026</li>
     </ul>
     <p class="note">All numbers are first drafts and have not been played at a table yet. Balance was only checked with a simple computer simulation. Tell us what feels wrong.</p>
@@ -84,7 +84,7 @@ footer{font-size:.82rem;color:var(--muted);border-top:1px solid var(--line);padd
     <div class="steps">
       <div class="step"><span class="num">1</span><div><h3>Read the rules</h3><p>The Players Handbook. Short chapters, with sample characters.</p><a class="btn" href="files/Players_Handbook.pdf" target="_blank" rel="noopener">Open the Handbook</a></div></div>
       <div class="step"><span class="num">2</span><div><h3>Make your agent</h3><p>Pick from dropdowns. The sheet does the maths.</p><a class="btn" href="https://claude.ai/artifact/KKLaE24eA4FhCLqegpJ8Hw" target="_blank" rel="noopener">Open the character creator</a></div></div>
-      <div class="step"><span class="num">3</span><div><h3>Try a fight</h3><p>Paste your agent in and fight on a battle map. Enemies match your Tier.</p><a class="btn" href="https://claude.ai/artifact/BedMt2Zx3Uq8nGA6nkU4fS" target="_blank" rel="noopener">Open the fight simulator</a></div></div>
+      <div class="step"><span class="num">3</span><div><h3>Try a fight</h3><p>Paste your agent in and fight on a battle map. Enemies have fixed stats and each Boss has a recommended Level.</p><a class="btn" href="https://claude.ai/artifact/BedMt2Zx3Uq8nGA6nkU4fS" target="_blank" rel="noopener">Open the fight simulator</a></div></div>
     </div>
     <p style="font-size:.88rem">This page is always the newest version. Bookmark it, and the links never change.</p>
   </section>
@@ -93,11 +93,11 @@ footer{font-size:.82rem;color:var(--muted);border-top:1px solid var(--line);padd
     <h2 id="quick">Quick start</h2>
     <div class="cards">
       <div class="card"><h3>1. Your turn</h3><p>Move up to 30 ft. Take one action, usually an attack. One free action. One reaction per round to Block an attack.</p></div>
-      <div class="card"><h3>2. Did you hit?</h3><p>Roll <b>d20 + stat + Tier Bonus + weapon bonus</b>. Equal to or above the target's <b>Evade</b> (10 + DEX + Tier Bonus) is a hit. Ranged attacks cost 1 Trion; melee is free.</p></div>
+      <div class="card"><h3>2. Did you hit?</h3><p>Roll <b>d20 + stat + Level Bonus + weapon bonus</b>. Equal to or above the target's <b>Evade</b> (10 + DEX + Level Bonus) is a hit. Ranged attacks cost 1 Trion; melee is free.</p></div>
       <div class="card"><h3>3. What happened?</h3><p>Roll a <b>d6 for the body part</b> (1 right leg, 2 left leg, 3 right arm, 4 left arm, 5 chest, 6 weapon). Roll a <b>d6 for severity</b> and add the weapon's Lethal. Seven or more counts as 7. Wounds cost Trion.</p></div>
       <div class="card"><h3>4. Bailing out</h3><p>You bail out at 0 Trion, when your head or chest is destroyed, or if you are hit while Nearly Dead (two limbs destroyed). Nobody dies.</p></div>
     </div>
-    <p class="lead" style="font-size:.95rem">Making an agent takes about ten minutes. Stats start at 0: add +3, +2, +1, +1 and -1. Pick a special ability (three for every stat); it needs +3 in its stat, so your +3 decides which abilities you can take. Max Trion is 40 + 5 x TRION + 2 x STA + your class's Trion per Tier above 1, minus 2 for each weapon and 1 for each sub trigger you carry. The character creator does the maths. If you are unsure of a rule, the Operator decides and the game keeps moving.</p>
+    <p class="lead" style="font-size:.95rem">Making an agent takes about ten minutes. Stats start at 0: add +3, +2, +1, +1 and -1. Pick a special ability (three for every stat); it needs +3 in its stat, so your +3 decides which abilities you can take. Max Trion is 40 + 5 x TRION + 2 x STA + your class's Trion per Level above 1, minus 2 for each weapon and 1 for each sub trigger you carry. The character creator does the maths. If you are unsure of a rule, the Operator decides and the game keeps moving.</p>
   </section>
 
   <section aria-labelledby="books">
@@ -143,7 +143,7 @@ footer{font-size:.82rem;color:var(--muted);border-top:1px solid var(--line);padd
 
   <section aria-labelledby="sim">
     <h2 id="sim">Fight simulator</h2>
-    <p class="lead" style="font-size:.95rem">Paste in the character code from the creator and your own agent fights, with enemies scaled to your Tier. Or pick two teams of three, or a team and an enemy group, then choose a map. Watch the fighters move, take cover and fight round by round, or run 1,000 fights to see win rates. It includes the Aftokrator and Black Trigger bosses. It models class features, special abilities and sub triggers (some simplified, listed on the page), so use it as a balance check, not a prediction.</p>
+    <p class="lead" style="font-size:.95rem">Paste in the character code from the creator and your own agent fights, with enemies scaled to your Level. Or pick two teams of three, or a team and an enemy group, then choose a map. Watch the fighters move, take cover and fight round by round, or run 1,000 fights to see win rates. It includes the Aftokrator and Black Trigger bosses. It models class features, special abilities and sub triggers (some simplified, listed on the page), so use it as a balance check, not a prediction.</p>
     <div class="row">
       <a class="btn" href="https://claude.ai/artifact/BedMt2Zx3Uq8nGA6nkU4fS" target="_blank" rel="noopener">Open fight simulator</a>
       <a class="btn ghost" href="files/Fight_Simulator.html" target="_blank" rel="noopener">Download offline version</a>
