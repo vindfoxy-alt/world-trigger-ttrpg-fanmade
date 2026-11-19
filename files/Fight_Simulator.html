@@ -119,11 +119,11 @@ select{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8p
  <div class="stats" id="stats"></div>
 </div>
 
-<p class="note">This is a rough model. Agents imported from a character code now use their class features for their Tier, their special ability and their sub triggers (listed below), so Tier 2 and higher results are closer to the real rules. The premade fighters in the dropdowns are now full characters built the same way (a class, a special ability, weapons and sub triggers, shown as chips on their cards), so they follow the same rules as imported agents. Tick Turn-based to choose who the Blue team attacks on each turn. Enemies scale with the Fight tier (Minion, Soldier and Elite gain Trion per Tier; Bosses and Black Triggers get Trion per player). Imported agents use their real stats, first weapon and Trion. Block adds up: Basic Guard +2, plus +2 for Kogetsu or Raygust, plus +2 if an imported agent carries a Shield (it costs 2 Trion each time it is used, 1 for a Counterstriker), up to +6. Fighters move up to 30 ft (5 ft squares), then attack. Melee reaches 5 ft, ranged fighters use their weapon range and need a clear line of sight. Not simulated: Link points and Team Plays, flanking, surprise and noticing, ability checks, Attacker Quick Trigger, Sword Master and Mantis, Gunner Overwatch, Ace Gunner, Shooter Composite and Area Control, Keep Them Moving, Called Shot targeting beyond the chest, Trapper Web Weaver and Entangle, Ground Strike, Assassin Chameleon Approach, Decoy and Break Their Formation, Tactician Control the Space, Exploit a Habit and Rapid Reassessment, Counterstriker Reprisal, Bulwark, Hold the Line, Lampyris and Vorvoros Tier features, Borrowed Fire, Perfect Parallel Processing, Wall Breaker, Trap Sense, the Shield techniques, and the sub triggers Radar, Bagworm Tag, Enhanced Radar, Silencer and Timer (they have no effect in this simulator). Tier 5 specialisations are fixed to the first option. Chelidon has Gun Swap (rifle, shotgun or sidearm each attack), the Sidearm Block, Jet Pack and Strafing Run; the rules give Strafing Run no limit and it wins fights alone, so the simulator allows it once every 6 rounds. Lampyris has Piercing Shards (Tier 2), Marker Shards (Tier 4: allies get an Edge die against a marked target), Spotter (Tier 5: hidden enemies within 60 ft are seen) and the Tier 10 Shield; it always fires its Guns form, so Shield (before Tier 10) and Wings are not used. Vorvoros has Liquefy (twice a round at Tier 10, the second costs 2 more Trion), Gas Form (Tier 4, used when low on Trion; before Tier 8 it stops only the first attack) and Choking Cloud (Tier 5, used when it catches 2 or more enemies). Resist Heat is not modelled because the simulator has no fire. Borrowed Fire (Tier 7, once a fight, no Link cost) lends an ally the matching feature for a round. Escudo, Switchbox, Dummy Beacon, Idaten, Teleporter, Grasshopper, Chameleon, Bagworm and Geist are simplified. Black Triggers: a fighter marked + Black Trigger starts ignited (Edge die on attacks, Lethal +1, Block +3, lose 2 Trion a round). The Black Trigger bosses use the Monster Manual numbers with their powers simplified. Balance in this simulator: Attacker, Assassin and Counterstriker move 40 ft, Counterstriker and Assassin get +1 to hit, Lampyris Shard Guns are +0 to hit with Lethal 2 and ignore cover, Liquefy costs 2 Trion and Escudo gives Block +3. Map and movement rules are my first draft, built from your 30 ft move and weapon ranges, and are untested at the table. Treat the win rates as a sanity check on balance, not a prediction.</p>
+<p class="note">This is a rough model. Agents imported from a character code now use their class features for their Tier, their special ability and their sub triggers (listed below), so Tier 2 and higher results are closer to the real rules. The premade fighters in the dropdowns are now full characters built the same way (a class, a special ability, weapons and sub triggers, shown as chips on their cards), so they follow the same rules as imported agents. Tick Turn-based to choose who the Blue team attacks on each turn. Enemies scale with the Fight tier (Minion, Soldier and Elite gain Trion per Tier; Bosses and Black Triggers get Trion per player). Imported agents use their real stats, first weapon and Trion. Block adds up: Basic Guard +2, plus +2 for Kogetsu or Raygust, plus +2 if an imported agent carries a Shield (it costs 2 Trion each time it is used, 1 for a Counterstriker), up to +6. Fighters move up to 30 ft (5 ft squares), then attack. Melee reaches 5 ft, ranged fighters use their weapon range and need a clear line of sight. Not simulated: Link points and Team Plays, flanking, surprise and noticing, ability checks, Attacker Quick Trigger, Sword Master and Mantis, Gunner Overwatch, Ace Gunner, Shooter Composite and Area Control, Keep Them Moving, Called Shot targeting beyond the chest, Trapper Web Weaver and Entangle, Ground Strike, Assassin Chameleon Approach, Decoy and Break Their Formation, Tactician Control the Space, Exploit a Habit and Rapid Reassessment, Counterstriker Reprisal, Bulwark, Hold the Line, Lampyris and Vorvoros Tier features, Borrowed Fire, Perfect Parallel Processing, Wall Breaker, Trap Sense, the Shield techniques, and the sub triggers Radar, Bagworm Tag, Enhanced Radar, Silencer and Timer (they have no effect in this simulator). Tier 5 specialisations are fixed to the first option. Chelidon has Gun Swap (rifle, shotgun or sidearm each attack), the Sidearm Block, Jet Pack and Strafing Run; the rules give Strafing Run no limit and it wins fights alone, so the simulator allows it once every 6 rounds. Enemy groups use the Monster Manual creatures: Skitter, Hollow Blade, Lancer, Shade Stalker, Glider, Bulwark, Gatecrawler, Mirrorwarden, Bamster, Bado, the three Dogs, Marmod, Idra, Ilgar and the Rabbit, with their main traits (simplified: Lancer's Laser Sight, Guard Dog's Cover Pack, Idra's Remote Control, Radar and the Rabbit's variants are not modelled). To keep fights hard as your Tier rises, the enemy group gets extra members at higher Tiers and bosses gain Trion per Tier (see the numbers in the notes below). Lampyris has Piercing Shards (Tier 2), Marker Shards (Tier 4: allies get an Edge die against a marked target), Spotter (Tier 5: hidden enemies within 60 ft are seen) and the Tier 10 Shield; it always fires its Guns form, so Shield (before Tier 10) and Wings are not used. Vorvoros has Liquefy (twice a round at Tier 10, the second costs 2 more Trion), Gas Form (Tier 4, used when low on Trion; before Tier 8 it stops only the first attack) and Choking Cloud (Tier 5, used when it catches 2 or more enemies). Resist Heat is not modelled because the simulator has no fire. Borrowed Fire (Tier 7, once a fight, no Link cost) lends an ally the matching feature for a round. Escudo, Switchbox, Dummy Beacon, Idaten, Teleporter, Grasshopper, Chameleon, Bagworm and Geist are simplified. Black Triggers: a fighter marked + Black Trigger starts ignited (Edge die on attacks, Lethal +1, Block +3, lose 2 Trion a round). The Black Trigger bosses use the Monster Manual numbers with their powers simplified. Balance in this simulator: Attacker, Assassin and Counterstriker move 40 ft, Counterstriker and Assassin get +1 to hit, Lampyris Shard Guns are +0 to hit with Lethal 2 and ignore cover, Liquefy costs 2 Trion and Escudo gives Block +3. Map and movement rules are my first draft, built from your 30 ft move and weapon ranges, and are untested at the table. Treat the win rates as a sanity check on balance, not a prediction.</p>
 </div>
 <script>
 // World Trigger RPG fight engine: a JS port of the rough Tier 1 model used for the tier lists.
-const CFG={LIQ2:2,STRAFE_GAP:6,MELEE_MOVE:2,GEAR:6,TRAP_BLOCK:3,TRAP_SLOW:1,LIQ_COST:2,LAMP_HIT:0,LAMP_LETH:2,LAMP_PIERCE:1,KOG_BLOCK:2,RAY_BLOCK:2,BLOCK_CAP:6,SHIELD_COST:2,SLOWB:2,RIP:-1,SHOOTER_HIT:2};
+const CFG={ENC_BASE:1,ENM_L5:0,ENM_L9:0,BOSS_TIER:2,ENC_STEP:4,MIN_TIER:0,LIQ2:2,STRAFE_GAP:6,MELEE_MOVE:2,GEAR:6,TRAP_BLOCK:3,TRAP_SLOW:1,LIQ_COST:2,LAMP_HIT:0,LAMP_LETH:2,LAMP_PIERCE:1,KOG_BLOCK:2,RAY_BLOCK:2,BLOCK_CAP:6,SHIELD_COST:2,SLOWB:2,RIP:-1,SHOOTER_HIT:2};
 const CLASSES={
  Attacker:{reach:1,trion:49,atk:3,hit:1,leth:2,dex:1,block:()=>Math.min(CFG.BLOCK_CAP,3+CFG.KOG_BLOCK),kind:'melee',note:'Kogetsu, Super Strength Basic Guard'},
  Gunner:{reach:24,trion:50,atk:3,hit:1,leth:1,dex:3,block:2,kind:'ranged',note:'Assault Rifle'},
@@ -138,9 +138,9 @@ const CLASSES={
  Vorvoros:{reach:1,trion:49,atk:3,hit:0,leth:1,dex:1,block:2,kind:'melee',liq:1,sig:1,note:'Aftokrator, liquid and gas'}
 };
 const ENEMIES={
- M:{reach:1,label:'Minion',trion:18,atk:3,leth:0,block:0,att:1,to:1},
- S:{reach:1,label:'Soldier',trion:44,atk:3,leth:1,block:0,att:1},
- E:{reach:1,label:'Elite',trion:76,atk:3,leth:2,block:2,att:1},
+ M:{reach:12,kind:'ranged',label:'Minion',trion:18,atk:1,leth:0,block:0,att:1,to:1},
+ S:{reach:1,label:'Soldier',trion:44,atk:3,leth:1,block:2,att:1},
+ E:{reach:1,label:'Elite',trion:76,atk:5,leth:2,block:4,att:1},
  K:{reach:12,label:'Black Trigger wielder',trion:90,atk:6,leth:2,block:3,att:2,to:1,burn:3,mv:1},
  CH:{reach:12,label:'Cinderheart',trion:90,atk:6,leth:2,block:3,att:2,to:1,burn:3,mv:9,weak:1,sp:'ch'},
  AL:{reach:1,label:'Alektor (Hyrein)',trion:90,atk:6,leth:2,block:3,att:2,to:1,burn:3,mv:1,weak:1,sp:'al'},
@@ -149,11 +149,33 @@ const ENEMIES={
  BE:{reach:1,label:'Beast',trion:18,atk:1,leth:0,block:0,att:1,to:1,beast:1},
  PR:{reach:3,label:'Chelidon boss',trion:60,atk:5,leth:1,block:2,att:2,to:1,shot:1},
  PH:{reach:3,label:'Lampyris boss',trion:60,atk:5,leth:1,block:2,att:2,to:1,rshield:1},
- PE:{reach:3,label:'Vorvoros boss',trion:60,atk:5,leth:1,block:2,att:2,to:1,liq:1,gas:1}
+ PE:{reach:3,label:'Vorvoros boss',trion:60,atk:5,leth:1,block:2,att:2,to:1,liq:1,gas:1},
+ // Monster Manual creatures (traits are coded in the monster layer)
+ SK:{reach:12,kind:'ranged',label:'Skitter',trion:18,atk:1,leth:0,block:0,att:1,to:1,mv:2,t:['pack','burst','fragile','fly']},
+ HB:{reach:1,label:'Hollow Blade',trion:44,atk:3,leth:1,block:2,att:2,mv:3,t:['twin','lunge']},
+ LA:{reach:24,kind:'ranged',label:'Lancer',trion:44,atk:3,leth:1,block:0,att:1,mv:-2,t:['anchor']},
+ SS:{reach:1,label:'Shade Stalker',trion:44,atk:3,leth:1,block:2,att:1,mv:1,t:['veil','fade']},
+ GL:{reach:12,kind:'ranged',label:'Glider',trion:44,atk:3,leth:0,block:2,att:1,dex:1,mv:2,t:['fly','bomb']},
+ BU:{reach:1,label:'Bulwark',trion:76,atk:5,leth:2,block:4,att:1,mv:-1,t:['plate','bash','cover']},
+ GC:{reach:18,kind:'ranged',label:'Gatecrawler',trion:60,atk:5,leth:1,block:2,att:2,to:1,mv:-1,nk:1,t:['gate','eye2']},
+ MW:{reach:12,kind:'ranged',label:'Mirrorwarden',trion:60,atk:5,leth:1,block:2,att:2,to:1,nk:1,t:['mirror']},
+ EC:{reach:1,label:'Echo',trion:10,atk:1,leth:0,block:0,att:1,to:1},
+ BA:{reach:1,label:'Bamster',trion:18,atk:1,leth:0,block:0,att:1,to:1,mv:-1,t:['tough','grab']},
+ BD:{reach:6,kind:'ranged',label:'Bado',trion:18,atk:1,leth:0,block:0,att:1,to:1,mv:2,t:['fly','snatch','survey']},
+ DS:{reach:1,label:'Scout Dog',trion:18,atk:1,leth:0,block:0,att:1,to:1,dex:1,mv:2,t:['dogs','scout']},
+ DH:{reach:1,label:'Hunter Dog',trion:44,atk:3,leth:1,block:2,att:1,mv:3,t:['dogs','lunge']},
+ DG:{reach:1,label:'Guard Dog',trion:44,atk:3,leth:1,block:3,att:1,t:['dogs']},
+ MM:{reach:1,label:'Marmod',trion:44,atk:3,leth:1,block:2,att:2,t:['twin','hard']},
+ ID:{reach:1,label:'Idra',trion:44,atk:3,leth:1,block:3,att:1,t:['idra']},
+ IL:{reach:2,label:'Ilgar',trion:76,atk:5,leth:2,block:4,att:1,mv:2,t:['fly','selfd','bomb2']},
+ RB:{reach:1,label:'Rabbit',trion:60,atk:5,leth:1,block:2,att:2,to:1,nk:1,t:['spikes','cube','armor','eye15']}
 };
 const ENCOUNTERS={
  '3 Soldiers + Minion':['S','S','S','M'],'2 Soldiers + 3 Minions':['S','S','M','M','M'],'Elite + Soldier':['E','S'],
  'Elite + 2 Soldiers':['E','S','S'],'6 Minions':['M','M','M','M','M','M'],
+ 'Skitter Run':['SK','SK','SK','SK','SK','SK','LA'],'Hold the Line':['BU','HB','HB'],'The Open Gate':['GC'],
+ 'Ambush Alley':['SS','SS','SK','SK','SK'],'Dive Bombers':['GL','GL','LA','SK'],'The Mirror Duel':['MW'],
+ 'Snatch and Grab':['BA','BA','BA','BA','BD'],'Dog Pack':['DS','DH','DG'],'Blade Line':['MM','MM','ID'],'Bomber Run':['IL','BD'],'The Capture Order':['RB'],
  'Black Trigger wielder':['K'],'Cinderheart':['CH'],'Alektor (Hyrein)':['AL'],'Organon (Viza)':['OR'],'Speiraskia (Mira)':['SP'],'Chelidon boss':['PR'],'Lampyris boss':['PH'],'Vorvoros boss':['PE']
 };
 
@@ -214,8 +236,9 @@ const val=v=>typeof v==='function'?v():v;
 // Tier scaling (Handbook Tier Progression): Tier Bonus is added to every attack roll and to Evade.
 const TIERB=[0,0,1,1,2,2,3,3,4,4];
 const TIER_TRION={Attacker:5,Gunner:4,Shooter:4,Sniper:3,Trapper:5,Assassin:4,Tactician:4,Counterstriker:5,Chelidon:4,Lampyris:4,Vorvoros:4};
-const ENEMY_TIER_TRION={M:3,S:4,E:6,BE:3};   // Handbook: Minion +3, Soldier +4, Elite +6 per Tier above 1
-const BOSS_PER_PLAYER={PR:20,PH:20,PE:20,K:30,CH:30,AL:30,OR:30,SP:30}; // Handbook: Boss 20, Black Trigger 30 per player
+const ENEMY_TIER_TRION={M:3,S:4,E:6,BE:3,SK:3,HB:4,LA:4,SS:4,GL:4,BU:6,BA:3,BD:3,DS:3,DH:4,DG:4,MM:4,ID:4,IL:6};   // Handbook: Minion +3, Soldier +4, Elite +6 per Tier above 1
+const BOSS_PER_PLAYER={GC:20,MW:20,RB:20,PR:30,PH:30,PE:40,K:30,CH:40,AL:30,OR:30,SP:40};
+const BOSS_SLOPE={GC:4,PE:4,PH:3}; // Handbook: Boss 20, Black Trigger 30 per player
 const tierBonus=t=>TIERB[Math.max(1,Math.min(10,t|0||1))-1];
 // reach is in 5 ft squares; hit = weapon hit bonus; shot = Lethal +1 within 15 ft (the shotgun rule, simplified)
 const WEAPONS={
@@ -288,9 +311,10 @@ function makeAgent(cls,team,label,T){
 }
 function makeEnemy(code,team,label,T,n){
   const e=ENEMIES[code]; T=T||1; n=n||3; const tb=tierBonus(T);
-  const trn=BOSS_PER_PLAYER[code]?BOSS_PER_PLAYER[code]*n:e.trion+(ENEMY_TIER_TRION[code]||0)*(T-1);
-  return {name:label||e.label,cls:code,bt:false,sp:e.sp||null,weak:!!e.weak,beast:!!e.beast,awake:false,cubes:1,volleyed:false,evUntil:-1,rootUntil:-1,burn:e.burn||0,mvb:e.mv||0,tb,tier:T,team,agent:false,max:trn,tr:trn,atk:e.atk+tb,leth:e.leth,dex:0,block:e.block,cost:0,attacks:e.att,
-    kind:'melee',reach:e.reach,legpen:0,w:{},ba:false,dead:false,mods:0,slow:0,riposte:false,assist:0,armpen:0,destroyed:new Set(),nd:false,
+  const mini=(ENEMY_TIER_TRION[code]===3)?CFG.MIN_TIER:ENEMY_TIER_TRION[code]||0;
+  const trn=BOSS_PER_PLAYER[code]?(BOSS_PER_PLAYER[code]+(BOSS_SLOPE[code]!=null?BOSS_SLOPE[code]:CFG.BOSS_TIER)*(T-1))*n:e.trion+mini*(T-1);
+  return {name:label||e.label,cls:code,bt:false,sp:e.sp||null,weak:!!e.weak,beast:!!e.beast,awake:false,cubes:1,volleyed:false,evUntil:-1,rootUntil:-1,burn:e.burn||0,mvb:e.mv||0,tb,tier:T,team,agent:false,mt:new Set(e.t||[]),nk:!!e.nk,max:trn,tr:trn,atk:e.atk+tb,leth:e.leth+(T>=9?CFG.ENM_L9:T>=5?CFG.ENM_L5:0),dex:e.dex||0,block:e.block,cost:0,attacks:e.att,
+    kind:e.kind||'melee',reach:e.reach,legpen:0,w:{},ba:false,dead:false,mods:0,slow:0,riposte:false,assist:0,armpen:0,destroyed:new Set(),nd:false,
     snipe:false,trap:false,ambush:false,tac:false,counter:false,shot:!!e.shot,liq:!!e.liq,to:!!e.to,rshield:!!e.rshield,gas:!!e.gas,gasr:false,liqused:false};
 }
 
@@ -313,6 +337,7 @@ function los(F,a,b){
 function sightCap(F){const f=F.map.f;return f.fog>1?8:f.fog?15:99;}
 function canShoot(F,a,t,pos){ // can a, standing at pos, attack t?
   const dist=cheb(pos,t.pos); if(dist>a.reach||dist>sightCap(F)) return false;
+  if(t.echoed&&echoGuard(F,t)) return false;
   return dist<=1||a.sp==='sp'||los(F,pos,t.pos);
 }
 function coverAt(F,t,from){ const g=F.g;
@@ -320,7 +345,7 @@ function coverAt(F,t,from){ const g=F.g;
     if(x<0||y<0||x>=g.W||y>=g.H||!g.blk[y*g.W+x])continue;
     if(dx*(from.x-t.pos.x)+dy*(from.y-t.pos.y)>0) return true; }
   return false; }
-function speed(F,u){ if(u.rootUntil>=F.rnd) return 0; let sp=6+u.mvb+(u.agent&&u.reach<=1&&!u.liq?CFG.MELEE_MOVE:0)-(F.map.f.rubble&&!u.lf?2:0)-u.legpen;
+function speed(F,u){ if(u.rootUntil>=F.rnd) return 0; if(u.grabbedBy&&!u.grabbedBy.dead) return 0; let sp=6+u.mvb+(u.agent&&u.reach<=1&&!u.liq?CFG.MELEE_MOVE:0)-(F.map.f.rubble&&!u.lf?2:0)-u.legpen;
   const legs=['leg0','leg1'].filter(k=>u.destroyed.has(k)).length; for(let i=0;i<legs;i++) sp=Math.floor(sp/2);
   if(u.slow>0) sp=Math.floor(sp/2); if(u.agent&&F.leader&&F.duskUntil>=F.rnd&&cheb(u.pos,F.leader.pos)<=6) sp=Math.floor(sp/2); return Math.max(1,sp); }
 function occupied(F,x,y,self){ for(const u of F.A.concat(F.B)) if(u!==self&&!u.dead&&u.pos.x===x&&u.pos.y===y) return true; return false; }
@@ -340,6 +365,15 @@ function nameAll(units){ // number duplicates
   const cnt={};units.forEach(u=>cnt[u.name]=(cnt[u.name]||0)+1);
   const seen={};units.forEach(u=>{if(cnt[u.name]>1){seen[u.name]=(seen[u.name]||0)+1;u.name+=' '+seen[u.name];}});
 }
+const ENC_ADJ={'3 Soldiers + Minion':{base:1,step:3},'2 Soldiers + 3 Minions':{base:1,step:4},'Elite + Soldier':{base:2,step:6},'Elite + 2 Soldiers':{base:1,step:4},'Skitter Run':{base:0,step:4},'Hold the Line':{base:1,step:99},'Ambush Alley':{base:1,step:4},'Dive Bombers':{base:1,step:3},'Snatch and Grab':{base:1,step:3},'Dog Pack':{base:1,step:3},'Blade Line':{base:1,step:6},'Bomber Run':{base:3,step:4}};
+function scaleEnc(codes,T,name){
+  const adj=(name&&ENC_ADJ[name])||{};
+  if(!codes||codes.some(c=>BOSS_PER_PLAYER[c])) return codes.slice();
+  const minOnly=codes.every(c=>ENEMY_TIER_TRION[c]===3);
+  const extra=Math.floor(((T||1)-1)/(adj.step||CFG.ENC_STEP))+(minOnly?0:(adj.base!=null?adj.base:CFG.ENC_BASE)); if(extra<=0) return codes.slice();
+  const cnt={}; codes.forEach(c=>cnt[c]=(cnt[c]||0)+1);
+  const base=Object.keys(cnt).sort((a,b)=>ENEMIES[a].trion-ENEMIES[b].trion||cnt[b]-cnt[a])[0];
+  const out=codes.slice(); for(let i=0;i<extra;i++) out.push(base); return out; }
 function newFight(sideA,sideB,opts={}){
   const R=mkRng(opts.seed);
   const T=opts.tier||1;
@@ -357,10 +391,13 @@ function newFight(sideA,sideB,opts={}){
 const d=(F,n)=>1+Math.floor(F.R()*n);
 const lim=(u,share)=>Math.max(1,Math.round(u.max*share));
 function L(F,kind,text){ if(F.log) F.log.push({rnd:F.rnd,kind,text}); }
-function bail(F,u){ u.dead=true; u.tr=Math.min(u.tr,0); L(F,'bail',u.name+' is bailed out.'); }
+function bail(F,u){ u.dead=true; u.tr=Math.min(u.tr,0); L(F,'bail',u.name+' is bailed out.');
+  if(u.mt&&u.mt.has('burst')){ for(const x of F.A.concat(F.B)){ if(x!==u&&!x.dead&&cheb(x.pos,u.pos)<=1){ x.tr-=1; L(F,'info',`${u.name} bursts: ${x.name} takes 1 wound.`); if(x.tr<=0) bail(F,x); } } }
+  if(u.echoOf){ u.deadRnd=F.rnd; const w=u.echoOf; const other=F.A.concat(F.B).find(x=>x.echoOf===w&&x!==u); if(other&&other.dead&&other.deadRnd===F.rnd&&!w.dead){ w.skipRnd=(w.actedRnd===F.rnd)?F.rnd+1:F.rnd; L(F,'big',`Both Echoes fall in the same round: ${w.name} is stunned and loses its next turn.`); } } }
 function survive(F,u,key){ if(u.htb>0&&!u.destroyed.has(key)){ u.htb--; u.w[key]=Math.min(u.w[key],lim(u,.1)-1); L(F,'big',`${u.name}'s limb survives as a hurt limb (Hard to Break).`); return true;} return false; }
 function wound(F,u,part,sev,Lt){
   if(u.dead) return;
+  if(u.mt&&u.mt.has('fly')&&part<2&&!u.grounded){ u.grounded=true; u.dex=Math.max(0,u.dex-1); u.mvb-=2; L(F,'big',`${u.name}'s wing is damaged: it lands and cannot fly.`); }
   if(u.cham){u.cham=false;u.gSnag=false;}
   const limb=part<4;
   let s=Math.min(sev+Lt,limb?7:6);
@@ -368,6 +405,12 @@ function wound(F,u,part,sev,Lt){
     s=Math.min(s,6);
     let n=part!==4?[1,1,1,2,2,3][s-1]:[2,2,2,4,4,8][s-1];
     if(u.weak&&part===4&&s>=6){ n+=6; L(F,'big',`Weak spot! The core takes 6 extra Trion.`); }
+    if(u.mt&&u.mt.size){ const m=u.mt;
+      if(m.has('tough')&&n<3) n=Math.max(1,n-1);
+      if(m.has('armor')&&s<=3) n=Math.max(1,n-1);
+      if(m.has('fragile')) n=Math.max(n,3);
+      if(m.has('eye2')&&part===4){ n+=2; L(F,'big',`The eye is hit: 2 extra wounds.`); }
+      if(m.has('eye15')&&part===4&&s>=5){ n+=15; L(F,'big',`The Rabbit's eye is hit: 15 extra Trion.`); } }
     u.tr-=n; L(F,'hit',`${u.name} takes ${n} wound${n>1?'s':''} (${u.tr<=0?'0':u.tr} Trion left).`);
     if(u.tr<=0) bail(F,u); return;
   }
@@ -414,10 +457,12 @@ function attack(F,a,t,bonus,opt){
   let r0=d(F,20); const snag=a.agent&&F.leader&&F.duskUntil>=F.rnd&&cheb(a.pos,F.leader.pos)<=6; if(a.bt&&!snag){ r0=Math.max(r0,d(F,20)); } else if(snag&&!a.bt){ r0=Math.min(r0,d(F,20)); } let r=r0+a.atk+bonus-a.armpen+a.mods+(opt.hit||0);
   if(a.supp>0){ r-=2; a.supp--; }
   if(a.cloudPen) r-=a.cloudPen;
+  if(a.stunUntil>=F.rnd) r-=2;
   if(t.distr>0&&t.distrOwner&&a!==t.distrOwner&&a.team===t.distrOwner.team){ r+=2; t.distr--; const dow=t.distrOwner; if(dow.f&&dow.f.T>=8&&dow.f.aoR!==F.rnd){ dow.f.aoR=F.rnd; opt.sev=(opt.sev||0)+1; } }
   if(t.expo>0&&a.team!==t.team){ r+=3; t.expo--; opt.ign=true; }
+  const hmm=(u,k)=>!!(u.mt&&u.mt.has(k));
   const mE=!!(t.mShard&&t.mShard!==a&&!t.mShard.dead&&t.mShard.team===a.team);
-  { const eN=(opt.edge||a.edge>0||t.edgeVs||mE)?1:0, sN=(opt.snag||a.snagN>0||a.pressureOn===t||t.gSnag)?1:0; if(a.edge>0)a.edge--; if(a.snagN>0)a.snagN--; if(a.pressureOn===t)a.pressureOn=null; if(eN) r+=d(F,4); if(sN) r-=d(F,4); }
+  { const sv=F.surv&&F.surv[a.team]; const eN=(opt.edge||a.edge>0||t.edgeVs||mE||(t.edgeUntil>=F.rnd&&a.team!==t.team)||(sv&&sv.t===t&&sv.rnd===F.rnd))?1:0, sN=(opt.snag||a.snagN>0||a.pressureOn===t||t.gSnag||(hmm(t,'mirror')&&a.markedBy===t)||(a.grabbedBy&&!a.grabbedBy.dead))?1:0; if(a.edge>0)a.edge--; if(a.snagN>0)a.snagN--; if(a.pressureOn===t)a.pressureOn=null; if(eN) r+=d(F,4); if(sN) r-=d(F,4); }
   if(a.cost&&a.kind==='ranged'&&!opt.free) a.tr-=a.cost;
   let ev=10+t.dex+(t.tb||0)-(t.slow>0?(t.slowPen||2):0)+(t.evB||0)-(t.evPen||0)+(a.kind==='ranged'?(t.es||0)+((t.f&&t.f.cls==='Sniper'&&t.f.T>=8&&cheb(a.pos,t.pos)>6)?2:0):0);
   if(a.kind==='ranged'||a.reach>1){ if(!(CFG.LAMP_PIERCE&&((a.cls==='Lampyris'&&(!a.f||a.f.T>=2))||a.bf==='L'))&&!opt.cov&&coverAt(F,t,a.pos)){ ev+=2; L(F,'info',t.name+' is behind cover (+2 Evade).'); } }
@@ -430,9 +475,10 @@ function attack(F,a,t,bonus,opt){
   if(t.sp==='or'&&!t.volleyed&&a.kind==='melee'&&a.reach<=2) blk+=1;
   if(t.sp==='sp'&&a.kind==='melee'&&a.reach<=1){ blk+=1; a.tr-=1; L(F,'info',`Spike Form: ${a.name} takes 1 wound.`); }
   if(t.gasr&&!(t.gasLeft<=0)){ if(t.gasLeft>0) t.gasLeft--; if(a.kind==='melee'){ L(F,'miss',desc+` — ${t.name} is gas, melee passes through.`); return false; } r-=2; if(r<ev){ L(F,'miss',desc+' — misses the gas cloud.'); return false; } }
+  if(t.mt&&t.mt.size) blk+=monBlock(F,a,t);
   if(opt.noWblk) blk-=(t.wblk||0);
   blk=Math.min(CFG.BLOCK_CAP,blk);
-  if(!t.ba&&t.shield&&r>=ev+blk&&r<ev+Math.min(CFG.BLOCK_CAP,blk+t.shield)&&t.tr>t.shieldCost+2){ t.tr-=t.shieldCost; blk=Math.min(CFG.BLOCK_CAP,blk+t.shield); L(F,'info',`${t.name} raises the Shield (-${t.shieldCost} Trion).`); }
+  if(!t.ba&&t.shield&&!hmm(a,'hard')&&r>=ev+blk&&r<ev+Math.min(CFG.BLOCK_CAP,blk+t.shield)&&t.tr>t.shieldCost+2){ t.tr-=t.shieldCost; blk=Math.min(CFG.BLOCK_CAP,blk+t.shield); L(F,'info',`${t.name} raises the Shield (-${t.shieldCost} Trion).`); }
   if(a.kind==='ranged'){ const escs=t.team==='A'?F.escA:F.escB; for(const e of escs){ if(e.n>0&&!e.own.dead&&cheb(e.own.pos,t.pos)<=2){ e.n--; blk+=3; L(F,'info',`${t.name} is behind the Escudo barrier (+3 Block).`); break; } } }
   if(opt.ign) blk=0;
   if(!t.ba&&r<ev+blk){ t.ba=true; if(t.counter) t.riposte=true; L(F,'block',desc+` — blocked by ${t.name} (Block +${blk}).`); return false; }
@@ -451,7 +497,7 @@ function plan(F,u,foes){
   const threats=foes.filter(f=>f.reach<=3);
   let best=null,bs=-1e9;
   for(let i=0;i<dist.length;i++){ if(dist[i]<0) continue; const pos={x:i%W,y:(i/W)|0};
-    let safety=0; if(!melee&&threats.length){ let m=99; for(const th of threats){ const dd=cheb(pos,th.pos); if(dd<m)m=dd; } safety=F.kite?Math.min(m,10)*(u.agent?5:1):0; }
+    let safety=0; if(!melee&&!u.nk&&threats.length){ let m=99; for(const th of threats){ const dd=cheb(pos,th.pos); if(dd<m)m=dd; } safety=F.kite?Math.min(m,10)*(u.agent?5:1):0; }
     for(const t of foes){ if(!canShoot(F,u,t,pos)) continue;
       let sc=100-dist[i]*(melee?3:0.5);
       sc+= u.agent? -t.tr*0.5+(t.sp?35:0) : 0;
@@ -509,7 +555,7 @@ function turnBT(F,u,foes){
 const FIREARMS=['Handgun','Assault Rifle','Shotgun','Grenade Launcher','Minigun'],SHOOTERS=['Asteroid','Meteora','Hound','Viper'],MELEEW=['Kogetsu','Scorpion','Raygust'];
 const hasS=(u,n)=>!!(u.f&&u.f.subs.has(n));
 const spend=(F,u,n,why)=>{u.tr-=n;L(F,'info',`${u.name} spends ${n} Trion on ${why}.`);};
-function seen(F,v,x){ if(x.marked) return true; for(const a of (v.team==='A'?F.A:F.B)){ if(!a.dead&&a.f&&a.f.cls==='Lampyris'&&a.f.T>=5&&cheb(a.pos,x.pos)<=12) return true; } return false; }
+function seen(F,v,x){ if(x.marked) return true; for(const a of (v.team==='A'?F.A:F.B)){ if(!a.dead&&a.mt&&a.mt.has('scout')&&cheb(a.pos,x.pos)<=12) return true; } for(const a of (v.team==='A'?F.A:F.B)){ if(!a.dead&&a.f&&a.f.cls==='Lampyris'&&a.f.T>=5&&cheb(a.pos,x.pos)<=12) return true; } return false; }
 function foesOf(F,u){return (u.team==='A'?F.B:F.A).filter(x=>!x.dead);}
 function alliesOf(F,u){return (u.team==='A'?F.A:F.B).filter(x=>!x.dead&&x!==u);}
 function initFeat(u,o,cls,T,wn){
@@ -644,6 +690,78 @@ function featHit(F,u,t,o){
 function push(F,t,from,n){ if(t.dead) return; for(let i=0;i<n;i++){ let best=null,bd=cheb(t.pos,from.pos); for(let dx=-1;dx<=1;dx++)for(let dy=-1;dy<=1;dy++){ if(!dx&&!dy)continue; const x=t.pos.x+dx,y=t.pos.y+dy; if(x<0||y<0||x>=F.g.W||y>=F.g.H||F.g.blk[y*F.g.W+x]||occupied(F,x,y,t))continue; const dd=cheb({x,y},from.pos); if(dd>bd){bd=dd;best={x,y};} } if(!best)break; t.pos=best; } L(F,'info',`${t.name} is pushed back (Super Strength).`); }
 function foeDecoy(F,a,t){ return t.decoy>=F.rnd&&a.agent!==undefined&&F.R()<.5; }
 
+
+// ---------- Monster layer: traits of the Monster Manual creatures ----------
+function hm(u,k){ return !!(u.mt&&u.mt.has(k)); }
+function echoGuard(F,w){ const es=(w.team==='A'?F.A:F.B).filter(x=>x.echoOf===w&&!x.dead); return es.length>=2&&es.every(e=>cheb(e.pos,w.pos)<=2); }
+function flankedBy(F,t){ const fs=(t.team==='A'?F.B:F.A).filter(x=>!x.dead&&cheb(x.pos,t.pos)<=1);
+  for(let i=0;i<fs.length;i++)for(let j=i+1;j<fs.length;j++){ if((fs[i].pos.x-t.pos.x)*(fs[j].pos.x-t.pos.x)+(fs[i].pos.y-t.pos.y)*(fs[j].pos.y-t.pos.y)<0) return true; } return false; }
+function monBlock(F,a,t){ let b=0;
+  if(hm(t,'plate')&&flankedBy(F,t)) b-=2;
+  if(hm(t,'idra')){ if(flankedBy(F,t)) b-=1; if((t.team==='A'?F.A:F.B).some(x=>x!==t&&!x.dead&&hm(x,'idra')&&cheb(x.pos,t.pos)<=2)) b+=1; }
+  if(hm(t,'selfd')&&t.charge) b+=2;
+  return b; }
+function spawnMon(F,owner,code,n,maxr){
+  const arr=owner.team==='A'?F.A:F.B; let made=0; const g=F.g;
+  for(let r=1;r<=(maxr||3)&&made<n;r++)for(let dx=-r;dx<=r&&made<n;dx++)for(let dy=-r;dy<=r&&made<n;dy++){
+    if(Math.max(Math.abs(dx),Math.abs(dy))!==r) continue;
+    const x=owner.pos.x+dx,y=owner.pos.y+dy; if(x<0||y<0||x>=g.W||y>=g.H||g.blk[y*g.W+x]||occupied(F,x,y,null)) continue;
+    const b=makeEnemy(code,owner.team,null,F.tier,3); b.name=b.name+' '+(arr.filter(z=>z.cls===code).length+1); b.pos={x,y}; b.spawned=true; if(code==='EC') b.echoOf=owner; arr.push(b); made++; }
+  return made; }
+function pull(F,t,toward,n){ for(let i=0;i<n;i++){ let best=null,bd=cheb(t.pos,toward.pos); for(let dx=-1;dx<=1;dx++)for(let dy=-1;dy<=1;dy++){ if(!dx&&!dy)continue; const x=t.pos.x+dx,y=t.pos.y+dy; if(x<0||y<0||x>=F.g.W||y>=F.g.H||F.g.blk[y*F.g.W+x]||occupied(F,x,y,t))continue; const dd=cheb({x,y},toward.pos); if(dd<bd&&dd>=1){bd=dd;best={x,y};} } if(!best)break; t.pos=best; } }
+function monStart(F,u,foes){
+  const rnd=F.rnd; u.mstart={x:u.pos.x,y:u.pos.y}; u.cs=0;
+  if(hm(u,'veil')&&rnd===1){ u.hid=true; for(const x of foes){ if(x.agent!==undefined&&d(F,20)+(x.tb||0)>=12){ u.hid=false; L(F,'info',`${x.name} notices ${u.name} (Notice check).`); break; } } if(u.hid) L(F,'info',`${u.name} starts Hidden.`); }
+  if(hm(u,'twin')){ const arms=['arm2','arm3'].filter(k=>u.destroyed.has(k)).length; u.attacks=arms>0?1:2; }
+  if(hm(u,'survey')){ const vis=foes.filter(x=>!x.dead&&cheb(x.pos,u.pos)<=12); if(vis.length){ const t=vis.sort((p,q)=>p.tr-q.tr)[0]; (F.surv=F.surv||{})[u.team]={t,rnd}; L(F,'info',`${u.name} spots ${t.name}: its allies have an Edge die against ${t.name} this round.`); } }
+  if(hm(u,'gate')&&!u.gateDone&&u.tr<=u.max/2){ u.gateDone=true; const n=spawnMon(F,u,'SK',3,6); L(F,'big',`${u.name} opens the Gate: ${n} Skitters pour out.`); }
+  if(hm(u,'mirror')&&!u.echoed&&u.tr<=u.max/2){ u.echoed=true; const n=spawnMon(F,u,'EC',2,3); L(F,'big',`${u.name} splits into Echoes: it cannot be hit while both Echoes stand within 10 ft.`); }
+  if(hm(u,'selfd')&&!u.charge&&u.tr<=u.max*.25){ u.charge=rnd; L(F,'big',`${u.name} begins to charge its Self-Destruct (Block +2). It explodes at the end of its next turn!`); }
+}
+function monAfterPlan(F,u,foes,tgt){ u.lunged=!!(u.mstart&&cheb(u.mstart,u.pos)>0); }
+function monCover(F,a,t){ if(hm(t,'cover')) return t;
+  const bw=(t.team==='A'?F.A:F.B).find(x=>!x.dead&&hm(x,'cover')&&x!==t&&cheb(x.pos,t.pos)<=1&&x.coverRnd!==F.rnd&&canShoot(F,a,x,a.pos));
+  if(bw){ bw.coverRnd=F.rnd; L(F,'info',`${bw.name} steps in front of ${t.name} (Cover Others).`); return bw; } return t; }
+function monAtk(F,u,t,k,foes){
+  const o={hit:0,leth:0,sev:0,edge:0,snag:0,free:false,noWblk:false,ign:false,cov:false,second:false};
+  if(hm(u,'twin')&&u.attacks>=2) o.hit-=2;
+  if(hm(u,'lunge')&&u.lunged&&k===0) o.edge=1;
+  if(hm(u,'anchor')){ if(u.lunged) o.snag=1; else o.edge=1; }
+  if(hm(u,'pack')){ const n=(u.team==='A'?F.A:F.B).filter(x=>!x.dead&&hm(x,'pack')&&cheb(x.pos,t.pos)<=2).length; if(n>=3) o.edge=1; }
+  if(hm(u,'dogs')){ const n=(u.team==='A'?F.A:F.B).filter(x=>x!==u&&!x.dead&&hm(x,'dogs')&&cheb(x.pos,u.pos)<=2).length; if(n>=1) o.edge=1; if(n>=2) o.hit+=2; }
+  if(hm(u,'hard')&&(t.shield||t.wblk)) o.leth+=1;
+  if(hm(u,'mirror')){ if(t.markedBy===u) o.hit+=2; const near=cheb(u.pos,t.pos)<=1; u.kind=near?'melee':'ranged'; if(!near) o.bounce=true; if(!near) o.leth-=0; }
+  if(hm(u,'gate')){ const near=cheb(u.pos,t.pos)<=2; u.kind=near?'melee':'ranged'; if(!near){ o.leth-=1; o.area=true; } }
+  if(hm(u,'bomb')) o.area=true;
+  if(hm(u,'bomb2')){ o.selfarea=true; o.leth-=1; }
+  if(hm(u,'veil')&&u.hid){ u.cs=1; }
+  return o; }
+function monArea(F,u,t,bonus,o){
+  const ctr=o.selfarea?u.pos:t.pos, r=o.selfarea?2:1;
+  for(const x of foesOf(F,u)){ if(x===t||x.dead||cheb(x.pos,ctr)>r) continue;
+    if(attack(F,u,x,bonus+(hm(u,'bomb')?2:0),{})) applyHit(F,u,x,u.leth+(o.leth||0)); } }
+function monBounce(F,u,t,bonus){
+  const x=foesOf(F,u).filter(y=>y!==t&&!y.dead&&cheb(y.pos,t.pos)<=2)[0]; if(!x) return;
+  L(F,'info',`The beam bounces to ${x.name}.`); if(attack(F,u,x,bonus,{})) applyHit(F,u,x,u.leth); }
+function monOnHit(F,a,t,o){
+  if(hm(t,'mirror')&&a.agent!==undefined||(hm(t,'mirror')&&a.team!==t.team)){ for(const x of foesOf(F,t)) if(x.markedBy===t) x.markedBy=null; if(!a.dead) a.markedBy=t; L(F,'info',`${a.name} is Marked by ${t.name}: it has +2 to hit ${a.name}, and ${a.name} has a Snag die against it.`); }
+  if(!hm(a,'grab')&&!hm(a,'snatch')&&!hm(a,'spikes')&&!hm(a,'bash')) return;
+  if(t.dead) return;
+  if(hm(a,'grab')&&(!t.grabbedBy||t.grabbedBy.dead)){ t.grabbedBy=a; L(F,'big',`${a.name} grabs ${t.name}: it cannot move and has a Snag die on attacks until ${a.name} is removed.`); }
+  if(hm(a,'snatch')){ pull(F,t,a,2); t.edgeUntil=F.rnd+(t.actedRnd===F.rnd?1:0); L(F,'info',`${a.name} snatches ${t.name} 10 ft closer: attacks against it have an Edge die.`); }
+  if(hm(a,'bash')){ push(F,t,a,2); t.snagN=(t.snagN||0)+1; L(F,'info',`${a.name}'s Shield Bash pushes ${t.name} back: its next attack has a Snag die.`); }
+  if(hm(a,'spikes')){
+    if(o&&o.cube){ L(F,'big',`Cube Tendrils: ${t.name} is turned to cubes and stored. Bailed out!`); t.tr=0; bail(F,t); return; }
+    t.tr-=2; t.stunUntil=F.rnd+(t.actedRnd===F.rnd?1:0); t.ba=true; L(F,'big',`Shock Spikes: ${t.name} takes 2 extra wounds and is Stunned (-2 to hit, no reaction).`); if(t.tr<=0) bail(F,t); } }
+function monEnd(F,u,foes){
+  if(u.dead) return;
+  if(hm(u,'veil')){ u.hid=false; u.cs=0; }
+  if(hm(u,'fade')){ const near=foes.filter(x=>!x.dead).sort((p,q)=>cheb(u.pos,p.pos)-cheb(u.pos,q.pos))[0];
+    if(near){ const dist=bfs(F,u,3),W=F.g.W; let bi=-1,bs=-1e9; for(let i=0;i<dist.length;i++){ if(dist[i]<0) continue; const p={x:i%W,y:(i/W)|0}; if(!coverAt(F,{pos:p},near.pos)) continue; const sc=cheb(p,near.pos); if(sc>bs){bs=sc;bi=i;} }
+      if(bi>=0){ u.pos={x:bi%W,y:(bi/W)|0}; u.hid=true; L(F,'info',`${u.name} fades into cover and is Hidden again.`); } } }
+  if(hm(u,'selfd')&&u.charge&&F.rnd>u.charge){ L(F,'big',`${u.name} EXPLODES!`); for(const x of foesOf(F,u)){ if(cheb(x.pos,u.pos)<=3&&attack(F,u,x,1,{})) applyHit(F,u,x,3); } u.tr=0; bail(F,u); }
+}
+
 function turnOf(F,u){
   const {A,B}=F,rnd=F.rnd;
     if(F.leader&&F.leader.dead){F.over=true;F.winner='A';return 'over';}
@@ -662,9 +780,11 @@ function turnOf(F,u){
     const mine=u.human&&F.manual&&F.pickFor===u;
     if(mine&&F.skipTurn){ F.skipTurn=false; L(F,'info',`${u.name} holds and does nothing this turn.`); return; }
     if(u.f){ featStart(F,u,foes); if(u.f.blink){ if(u.hitBy) u.hitBy.clear(); return; } }
+    if(u.mt&&u.mt.size) monStart(F,u,foes);
     const pick=()=>foes.filter(x=>!x.dead&&canShoot(F,u,x,u.pos)&&!(x.hid&&u.kind==='ranged'&&cheb(u.pos,x.pos)>6&&!seen(F,u,x))).sort((p,q)=>p.tr-q.tr)[0];
     let tgt=plan(F,u,mine&&F.pickT&&!F.pickT.dead?[F.pickT]:foes);
     if(u.f) featAfterPlan(F,u,foes,tgt);
+    if(u.mt&&u.mt.size) monAfterPlan(F,u,foes,tgt);
     if(tgt&&tgt.hid&&u.kind==='ranged'&&cheb(u.pos,tgt.pos)>6&&!seen(F,u,tgt)) tgt=null;
     if(u.force&&!u.force.dead&&canShoot(F,u,u.force,u.pos)){ tgt=u.force; }
     u.force=null;
@@ -673,23 +793,32 @@ function turnOf(F,u){
     for(let k=0;k<(noAct?0:nAtt);k++){
       if(u.f&&u.f.strafe&&k===1&&!u.f.strafe.dead) tgt=u.f.strafe;
       if(!tgt||tgt.dead){ tgt=pick(); if(!tgt) break; }
+      let cubeAtk=false;
+      if(hm(u,'cube')&&k>=1){ const st=foes.find(x=>!x.dead&&x.stunUntil>=rnd&&canShoot(F,u,x,u.pos)); if(st){ tgt=st; cubeAtk=true; } }
+      if(!cubeAtk) tgt=monCover(F,u,tgt);
       if(tgt.decoy>=rnd&&u.agent!==undefined&&F.R()<.5&&u.team!==tgt.team){ L(F,'miss',`${u.name} aims at a Dummy Beacon decoy instead of ${tgt.name}.`); if(u.cost&&u.kind==='ranged') u.tr-=u.cost; continue; }
       let bonus=0;
       if(u.ambush&&rnd===1) bonus+=2;
       if(tgt.slow>0&&u.agent) bonus+=CFG.SLOWB;
       if(u.agent&&u.assist&&!u.tac) bonus+=1;
-      const o=u.f?featAtk(F,u,tgt,k):{};
+      const o=u.f?featAtk(F,u,tgt,k):(u.mt&&u.mt.size?monAtk(F,u,tgt,k,foes):{});
+      if(cubeAtk) o.cube=true;
       if(attack(F,u,tgt,bonus,o)){
         applyHit(F,u,tgt,u.leth+(u.ambush&&rnd===1?1:0)+(o.leth||0)+(o.sev||0)+(u.bf==='C'&&cheb(u.pos,tgt.pos)<=3?1:0));
         if(u.trap&&!tgt.dead){ tgt.slow=CFG.TRAP_SLOW; tgt.slowPen=u.heavy?3:2; L(F,'info',`${tgt.name} is slowed by the Lead Bullet.`); }
         if(u.f) featHit(F,u,tgt,o);
+        if((u.mt&&u.mt.size)||(tgt.mt&&tgt.mt.size)) monOnHit(F,u,tgt,o);
+        if(o.bounce&&!u.dead) monBounce(F,u,tgt,bonus);
       } else if(u.f) { if(u.cham){ u.cham=false; u.gSnag=false; } if(u.bagOn) u.hid=false; }
+      if(o.area&&!u.dead) monArea(F,u,tgt,bonus,o);
+      if(o.selfarea&&!u.dead) monArea(F,u,tgt,bonus,o);
       if(tgt.riposte&&!tgt.dead){
         tgt.riposte=false;
         if(tgt.agent&&cheb(tgt.pos,u.pos)<=12&&los(F,tgt.pos,u.pos)){ const r=d(F,20)+tgt.atk+CFG.RIP; if(r>=10+u.dex){ L(F,'block',`${tgt.name} ripostes (${r}) and hits.`); applyHit(F,tgt,u,tgt.leth+(tgt.f&&tgt.f.T>=2?1:0));} else L(F,'miss',`${tgt.name} ripostes (${r}) and misses.`); }
       }
       if(u.dead) break;
     }
+    if(u.mt&&u.mt.size) monEnd(F,u,foes);
     if(u.f&&u.marks&&u.marks.length&&!u.dead){ for(let mi=0;mi<u.marks.length;mi++){ const m=u.marks[mi]; const x=foes.find(e=>!e.dead&&cheb(e.pos,m)<=1); if(x){ u.marks.splice(mi,1); L(F,'info',`${u.name} sets off a Switchbox blade at ${x.name}.`); if(attack(F,u,x,0,{free:true})) applyHit(F,u,x,1); break; } } }
     if(u.hitBy) u.hitBy.clear();
   }
@@ -913,11 +1042,11 @@ myList();
 function sel(host,vals,n,onchg){host.innerHTML='';for(let i=0;i<n;i++){const s=document.createElement('select');s.setAttribute('aria-label','Fighter '+(i+1));CL.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c+(CLASSES[c].sig?' (Aftokrator)':'');s.appendChild(o);});CL.forEach(c=>{const o=document.createElement('option');o.value=c+'+BT';o.textContent=c+' + Black Trigger';s.appendChild(o);});if(host.id==='selA'||mode==='pvp')CHARS.forEach((c,k)=>{const o=document.createElement('option');o.value='C:'+k;o.dataset.c=1;o.textContent='★ '+c.name+' ('+c.cls+', Tier '+c.tier+')';s.insertBefore(o,s.firstChild);});s.value=vals[i];s.onchange=onchg;host.appendChild(s);}}
 function encSel(host,onchg){host.innerHTML='';const s=document.createElement('select');s.setAttribute('aria-label','Enemy group');Object.keys(ENCOUNTERS).forEach(k=>{const o=document.createElement('option');o.value=k;o.textContent=k;s.appendChild(o);});s.onchange=onchg;host.appendChild(s);}
 const getA=()=>[...$('selA').querySelectorAll('select')].map(s=>s.value);
-const getB=()=>mode==='pvp'?[...$('selB').querySelectorAll('select')].map(s=>s.value):ENCOUNTERS[$('selB').querySelector('select').value];
+const getB=()=>mode==='pvp'?[...$('selB').querySelectorAll('select')].map(s=>s.value):scaleEnc(ENCOUNTERS[$('selB').querySelector('select').value],TIER,$('selB').querySelector('select').value);
 function hints(){const af=l=>l.filter(c=>CLASSES[c.replace('+BT','')]&&CLASSES[c.replace('+BT','')].sig).length;
  $('hA').textContent=af(getA())>1?'Rules allow one Aftokrator per team.':'';
  $('hB').textContent=mode==='pvp'&&af(getB())>1?'Rules allow one Aftokrator per team.':'';
- if(mode==='pve'){const k=$('selB').querySelector('select').value;$('hB').textContent=ENCOUNTERS[k].reduce((s,c)=>s+ENEMIES[c].trion,0)+' Trion in total across the enemies.';}}
+ if(mode==='pve'){const k=$('selB').querySelector('select').value;{const g=getB();$('hB').textContent=g.length+' enemies at Tier '+TIER+(g.length>ENCOUNTERS[k].length?' ('+(g.length-ENCOUNTERS[k].length)+' extra join as the Tier rises).':'.');}}}
 function setup(){stop();F=null;
  sel($('selA'),getA().length?getA():DEF_A,3,onchg);
  if(mode==='pvp')sel($('selB'),DEF_B,3,onchg);else encSel($('selB'),onchg);
