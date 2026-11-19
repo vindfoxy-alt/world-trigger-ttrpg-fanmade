@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>World Trigger Character Creator</title>
+<style>
+:root{--bg:#F3F7FA;--sf:#fff;--ink:#0E2A47;--mut:#53697C;--line:#D3DEE6;--head:#DCE9F0;--in:#FFF4C2;--acc:#0F8FA3}
+@media (prefers-color-scheme:dark){:root{--bg:#0A1622;--sf:#112334;--ink:#E6F1F6;--mut:#9DB3C2;--line:#24405A;--head:#173149;--in:#3A3210;--acc:#5FD4E4}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 "Segoe UI",system-ui,Arial,sans-serif;padding:16px}
+.wrap{max-width:980px;margin:0 auto}
+h1{font-size:22px;margin:0 0 4px}
+.sub{color:var(--mut);font-size:13px;margin-bottom:14px}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+button{font:600 13px inherit;font-family:inherit;border:1.5px solid var(--acc);background:transparent;color:var(--ink);border-radius:6px;padding:7px 12px;cursor:pointer}
+button:hover{background:var(--head)}
+.sec{background:var(--head);font-weight:700;padding:8px 10px;margin-top:16px;border-radius:6px 6px 0 0}
+table{width:100%;border-collapse:collapse;background:var(--sf);border:1px solid var(--line)}
+td,th{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:middle}
+th{background:var(--head);font-size:13px}
+td.l{font-weight:600;width:170px}
+td.n,.nt{color:var(--mut);font-size:12.5px}
+td.v{font-weight:700;color:var(--acc);width:150px;text-align:center}
+td.big{font-size:22px}
+input,select{font:inherit;color:inherit;width:100%;border:1px solid var(--line);border-radius:999px;padding:5px 10px;background:var(--in);text-align:center;min-width:0}
+input[type=number]{border-radius:6px}
+select{appearance:auto;font-weight:700}
+.tbl{overflow-x:auto}
+.ok{color:#1E7A3C;font-weight:700}.bad{color:#C0392B;font-weight:700}
+.stat{text-align:center}.stat select{min-width:84px}
+footer{margin-top:18px;color:var(--mut);font-size:12px}
+@media (max-width:640px){td.l{width:110px}}
+</style></head><body><div class="wrap">
+<h1>WORLD TRIGGER CHARACTER SHEET</h1>
+<div class="sub">Works offline. Pick from the coloured cells; everything else is worked out for you. Your sheet is saved in this browser automatically. Draft rules, not yet playtested.</div>
+<div class="bar"><button id="sample">Load sample (Kenji)</button><button id="clear">Clear everything</button><button id="code" class="pri">Copy character code</button></div>
+<div id="codebox" style="display:none;margin-top:8px"><div class="sub" style="margin:0 0 4px">Paste this line into the Fight Simulator (Bring your own agent). If copying did not work, select and copy it here:</div><input id="codeout" readonly style="width:100%;font-family:monospace" onclick="this.select()"></div>
+
+<table id="top"></table>
+
+<div class="sec">Stats</div>
+<table id="stats"></table>
+
+<div class="sec">Calculated numbers</div>
+<table id="calc"></table>
+
+<div class="sec">Weapons</div>
+<div class="tbl"><table id="weap"></table></div>
+
+<div class="sec">Free triggers (every agent has these, no slot)</div>
+<table><tr><th>Trigger</th><th>Cost</th><th>Effect</th></tr>
+<tr><td class="l">Trion Body</td><td>None</td><td>While you are in your Trion body, damage that is not Trion-based cannot hurt you. You are also linked to your team by radio.</td></tr>
+<tr><td class="l">Bail Out</td><td>None</td><td>Works automatically or on command.</td></tr>
+<tr><td class="l">Radar</td><td>1 per round</td><td>Know every Trion body within 60 ft, except Bagworm users. Chameleon users still show up. Spend 1 more Trion to focus on one target.</td></tr>
+<tr><td class="l">Basic Guard</td><td>None</td><td>+2 Block, once per round. Every class has it. Weapon and Shield Block add on top of it, up to +6 in total.</td></tr></table>
+
+<div class="sec">Optional triggers (each costs 1 Trion carried, plus any use cost)</div>
+<div class="tbl"><table id="opt"></table></div>
+
+<div class="sec">In the fight</div>
+<table id="fight"></table>
+
+<footer>Unofficial fan game. World Trigger belongs to Daisuke Ashihara. Limits: limbs 10%, chest 30%, head 20% of Max Trion. A limb is also destroyed by severity 7. Nearly Dead (2 limbs destroyed): Trion drops to 10% of Max Trion (at least 5) if higher, and any further wound makes you bail out.</footer>
+</div>
+<script>
+var D={"tier": [[1, "C", 0], [2, "C", 0], [3, "C", 1], [4, "B", 1], [5, "B", 2], [6, "B", 2], [7, "B", 3], [8, "A", 3], [9, "A", 4], [10, "A", 4]], "classes": [["Attacker", 5], ["Gunner", 4], ["Shooter", 4], ["Sniper", 3], ["Trapper", 5], ["Assassin", 4], ["Tactician", 4], ["Counterstriker", 5], ["Aftokrator", 4]], "abil": [["Emotional Sense", "TRION"], ["Foresight", "TRION"], ["Perfect Parallel Processing", "TRION"], ["Super Strength", "STR"], ["Iron Grip", "STR"], ["Wall Breaker", "STR"], ["Quick Reflexes", "DEX"], ["Sharp Eye", "DEX"], ["Light Feet", "DEX"], ["Tireless Body", "STA"], ["Hard to Break", "STA"], ["Pain Tolerance", "STA"], ["Rallying Voice", "CHA"], ["Commanding Presence", "CHA"], ["Silver Tongue", "CHA"], ["Analytical Mind", "INT"], ["Weak Point", "INT"], ["Trap Sense", "INT"]], "wp": [["Kogetsu", "STR", 1, 2, "Two-handed. +2 Block, added to Basic Guard. Also called Sōgetsu. Wield two at -2 each (uses 2 slots)."], ["Scorpion", "DEX", 2, 1, "One-handed. Shapeshift."], ["Raygust", "STR", 0, 1, "+2 Block, added to Basic Guard. Can become a Shield."], ["Handgun", "DEX", 2, 1, "60 ft."], ["Assault Rifle", "DEX", 1, 1, "120 ft."], ["Shotgun", "DEX", 0, 2, "+2 Lethal within 15 ft, +0 beyond."], ["Grenade Launcher", "DEX", -1, 0, "Explosive: hits all within 10 ft."], ["Minigun", "DEX", 0, 0, "Uses 2 slots. Make 2 attack rolls each turn."], ["Ibis", "DEX", -3, 3, "Sniper. You cannot move on the turn you fire."], ["Lightning", "DEX", 0, 0, "Sniper. Attack twice each turn."], ["Egret", "DEX", -2, 2, "Sniper. Between Ibis and Lightning."], ["Asteroid", "DEX", 2, 1, "Move 1 point between hit and Lethal."], ["Meteora", "DEX", -1, 0, "Explosive: hits all within 5 ft."], ["Hound", "DEX", 3, 0, "Homing. Ignores cover."], ["Viper", "DEX", 0, 1, "Ignores Block bonuses from a Shield."], ["Lead Bullet", "DEX", 1, 1, "Costs 1 Trion. Attacks against the target get an Edge die, half speed."], ["Chelidon Rifle", "DEX", 1, 1, "Aftokrator (Chelidon). Gun Swap. 120 ft."], ["Chelidon Shotgun", "DEX", 0, 1, "Aftokrator (Chelidon). Gun Swap. 15 ft. Lethal 2 from Tier 8."], ["Chelidon Sidearm", "DEX", 1, 1, "Aftokrator (Chelidon). Gun Swap. 60 ft. Blocks +1 from Tier 2."], ["Lampyris Shard Guns", "DEX", 0, 2, "Aftokrator (Lampyris). Ranged 90 ft, never melee."], ["Vorvoros Lash", "DEX", 0, 1, "Aftokrator (Vorvoros). Liquid lash, reach 15 ft."]], "sub": [["Radar", "1 per round", "Know every Trion body within 60 ft, except Bagworm users."], ["Shield", "1 carried, then 2 per raise", "Block is added on top of Basic Guard and weapon. Shield +2 (2 Trion), Focused Shield +4 vs one attack (3 Trion), Fixed Mode (3 Trion), Full Guard (4 Trion). Takes a hand. Total Block max +6."], ["Escudo", "2", "Action. Raise a barrier from a surface within 15 ft."], ["Switchbox", "1 per mark", "Action. Place up to 2 marks on a surface within 30 ft."], ["Bagworm", "1 per round", "Radar cannot detect you, and you are Hidden from ranged attackers more easily."], ["Bagworm Tag", "0", "Draft: one ally within 10 ft shares your Bagworm."], ["Chameleon", "2 per round", "Invisible, but still on Radar."], ["Dummy Beacon", "2", "Action. Place up to 3 orbs within 30 ft that copy your Trion signature."], ["Enhanced Radar", "2 per round", "Draft: Radar that also shows Bagworm users within 30 ft."], ["Grasshopper", "1 per jump", "Free action once a turn. Jump up to 30 ft in any direction."], ["Idaten", "2", "Action. Move up to 60 ft along a fixed path."], ["Silencer", "1", "Draft: your attacks make no sound or flash."], ["Teleporter", "1 per 15 ft", "Action. Teleport 15 ft (1 Trion) or 30 ft (2 Trion)."], ["Timer", "1", "Draft: delay one effect so it happens at a chosen time."], ["Senkū", "1", "Kogetsu only. Free action. One attack reaches 30 ft, at -2 to hit."], ["Gen'yō", "1", "Kogetsu only. Once a turn, reshape the blade mid-swing to ignore cover."], ["Makō", "2", "Draft, Kogetsu only. Once per fight, one attack bypasses Block."], ["Thruster", "1", "Raygust only. One attack gets an Edge die and +1 Lethal, and you move 10 ft."], ["Connector", "3 per attack", "Kogetsu only (two blades). Merge two into a two-handed axe: -1 to hit, +3 Lethal."], ["Starmaker", "1", "All-purpose. Fire with a firearm, shooter trigger, or sniper rifle."], ["Full Arms", "3 per turn", "Prototype. Two mechanical arms hold a weapon each and a Raygust Shield."], ["Geist", "5 at the start of each turn", "Prototype. Choose a Shift when you activate it; you cannot turn it off."]]};
+var HUE={red:['#F4A8A8','#8B2222'],orange:['#F9CC9E','#8A4A0E'],purple:['#CDB8EA','#4B2B7F'],blue:['#A8CCF2','#1D4F86'],green:['#98DC98','#1E6B1E'],gray:['#C8C8C8','#444'],teal:['#7FD9B8','#0E6B4E'],yellow:['#F7E38E','#7A6208'],magenta:['#F4A6C6','#8A2255']};
+function inv(g){var m={};for(var h in g)g[h].forEach(function(n){m[n]=h});return m}
+var CLS=inv({red:['Attacker'],orange:['Gunner'],purple:['Shooter'],blue:['Sniper'],green:['Trapper'],gray:['Assassin'],teal:['Tactician'],yellow:['Counterstriker'],magenta:['Aftokrator']});
+var ABL=inv({purple: ["Emotional Sense", "Foresight", "Perfect Parallel Processing"], "red": ["Super Strength", "Iron Grip", "Wall Breaker"], "orange": ["Quick Reflexes", "Sharp Eye", "Light Feet"], "green": ["Tireless Body", "Hard to Break", "Pain Tolerance"], "magenta": ["Rallying Voice", "Commanding Presence", "Silver Tongue"], "blue": ["Analytical Mind", "Weak Point", "Trap Sense"]});
+var STT=inv({gray:['-1','0'],teal:['1','2'],green:['3','4'],blue:['5','6']});
+var WPN=inv({red:['Kogetsu','Scorpion','Raygust'],orange:['Handgun','Assault Rifle','Shotgun','Grenade Launcher','Minigun'],blue:['Ibis','Lightning','Egret'],purple:['Asteroid','Meteora','Hound','Viper'],green:['Lead Bullet'],magenta:['Chelidon Rifle','Chelidon Shotgun','Chelidon Sidearm','Lampyris Shard Guns','Vorvoros Lash']});
+var SUB=inv({gray:['Radar'],blue:['Shield','Escudo'],green:['Switchbox'],teal:['Bagworm','Bagworm Tag','Chameleon','Dummy Beacon','Enhanced Radar','Grasshopper','Idaten','Silencer','Teleporter','Timer'],red:['Senkū',"Gen'yō",'Makō','Thruster','Connector'],yellow:['Starmaker'],purple:['Full Arms','Geist']});
+var STATS=['STR','DEX','STA','TRION','INT','CHA'];
+var STATN={STR:'Melee attack rolls (Kogetsu, Raygust). Athletics.',DEX:'Ranged attacks and Scorpion. Evade and initiative.',STA:'2 Trion each. Endurance.',TRION:'5 Trion each. Trigger power.',INT:'Tactics, knowledge, Radar and analysis.',CHA:'Leadership and persuasion.'};
+var S={};try{S=JSON.parse(localStorage.getItem('wt')||'{}')}catch(e){}
+function save(){try{localStorage.setItem('wt',JSON.stringify(S))}catch(e){}}
+function esc(t){return String(t==null?'':t).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function sel(id,opts,map,none){var v=S[id]||'';var h='<select data-id="'+id+'" data-map="'+(map||'')+'"><option value="">'+(none||'None')+'</option>';opts.forEach(function(o){h+='<option'+(o==v?' selected':'')+'>'+esc(o)+'</option>'});return h+'</select>'}
+var MAPS={CLS:CLS,ABL:ABL,STT:STT,WPN:WPN,SUB:SUB};
+function num(id){var v=S[id];return v===undefined||v===''||isNaN(+v)?0:+v}
+function paint(){document.querySelectorAll('select').forEach(function(s){var m=MAPS[s.dataset.map],h=m&&m[s.value];if(h){s.style.background=HUE[h][0];s.style.color=HUE[h][1]}else{s.style.background='';s.style.color=''}})}
+function find(a,n,i){for(var k=0;k<a.length;k++)if(a[k][i||0]==n)return a[k]}
+function render(){
+ var ab=find(D.abil,S.abl);
+ var req='';if(S.abl&&ab){req=num('st_'+ab[1])>=3?'<span class="ok">OK</span>':'<span class="bad">Needs +3 in '+ab[1]+'</span>'}
+ document.getElementById('top').innerHTML=
+ '<tr><td class="l">Name</td><td><input data-id="name" value="'+esc(S.name)+'" placeholder="Your agent"></td><td class="n"></td></tr>'+
+ '<tr><td class="l">Class</td><td>'+sel('cls',D.classes.map(function(c){return c[0]}),'CLS')+'</td><td class="n"></td></tr>'+
+ '<tr><td class="l">Tier (1 to 10)</td><td>'+sel('tier',[1,2,3,4,5,6,7,8,9,10].map(String),'')+'</td><td class="n"></td></tr>'+
+ '<tr><td class="l">Special ability</td><td>'+sel('abl',D.abil.map(function(a){return a[0]}),'ABL')+'</td><td>'+req+'</td></tr>';
+ var sh='<tr><th>Stat</th><th>Score</th><th>What it does</th></tr>',tot=0;
+ STATS.forEach(function(s){tot+=num('st_'+s);sh+='<tr><td class="l">'+s+'</td><td>'+sel('st_'+s,['-1','0','1','2','3','4','5','6'],'STT')+'</td><td class="n">'+STATN[s]+'</td></tr>'});
+ sh+='<tr><td class="l">Stat total</td><td class="v">'+tot+'</td><td></td></tr>';
+ document.getElementById('stats').innerHTML=sh;
+ var t=S.tier?+S.tier:0,tb=t?D.tier[t-1][2]:null,rank=t?D.tier[t-1][1]:'';
+ var cl=find(D.classes,S.cls);var ct=cl?cl[1]:0;
+ var wc=0;var wrows=[];
+ var has=function(v){return v&&v!=='None'};for(var i=0;i<4;i++)if(has(S['w'+i]))wc++;for(var i=0;i<2;i++)if(has(S['cw'+i]))wc++;
+ var oc=0;for(var i=0;i<4;i++)if(has(S['o'+i]))oc++;for(var i=0;i<2;i++)if(has(S['co'+i]))oc++;
+ var gear=2*wc+oc;
+ var mx=40+5*num('st_TRION')+2*num('st_STA')+ct*(t?t-1:0)-gear;
+ var dex=num('st_DEX'),str=num('st_STR'),T=tb||0;
+ var cb=(S.cls==='Assassin'||S.cls==='Counterstriker')?1:0;var mel=str+T+cb,ran=dex+T+cb;
+ document.getElementById('calc').innerHTML=
+ [['Tier Bonus',tb==null?'':tb,'Added to every attack roll and to Evade.'],['Rank',rank,'C: Tiers 1 to 3. B: 4 to 7. A: 8 to 10.'],
+  ['Max Trion','<b style="font-size:22px">'+mx+'</b>','40 + 5 x TRION + 2 x STA + class Trion per Tier above 1, minus Gear Trion cost.'],
+  ['Evade',10+dex+T,'10 + DEX + Tier Bonus.'],['Initiative','1d20 '+(dex>=0?'+ ':'- ')+Math.abs(dex),'1d20 + DEX. Move 30 ft, or 40 ft as an Attacker, Assassin or Counterstriker.'],
+  ['Melee attack bonus',mel,'STR + Tier Bonus (+1 as Assassin or Counterstriker). Add the weapon\'s bonus.'],['Ranged attack bonus',ran,'DEX + Tier Bonus (+1 as Assassin or Counterstriker). Add the weapon\'s bonus.'],
+  ['Basic Guard Block',2,'Basic Guard +2. Weapon Block (Kogetsu +2, Raygust +2) and Shield (+2) add on top, up to +6, once per round.'],['Link points',1,'Spend 1 as a free action for a Team Move.'],
+  ['Gear Trion cost',gear,'2 per weapon, 1 per sub trigger carried. Draft, untested. Taken off your Max Trion.']
+ ].map(function(r){return '<tr><td class="l">'+r[0]+'</td><td class="v">'+r[1]+'</td><td class="n">'+r[2]+'</td></tr>'}).join('');
+ var wh='<tr><th>Weapon</th><th>Stat</th><th>Attack</th><th>Lethal</th><th>Notes</th></tr>';
+ for(var i=0;i<4;i++){var w=find(D.wp,S['w'+i]);var a=w?((w[1]=='STR'?mel:ran)+w[2]):'';
+  wh+='<tr><td>'+sel('w'+i,D.wp.map(function(x){return x[0]}),'WPN')+'</td><td class="stat">'+(w?w[1]:'')+'</td><td class="stat"><b>'+(a===''?'':(a>=0?'+':'')+a)+'</b></td><td class="stat"><b>'+(w?w[3]:'')+'</b></td><td class="n">'+(w?esc(w[4]):'')+'</td></tr>'}
+ wh+='<tr><th colspan="5">Custom weapons (type your own)</th></tr>';
+ for(var i=0;i<2;i++){var st=S['cws'+i]||'DEX',hb=num('cwh'+i),a=(st=='STR'?mel:ran)+hb;
+  wh+='<tr><td><input data-id="cw'+i+'" value="'+esc(S['cw'+i])+'" placeholder="Name"></td><td class="stat"><select data-id="cws'+i+'" data-map=""><option'+(st=='STR'?' selected':'')+'>STR</option><option'+(st=='DEX'?' selected':'')+'>DEX</option></select></td><td class="stat"><b>'+(S['cw'+i]?(a>=0?'+':'')+a:'')+'</b></td><td><input data-id="cwl'+i+'" value="'+esc(S['cwl'+i])+'" placeholder="Lethal"></td><td class="n">Hit bonus <input type="number" data-id="cwh'+i+'" value="'+(S['cwh'+i]||0)+'" style="width:70px"> <input data-id="cwn'+i+'" value="'+esc(S['cwn'+i])+'" placeholder="Notes" style="width:60%;border-radius:6px;text-align:left"></td></tr>'}
+ document.getElementById('weap').innerHTML=wh;
+ var oh='<tr><th>Trigger</th><th>Cost</th><th>Effect</th></tr>';
+ for(var i=0;i<4;i++){var s=find(D.sub,S['o'+i]);oh+='<tr><td>'+sel('o'+i,D.sub.map(function(x){return x[0]}),'SUB')+'</td><td class="stat">'+(s?esc(s[1]):'')+'</td><td class="n">'+(s?esc(s[2]):'')+'</td></tr>'}
+ oh+='<tr><th colspan="3">Custom triggers (type your own)</th></tr>';
+ for(var i=0;i<2;i++)oh+='<tr><td><input data-id="co'+i+'" value="'+esc(S['co'+i])+'" placeholder="Name"></td><td><input data-id="coc'+i+'" value="'+esc(S['coc'+i])+'" placeholder="Cost"></td><td><input data-id="coe'+i+'" value="'+esc(S['coe'+i])+'" placeholder="Effect" style="border-radius:6px;text-align:left"></td></tr>';
+ document.getElementById('opt').innerHTML=oh;
+ var parts=[['Right leg',.1,0],['Left leg',.1,0],['Right arm',.1,0],['Left arm',.1,0],['Chest',.3,1],['Head',.2,1]];
+ var fh='<tr><th>Body part</th><th>Wounds</th><th>Status</th><th>Limit</th></tr>',sum=0,dest=0,bail=false;
+ parts.forEach(function(p,i){var w=num('wd'+i),lim=Math.max(1,Math.round(mx*p[1]));sum+=w;var st='';
+  if(S.tier&&w>=lim){st=p[2]?'BAIL OUT':'Destroyed';if(p[2])bail=true;else dest++}
+  fh+='<tr><td class="l">'+p[0]+'</td><td><input type="number" min="0" data-id="wd'+i+'" value="'+w+'" style="max-width:100px"></td><td class="bad">'+st+'</td><td class="v" style="width:90px">'+(S.tier?lim:'')+'</td></tr>'});
+ var cur=mx-sum,status=(cur<=0||bail)?'BAIL OUT':dest>=2?'Nearly Dead':'Fighting';
+ fh+='<tr><td class="l">Current Trion</td><td class="v" style="font-size:22px">'+cur+'</td><td class="n" colspan="2">Every wound costs 1 Trion.</td></tr><tr><td class="l">Status</td><td class="v '+(status=='Fighting'?'':'bad')+'">'+status+'</td><td class="n" colspan="2">Nearly Dead: Trion drops to 10% of Max (min 5). Any wound makes you bail out.</td></tr>';
+ document.getElementById('fight').innerHTML=fh;paint();
+}
+document.addEventListener('change',function(e){var id=e.target.dataset&&e.target.dataset.id;if(!id)return;S[id]=e.target.value;save();render()});
+document.addEventListener('input',function(e){var t=e.target;if(t.tagName=='INPUT'&&t.dataset.id&&t.type!='number'){S[t.dataset.id]=t.value;save()}});
+document.getElementById('clear').onclick=function(){if(Object.keys(S).length&&!window.__c){window.__c=1;this.textContent='Click again to clear';var b=this;setTimeout(function(){window.__c=0;b.textContent='Clear everything'},3000);return}S={};save();window.__c=0;this.textContent='Clear everything';render()};
+document.getElementById('sample').onclick=function(){S={name:'Kenji Arashi',cls:'Aftokrator',tier:'1',abl:'Super Strength',st_STR:'3',st_DEX:'1',st_STA:'2',st_TRION:'1',st_INT:'0',st_CHA:'-1',w0:'Lampyris Shard Guns',w1:'Scorpion'};save();render()};
+
+function wtCode(){var w=[],o=[],i;for(i=0;i<4;i++)if(S['w'+i])w.push(S['w'+i]);for(i=0;i<4;i++)if(S['o'+i])o.push(S['o'+i]);
+ function c(v){return String(v==null?'':v).replace(/[|\n\r]/g,' ')}
+ return ['WT1',c(S.name||'Agent'),c(S.cls||'Gunner'),c(S.tier||1),num('st_STR'),num('st_DEX'),num('st_STA'),num('st_TRION'),num('st_INT'),num('st_CHA'),w.join(','),o.join(','),c(S.abl||'')].join('|')}
+document.getElementById('code').onclick=function(){var t=wtCode(),box=document.getElementById('codebox'),inp=document.getElementById('codeout'),b=this;inp.value=t;box.style.display='block';
+ function done(m){b.textContent=m;setTimeout(function(){b.textContent='Copy character code'},2500)}
+ if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(function(){done('Copied!')}).catch(function(){inp.select();done('Select and copy below')})}else{inp.select();done('Select and copy below')}};
+render();
+</script></body></html>

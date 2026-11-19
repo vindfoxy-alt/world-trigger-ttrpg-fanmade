@@ -1,0 +1,210 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Unofficial fan game: free Players Handbook, Operator Guide, Monster Manual, character creator, fight simulator and 18 battle maps.">
+<meta property="og:type" content="website"><meta property="og:site_name" content="World Trigger Tabletop RPG"><meta property="og:title" content="World Trigger Tabletop RPG"><meta property="og:description" content="Unofficial fan game: free Players Handbook, Operator Guide, Monster Manual, character creator, fight simulator and 18 battle maps."><meta property="og:url" content="https://vindfoxy-alt.github.io/world-trigger-ttrpg-fanmade/"><meta property="og:image" content="https://vindfoxy-alt.github.io/world-trigger-ttrpg-fanmade/files/maps/00_Contact_Sheet.jpg">
+<meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="World Trigger Tabletop RPG"><meta name="twitter:description" content="Unofficial fan game: free Players Handbook, Operator Guide, Monster Manual, character creator, fight simulator and 18 battle maps."><meta name="twitter:image" content="https://vindfoxy-alt.github.io/world-trigger-ttrpg-fanmade/files/maps/00_Contact_Sheet.jpg">
+<style>body{margin:0}</style></head><body><title>World Trigger Tabletop RPG</title>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+/* Layout: one narrow column. Header, three book cards, character creator band, feedback list. Navy and teal taken from the books themselves. */
+:root{
+  --bg:#F3F7FA; --surface:#FFFFFF; --ink:#0E2A47; --muted:#53697C; --line:#D3DEE6;
+  --accent:#0F8FA3; --accent-ink:#FFFFFF; --band:#0E2A47; --band-ink:#EAF4F8; --band-accent:#5FD4E4; --warn-bg:#FFF4C2; --warn-ink:#5A4A00;
+  --display:"Space Grotesk","Segoe UI",system-ui,sans-serif; --body:"Inter","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0A1622; --surface:#112334; --ink:#E6F1F6; --muted:#9DB3C2; --line:#24405A;
+  --accent:#5FD4E4; --accent-ink:#06202B; --band:#0E2A47; --band-ink:#EAF4F8; --band-accent:#5FD4E4; --warn-bg:#3A3210; --warn-ink:#F3E3A0; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0A1622; --surface:#112334; --ink:#E6F1F6; --muted:#9DB3C2; --line:#24405A;
+  --accent:#5FD4E4; --accent-ink:#06202B; --band:#0E2A47; --band-ink:#EAF4F8; --band-accent:#5FD4E4; --warn-bg:#3A3210; --warn-ink:#F3E3A0; color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.55;
+  padding-block:0;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:860px;margin:0 auto;padding-block:40px 56px;display:flex;flex-direction:column;gap:40px}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.15}
+h1{font-size:clamp(2rem,6vw,3rem);font-weight:700;letter-spacing:-.01em}
+h2{font-size:1.4rem;font-weight:700}
+h3{font-size:1.1rem;font-weight:700}
+p{margin:0}
+.eyebrow{font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);font-weight:600}
+header{display:flex;flex-direction:column;gap:14px}
+.lead{max-width:62ch;color:var(--muted);font-size:1.05rem}
+.facts{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:.85rem;color:var(--muted);padding:0;margin:0;list-style:none}
+.facts li{border:1px solid var(--line);border-radius:6px;padding:3px 10px;background:var(--surface)}
+.note{background:var(--warn-bg);color:var(--warn-ink);border-radius:6px;padding:12px 14px;font-size:.92rem;max-width:70ch}
+section{display:flex;flex-direction:column;gap:16px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:18px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.card .meta{font-size:.82rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.card p{color:var(--muted);font-size:.93rem;flex:1}
+.btn{font:600 .95rem var(--body);display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--accent);color:var(--accent-ink);border:0;border-radius:6px;padding:10px 16px;cursor:pointer;text-decoration:none;min-height:42px}
+.btn:hover{filter:brightness(1.08)}
+.btn:focus-visible,a:focus-visible{outline:3px solid var(--band-accent);outline-offset:2px}
+.btn[disabled]{opacity:.65;cursor:default}
+.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--accent)}
+.status{font-size:.82rem;color:var(--muted);min-height:1.2em}
+.band{background:var(--band);color:var(--band-ink);border-radius:10px;padding:26px;display:flex;flex-direction:column;gap:14px}
+.band h2{color:#fff}
+.band p{color:var(--band-ink);opacity:.92;max-width:62ch}
+.band .row{display:flex;flex-wrap:wrap;gap:10px}
+.band .btn{background:var(--band-accent);color:#06202B}
+.band .btn.ghost{background:transparent;color:var(--band-ink);border-color:var(--band-accent)}
+ul.ask{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:6px;max-width:68ch}
+footer{font-size:.82rem;color:var(--muted);border-top:1px solid var(--line);padding-top:16px;max-width:70ch}
+
+.fb{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:18px}
+.fb label{display:flex;flex-direction:column;gap:4px;font-size:.88rem;font-weight:600;min-width:0}
+.fb .wide{grid-column:1/-1}
+.fb input,.fb select,.fb textarea{font:400 .95rem var(--body);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:8px 10px;width:100%;min-width:0}
+.fb textarea{resize:vertical}
+@media (prefers-reduced-motion:no-preference){.btn{transition:filter .15s}}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:16px}
+.step{display:flex;gap:12px;align-items:flex-start;min-width:0}
+.step>div{display:flex;flex-direction:column;gap:8px;min-width:0}
+.step h3{color:#fff}
+.step p{font-size:.92rem}
+.num{flex:none;width:34px;height:34px;border-radius:50%;background:var(--band-accent);color:#06202B;font:700 1rem var(--display);display:flex;align-items:center;justify-content:center}
+.step .btn{align-self:flex-start;text-align:center}
+.tag{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:var(--muted)}
+.mapgal{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-top:18px}.mapgal figure{margin:0}.mapgal img{width:100%;aspect-ratio:2/1;object-fit:cover;border-radius:10px;display:block;border:1px solid var(--line,#ccd)}.mapgal figcaption{font-size:.85rem;margin-top:4px;opacity:.8}
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Unofficial fan game · Playtest draft</span>
+    <h1>World Trigger Tabletop RPG</h1>
+    <p class="lead">A d20 role-playing game of Border agents, Trion bodies and Neighbor invasions, built for teams of three. Wounds and Trion are one pool, every agent can bail out, and nobody dies.</p>
+    <ul class="facts">
+      <li>d20 + d6 / d4</li>
+      <li>3 players + an Operator (game master)</li>
+      <li>9 classes, Tiers 1 to 10</li>
+      <li>Version: 18 Nov 2026</li>
+    </ul>
+    <p class="note">All numbers are first drafts and have not been played at a table yet. Balance was only checked with a simple computer simulation. Tell us what feels wrong.</p>
+  </header>
+
+  <section class="band" aria-labelledby="start">
+    <h2 id="start">New player? Do these three things</h2>
+    <div class="steps">
+      <div class="step"><span class="num">1</span><div><h3>Read the rules</h3><p>The Players Handbook. Short chapters, with sample characters.</p><a class="btn" href="files/Players_Handbook.pdf" target="_blank" rel="noopener">Open the Handbook</a></div></div>
+      <div class="step"><span class="num">2</span><div><h3>Make your agent</h3><p>Pick from dropdowns. The sheet does the maths.</p><a class="btn" href="https://claude.ai/artifact/KKLaE24eA4FhCLqegpJ8Hw" target="_blank" rel="noopener">Open the character creator</a></div></div>
+      <div class="step"><span class="num">3</span><div><h3>Try a fight</h3><p>Paste your agent in and fight on a battle map. Enemies match your Tier.</p><a class="btn" href="https://claude.ai/artifact/BedMt2Zx3Uq8nGA6nkU4fS" target="_blank" rel="noopener">Open the fight simulator</a></div></div>
+    </div>
+    <p style="font-size:.88rem">This page is always the newest version. Bookmark it, and the links never change.</p>
+  </section>
+
+  <section aria-labelledby="quick">
+    <h2 id="quick">Quick start</h2>
+    <div class="cards">
+      <div class="card"><h3>1. Your turn</h3><p>Move up to 30 ft. Take one action, usually an attack. One free action. One reaction per round to Block an attack.</p></div>
+      <div class="card"><h3>2. Did you hit?</h3><p>Roll <b>d20 + stat + Tier Bonus + weapon bonus</b>. Equal to or above the target's <b>Evade</b> (10 + DEX + Tier Bonus) is a hit. Ranged attacks cost 1 Trion; melee is free.</p></div>
+      <div class="card"><h3>3. What happened?</h3><p>Roll a <b>d6 for the body part</b> (1 right leg, 2 left leg, 3 right arm, 4 left arm, 5 chest, 6 weapon). Roll a <b>d6 for severity</b> and add the weapon's Lethal. Seven or more counts as 7. Wounds cost Trion.</p></div>
+      <div class="card"><h3>4. Bailing out</h3><p>You bail out at 0 Trion, when your head or chest is destroyed, or if you are hit while Nearly Dead (two limbs destroyed). Nobody dies.</p></div>
+    </div>
+    <p class="lead" style="font-size:.95rem">Making an agent takes about ten minutes. Stats start at 0: add +3, +2, +1, +1 and -1. Pick a special ability (three for every stat); it needs +3 in its stat, so your +3 decides which abilities you can take. Max Trion is 40 + 5 x TRION + 2 x STA + your class's Trion per Tier above 1, minus 2 for each weapon and 1 for each sub trigger you carry. The character creator does the maths. If you are unsure of a rule, the Operator decides and the game keeps moving.</p>
+  </section>
+
+  <section aria-labelledby="books">
+    <h2 id="books">The books</h2>
+    <div class="cards">
+      <div class="card">
+        <span class="tag">For everyone</span>
+        <h3>Players Handbook</h3>
+        <span class="meta">PDF 2.3 MB · 47 pages</span>
+        <p>Start here. Character creation, classes, 18 special abilities, weapons, triggers and the combat rules, with sample characters.</p>
+        <a class="btn" href="files/Players_Handbook.pdf" target="_blank" rel="noopener">Download PDF</a>
+        <a class="btn ghost" href="files/Players_Handbook.docx" target="_blank" rel="noopener">Download Word</a>
+        <span class="status" aria-live="polite"></span>
+      </div>
+      <div class="card">
+        <span class="tag">For the Operator only</span>
+        <h3>Operator Guide</h3>
+        <span class="meta">PDF 4.2 MB · 68 pages</span>
+        <p>For the person running the game. Full rules, the setting, two ready-to-run missions and balance notes.</p>
+        <a class="btn" href="files/Operator_Guide.pdf" target="_blank" rel="noopener">Download PDF</a>
+        <a class="btn ghost" href="files/Operator_Guide.docx" target="_blank" rel="noopener">Download Word</a>
+        <span class="status" aria-live="polite"></span>
+      </div>
+      <div class="card">
+        <span class="tag">For the Operator only</span>
+        <h3>Monster Manual</h3>
+        <span class="meta">PDF 3.1 MB · 34 pages</span>
+        <p>Trion soldiers, Neighbors, Aftokrator bosses and Black Trigger enemies, with stats and tactics.</p>
+        <a class="btn" href="files/Monster_Manual.pdf" target="_blank" rel="noopener">Download PDF</a>
+        <a class="btn ghost" href="files/Monster_Manual.docx" target="_blank" rel="noopener">Download Word</a>
+        <span class="status" aria-live="polite"></span>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" aria-labelledby="creator">
+    <h2 id="creator">Character creator</h2>
+    <p>Pick a class, tier, stats, weapons and triggers from the dropdowns. Trion, Evade, attack bonuses and wound limits are worked out for you. The last row gives a character code you can paste into the fight simulator.</p>
+    <div class="row">
+      <a class="btn" href="https://claude.ai/artifact/KKLaE24eA4FhCLqegpJ8Hw" target="_blank" rel="noopener">Open online character creator</a>
+      <a class="btn ghost" href="files/Character_Creator_Offline.html" target="_blank" rel="noopener">Download offline version</a>
+    </div>
+    <p style="font-size:.88rem">The offline version is one file. Save it, then open it in any browser. No internet needed, and it remembers your sheet.</p>
+    <span class="status" id="creator-status" style="color:var(--band-ink)" aria-live="polite"></span>
+  </section>
+
+  <section aria-labelledby="sim">
+    <h2 id="sim">Fight simulator</h2>
+    <p class="lead" style="font-size:.95rem">Paste in the character code from the creator and your own agent fights, with enemies scaled to your Tier. Or pick two teams of three, or a team and an enemy group, then choose a map. Watch the fighters move, take cover and fight round by round, or run 1,000 fights to see win rates. It includes the Aftokrator and Black Trigger bosses. It models class features, special abilities and sub triggers (some simplified, listed on the page), so use it as a balance check, not a prediction.</p>
+    <div class="row">
+      <a class="btn" href="https://claude.ai/artifact/BedMt2Zx3Uq8nGA6nkU4fS" target="_blank" rel="noopener">Open fight simulator</a>
+      <a class="btn ghost" href="files/Fight_Simulator.html" target="_blank" rel="noopener">Download offline version</a>
+    </div>
+    <span class="status" id="sim-status" aria-live="polite"></span>
+  </section>
+
+  <section aria-labelledby="maps">
+    <h2 id="maps">Battle maps</h2>
+    <p class="lead" style="font-size:.95rem">18 original illustrated maps, 120 × 60 ft on a 5 ft grid. Open one to save the full-size image for Discord or a virtual tabletop. The fight simulator uses the same maps. Water and the crater block movement.</p>
+    <div class="row"><a class="btn" href="files/maps/00_Contact_Sheet.jpg" target="_blank" rel="noopener">Contact sheet</a><a class="btn ghost" href="files/World_Trigger_Maps_Player_copy.pdf" target="_blank" rel="noopener">Printable maps (players)</a><a class="btn ghost" href="files/World_Trigger_Maps_Operator_copy.pdf" target="_blank" rel="noopener">Printable maps (Operator)</a></div>
+    <div class="mapgal"><figure><a href="files/maps/01_Border_HQ_Courtyard.jpg" target="_blank" rel="noopener"><img src="files/maps/01_Border_HQ_Courtyard.jpg" loading="lazy" alt="Battle map: Border HQ Courtyard"></a><figcaption>Border HQ Courtyard</figcaption></figure><figure><a href="files/maps/02_Residential_Streets.jpg" target="_blank" rel="noopener"><img src="files/maps/02_Residential_Streets.jpg" loading="lazy" alt="Battle map: Residential Streets"></a><figcaption>Residential Streets</figcaption></figure><figure><a href="files/maps/03_Rooftops.jpg" target="_blank" rel="noopener"><img src="files/maps/03_Rooftops.jpg" loading="lazy" alt="Battle map: Rooftops"></a><figcaption>Rooftops</figcaption></figure><figure><a href="files/maps/04_Alley_Maze.jpg" target="_blank" rel="noopener"><img src="files/maps/04_Alley_Maze.jpg" loading="lazy" alt="Battle map: Alley Maze"></a><figcaption>Alley Maze</figcaption></figure><figure><a href="files/maps/05_Warehouse.jpg" target="_blank" rel="noopener"><img src="files/maps/05_Warehouse.jpg" loading="lazy" alt="Battle map: Warehouse"></a><figcaption>Warehouse</figcaption></figure><figure><a href="files/maps/06_Industrial_Yard.jpg" target="_blank" rel="noopener"><img src="files/maps/06_Industrial_Yard.jpg" loading="lazy" alt="Battle map: Industrial Yard"></a><figcaption>Industrial Yard</figcaption></figure><figure><a href="files/maps/07_Riverbank.jpg" target="_blank" rel="noopener"><img src="files/maps/07_Riverbank.jpg" loading="lazy" alt="Battle map: Riverbank"></a><figcaption>Riverbank</figcaption></figure><figure><a href="files/maps/08_Fog_Harbor.jpg" target="_blank" rel="noopener"><img src="files/maps/08_Fog_Harbor.jpg" loading="lazy" alt="Battle map: Fog Harbor"></a><figcaption>Fog Harbor</figcaption></figure><figure><a href="files/maps/09_Night_City.jpg" target="_blank" rel="noopener"><img src="files/maps/09_Night_City.jpg" loading="lazy" alt="Battle map: Night City"></a><figcaption>Night City</figcaption></figure><figure><a href="files/maps/10_Gate_Attack_Ruins.jpg" target="_blank" rel="noopener"><img src="files/maps/10_Gate_Attack_Ruins.jpg" loading="lazy" alt="Battle map: Gate Attack Ruins"></a><figcaption>Gate Attack Ruins</figcaption></figure><figure><a href="files/maps/11_Open_Field.jpg" target="_blank" rel="noopener"><img src="files/maps/11_Open_Field.jpg" loading="lazy" alt="Battle map: Open Field"></a><figcaption>Open Field</figcaption></figure><figure><a href="files/maps/12_Subway_Tunnel.jpg" target="_blank" rel="noopener"><img src="files/maps/12_Subway_Tunnel.jpg" loading="lazy" alt="Battle map: Subway Tunnel"></a><figcaption>Subway Tunnel</figcaption></figure><figure><a href="files/maps/13_Park_and_Forest.jpg" target="_blank" rel="noopener"><img src="files/maps/13_Park_and_Forest.jpg" loading="lazy" alt="Battle map: Park and Forest"></a><figcaption>Park and Forest</figcaption></figure><figure><a href="files/maps/14_Mall_Atrium.jpg" target="_blank" rel="noopener"><img src="files/maps/14_Mall_Atrium.jpg" loading="lazy" alt="Battle map: Mall Atrium"></a><figcaption>Mall Atrium</figcaption></figure><figure><a href="files/maps/15_Training_Room.jpg" target="_blank" rel="noopener"><img src="files/maps/15_Training_Room.jpg" loading="lazy" alt="Battle map: Training Room"></a><figcaption>Training Room</figcaption></figure><figure><a href="files/maps/16_Gate_Crater.jpg" target="_blank" rel="noopener"><img src="files/maps/16_Gate_Crater.jpg" loading="lazy" alt="Battle map: Gate Crater"></a><figcaption>Gate Crater</figcaption></figure><figure><a href="files/maps/17_Mountain_Pass.jpg" target="_blank" rel="noopener"><img src="files/maps/17_Mountain_Pass.jpg" loading="lazy" alt="Battle map: Mountain Pass"></a><figcaption>Mountain Pass</figcaption></figure><figure><a href="files/maps/18_Dockyard_Containers.jpg" target="_blank" rel="noopener"><img src="files/maps/18_Dockyard_Containers.jpg" loading="lazy" alt="Battle map: Dockyard Containers"></a><figcaption>Dockyard Containers</figcaption></figure></div>
+  </section>
+
+  <section aria-labelledby="feedback">
+    <h2 id="feedback">Send feedback</h2>
+    <p class="lead" style="font-size:.95rem">Fill in what you can. The form builds a message you copy and paste into Discord or send to whoever shared this page. Nothing is sent from here.</p>
+    <form id="fbform" class="fb">
+      <label>Your name (optional)<input id="f-name" type="text" autocomplete="off"></label>
+      <label>You were the<select id="f-role"><option>Player</option><option>Operator</option><option>Just read it</option></select></label>
+      <label>Did you play a fight?<select id="f-played"><option>No, only read</option><option>Yes, one fight</option><option>Yes, several</option></select></label>
+      <label>Strongest class<select id="f-strong"><option value="">Not sure</option></select></label>
+      <label>Weakest class<select id="f-weak"><option value="">Not sure</option></select></label>
+      <label class="wide">Anything confusing or missing in the rules?<textarea id="f-conf" rows="3"></textarea></label>
+      <label class="wide">Weapons or triggers that feel too strong or too weak?<textarea id="f-bal" rows="3"></textarea></label>
+      <label class="wide">One Trion pool for health and energy, and the gear cost: fun or annoying?<textarea id="f-trion" rows="3"></textarea></label>
+      <label class="wide">Was the hit-location roll too slow in a 3 against 3 fight?<textarea id="f-slow" rows="3"></textarea></label>
+      <label class="wide">Anything else<textarea id="f-else" rows="3"></textarea></label>
+      <div class="wide"><button type="submit" class="btn" id="f-copy">Copy feedback</button> <span class="status" id="f-status" aria-live="polite"></span></div>
+      <label class="wide" id="f-outwrap" hidden>If copying did not work, select and copy this text<textarea id="f-out" rows="8" readonly></textarea></label>
+    </form>
+  </section>
+
+  <footer>An unofficial fan game. World Trigger is the work of Daisuke Ashihara. The rules and stats here are interpretations made for this game, not official material. Art spots in the books are placeholders.</footer>
+</div>
+
+<script>
+(function(){
+  var cls=['Attacker','Gunner','Shooter','Sniper','Trapper','Assassin','Tactician','Counterstriker','Aftokrator'];
+  ['f-strong','f-weak'].forEach(function(id){var el=document.getElementById(id);cls.forEach(function(c){var o=document.createElement('option');o.textContent=c;el.appendChild(o);});});
+  document.getElementById('fbform').addEventListener('submit',function(e){
+    e.preventDefault();
+    function v(id){return (document.getElementById(id).value||'').trim();}
+    var L=['**World Trigger RPG feedback**'];
+    if(v('f-name'))L.push('From: '+v('f-name'));
+    L.push('Role: '+v('f-role')+' | Played: '+v('f-played'));
+    if(v('f-strong'))L.push('Strongest class: '+v('f-strong'));
+    if(v('f-weak'))L.push('Weakest class: '+v('f-weak'));
+    [['f-conf','Confusing or missing'],['f-bal','Weapons and triggers'],['f-trion','Trion pool and gear cost'],['f-slow','Hit-location speed'],['f-else','Other']].forEach(function(p){if(v(p[0]))L.push('**'+p[1]+':** '+v(p[0]));});
+    var text=L.join('\n'),st=document.getElementById('f-status'),out=document.getElementById('f-out');
+    out.value=text;
+    function fallback(){document.getElementById('f-outwrap').hidden=false;out.focus();out.select();st.textContent='Copy the text below.';}
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(function(){st.textContent='Copied. Paste it into Discord.';}).catch(fallback);}else{fallback();}
+  });
+})();
+</script>
+</body></html>

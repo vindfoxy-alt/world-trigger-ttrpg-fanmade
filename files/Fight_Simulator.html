@@ -1,0 +1,964 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body><title>Trion Fight Simulator</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+:root{--bg:#f4f6f9;--panel:#fff;--ink:#14213d;--mute:#5d6b82;--line:#d7deea;--navy:#14284b;--cyan:#0a9bb5;--a:#1f6fd1;--b:#d0502d;--hit:#b3261e;--blk:#1f6fd1;--ok:#1d8a52;--track:#e3e8f0;--shadow:0 1px 2px rgba(20,33,61,.08)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1522;--panel:#162033;--ink:#e8edf6;--mute:#93a1ba;--line:#2a3750;--navy:#0a1220;--cyan:#38c3dc;--a:#5ea2f5;--b:#f08a66;--hit:#ff8a80;--blk:#7eb6ff;--ok:#5fd19a;--track:#243148;--shadow:none;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0e1522;--panel:#162033;--ink:#e8edf6;--mute:#93a1ba;--line:#2a3750;--navy:#0a1220;--cyan:#38c3dc;--a:#5ea2f5;--b:#f08a66;--hit:#ff8a80;--blk:#7eb6ff;--ok:#5fd19a;--track:#243148;--shadow:none;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 Inter,system-ui,sans-serif;margin:0;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 40px}
+.wrap{max-width:1100px;margin:0 auto}
+header{padding:26px 0 8px}
+h1{font:700 30px/1.15 'Space Grotesk',Inter,sans-serif;margin:0;letter-spacing:-.01em;text-wrap:balance}
+header p{color:var(--mute);margin:6px 0 0;max-width:65ch}
+h2{font:700 13px 'Space Grotesk',Inter,sans-serif;text-transform:uppercase;letter-spacing:.09em;color:var(--mute);margin:0 0 10px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;box-shadow:var(--shadow);margin-top:14px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.seg button{border:0;background:transparent;color:var(--ink);padding:8px 14px;font:500 14px Inter;cursor:pointer}
+.seg button[aria-pressed=true]{background:var(--navy);color:#fff}
+.setup{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px}
+.side h3{margin:0 0 8px;font:700 16px 'Space Grotesk';display:flex;gap:8px;align-items:center}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+select{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:500 14px Inter;margin-bottom:8px}
+.hint{color:var(--mute);font-size:13px;min-height:1.2em;margin:2px 0 0}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:14px}
+.btn{border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:9px 14px;border-radius:9px;font:600 14px Inter;cursor:pointer}
+.btn:hover{border-color:var(--cyan)}
+.btn.pri{background:var(--navy);color:#fff;border-color:var(--navy)}
+.btn:disabled{opacity:.45;cursor:default}
+.spd{display:flex;align-items:center;gap:8px;color:var(--mute);font-size:13px;margin-left:auto}
+.spd input{width:110px}
+.arena{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px}
+.team{min-width:0}
+.team h3{margin:0 0 8px;font:700 16px 'Space Grotesk';display:flex;gap:8px;align-items:center}
+.card{background:var(--panel);border:1px solid var(--line);border-left:5px solid var(--c);border-radius:10px;padding:10px 12px;margin-bottom:8px;box-shadow:var(--shadow);transition:opacity .3s}
+.card.out{opacity:.45}
+.card .top{display:flex;justify-content:space-between;gap:8px;align-items:baseline;flex-wrap:wrap}
+.card b{font:700 15px 'Space Grotesk'}
+.tag{font-size:12px;font-weight:600;padding:2px 8px;border-radius:99px;background:hsl(var(--h) 70% 90%);color:hsl(var(--h) 60% 22%)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .tag{background:hsl(var(--h) 40% 24%);color:hsl(var(--h) 80% 85%)}}
+:root[data-theme="dark"] .tag{background:hsl(var(--h) 40% 24%);color:hsl(var(--h) 80% 85%)}
+.tr{height:9px;background:var(--track);border-radius:9px;overflow:hidden;margin:7px 0 4px}
+.tr i{display:block;height:100%;background:var(--ok);width:100%;transition:width .4s,background .4s}
+.trn{font-size:12.5px;color:var(--mute);display:flex;justify-content:space-between}
+.chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
+.chip{font-size:11.5px;padding:1px 7px;border-radius:6px;border:1px solid var(--line);color:var(--mute)}
+.chip.bad{color:var(--hit);border-color:var(--hit)}
+.logbox{max-height:420px;overflow:auto;padding:0}
+.logbox:empty::before{content:"Pick two sides and press Play fight.";display:block;padding:16px;color:var(--mute)}
+.ln{padding:3px 14px;font-size:13.5px;border-left:3px solid transparent}
+.ln.round{font:700 13px 'Space Grotesk';text-transform:uppercase;letter-spacing:.08em;background:var(--track);margin-top:6px;padding:5px 14px}
+.ln.hit{color:var(--hit);border-color:var(--hit)}
+.ln.block{color:var(--blk);border-color:var(--blk)}
+.ln.miss{color:var(--mute)}
+.ln.info{color:var(--mute);padding-left:28px;font-size:13px}
+.ln.big{font-weight:600}
+.ln.bail{font-weight:700;color:var(--ink);background:var(--track)}
+.result{font:700 18px 'Space Grotesk';margin:12px 0 0}
+.stats{display:grid;gap:10px}
+.wb{display:flex;height:34px;border-radius:9px;overflow:hidden;font:700 13px Inter;color:#fff}
+.wb div{display:flex;align-items:center;justify-content:center;min-width:0;overflow:hidden;white-space:nowrap}
+.sm{color:var(--mute);font-size:13px}
+.note{color:var(--mute);font-size:13px;margin-top:14px}
+.mapgrid{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:16px;align-items:start}.mapgrid svg{width:100%;height:auto;border-radius:8px;border:1px solid var(--line);display:block}.chip.tag2{color:var(--ink);border-color:var(--cyan)}
+@media (max-width:640px){.mapgrid{grid-template-columns:1fr}}
+@media (max-width:640px){.setup,.arena{grid-template-columns:1fr}.spd{margin-left:0}h1{font-size:25px}}
+.un{transition:transform .6s ease;font:700 13px Inter,sans-serif}.un circle{stroke:#fff;stroke-width:2.5;filter:drop-shadow(0 2px 2px rgba(0,0,0,.5))}.un.dead{opacity:.35}.un text{fill:#fff;text-anchor:middle;pointer-events:none}.ln.move{color:var(--mute);font-style:italic;padding-left:20px}
+</style>
+<div class="wrap">
+<header>
+<h1>Trion Fight Simulator</h1>
+<p>Pick two teams (or bring your own agent) and watch the fighters move across the map and fight round by round, or run a couple of thousand fights to see who wins more often. It uses your own rules: d20 + stat vs Evade, Block, hit locations, wounds, Nearly Dead and bail out.</p>
+</header>
+
+<div class="panel">
+ <div class="bar" style="margin:0 0 4px"><div class="seg" role="group" aria-label="Mode"><button id="m-pvp" aria-pressed="true">Team vs Team</button><button id="m-pve" aria-pressed="false">Team vs Enemies</button></div>
+  <label class="sm" style="display:flex;align-items:center;gap:8px;margin-left:8px">Fight tier <select id="tierSel" aria-label="Fight tier" style="width:auto;margin:0"></select></label></div>
+ <p class="hint" id="tierHint">Everyone in the fight, enemies included, uses this Tier: Tier Bonus on attacks and Evade, and Trion per Tier.</p>
+ <div class="setup">
+  <div class="side"><h3><span class="dot" style="background:var(--a)"></span>Blue team</h3><div id="selA"></div><p class="hint" id="hA"></p></div>
+  <div class="side"><h3><span class="dot" style="background:var(--b)"></span><span id="bTitle">Orange team</span></h3><div id="selB"></div><p class="hint" id="hB"></p></div>
+ </div>
+ <div class="bar">
+  <label class="sm" style="display:flex;align-items:center;gap:6px"><input type="checkbox" id="manual"> Turn-based: I choose who the Blue team attacks</label>
+ </div>
+ <div class="bar">
+  <button class="btn pri" id="play">Play fight</button>
+  <button class="btn" id="next">Next round</button>
+  <button class="btn" id="skip">Skip to end</button>
+  <button class="btn" id="rand">Random teams</button>
+  <label class="spd">Speed <input type="range" id="speed" min="1" max="5" value="3" aria-label="Playback speed"></label>
+ </div>
+</div>
+
+<div class="panel" id="myPanel">
+ <h2>Bring your own agent</h2>
+ <p class="sm" style="margin:0 0 10px">Make an agent in the character creator, press <b>Copy character code</b>, and paste it here. Your agent then shows up in the fighter lists with its real class, stats, weapon and Trion, and the Fight tier (and the enemies) follow its Tier.</p>
+ <div class="bar" style="margin:0"><input id="codeIn" aria-label="Character code" placeholder="Paste character code (starts with WT1|)" style="flex:1;min-width:220px;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:500 14px Inter"><button class="btn pri" id="codeAdd">Add agent</button></div>
+ <p class="hint" id="codeMsg" aria-live="polite"></p>
+ <div class="chips" id="myList"></div>
+</div>
+
+<div class="panel" id="turnPanel" hidden><h2 id="turnTitle"></h2><p class="hint" id="turnHint">Pick who to attack. Your fighter moves into position if it needs to, then attacks.</p><div class="bar" id="turnBtns" style="margin:0;gap:8px;flex-wrap:wrap"></div></div>
+<div class="panel" id="mapPanel">
+ <h2>Battlefield</h2>
+ <div class="bar" style="margin:0 0 12px"><select id="mapSel" aria-label="Map" style="max-width:260px;margin:0"></select><button class="btn" id="reroll">New random map</button><label class="sm"><input type="checkbox" id="mapEach"> New map every fight in "Many fights"</label><label class="sm"><input type="checkbox" id="kite" checked> Ranged fighters back away from melee</label></div>
+ <div class="mapgrid"><div id="mapsvg"></div><div><div class="chips" id="mapTags"></div><p class="sm" id="mapDesc"></p></div></div>
+</div>
+<div class="arena">
+ <div class="team"><h3><span class="dot" style="background:var(--a)"></span>Blue team</h3><div id="cA"></div></div>
+ <div class="team"><h3><span class="dot" style="background:var(--b)"></span><span id="cBt">Orange team</span></h3><div id="cB"></div></div>
+</div>
+<div class="result" id="result" aria-live="polite"></div>
+
+<div class="panel"><h2>Fight log</h2><div class="logbox" id="log" tabindex="0"></div></div>
+
+<div class="panel">
+ <h2>Many fights</h2>
+ <div class="bar" style="margin:0 0 12px"><button class="btn pri" id="bulk">Run 1,000 fights</button><span class="sm" id="bulkNote">Uses the teams chosen above.</span></div>
+ <div class="stats" id="stats"></div>
+</div>
+
+<p class="note">This is a rough model. Agents imported from a character code now use their class features for their Tier, their special ability and their sub triggers (listed below), so Tier 2 and higher results are closer to the real rules. The premade fighters in the dropdowns are now full characters built the same way (a class, a special ability, weapons and sub triggers, shown as chips on their cards), so they follow the same rules as imported agents. Tick Turn-based to choose who the Blue team attacks on each turn. Enemies scale with the Fight tier (Minion, Soldier and Elite gain Trion per Tier; Bosses and Black Triggers get Trion per player). Imported agents use their real stats, first weapon and Trion. Block adds up: Basic Guard +2, plus +2 for Kogetsu or Raygust, plus +2 if an imported agent carries a Shield (it costs 2 Trion each time it is used, 1 for a Counterstriker), up to +6. Fighters move up to 30 ft (5 ft squares), then attack. Melee reaches 5 ft, ranged fighters use their weapon range and need a clear line of sight. Not simulated: Link points and Team Plays, flanking, surprise and noticing, ability checks, Attacker Quick Trigger, Sword Master and Mantis, Gunner Overwatch, Ace Gunner, Shooter Composite and Area Control, Keep Them Moving, Called Shot targeting beyond the chest, Trapper Web Weaver and Entangle, Ground Strike, Assassin Chameleon Approach, Decoy and Break Their Formation, Tactician Control the Space, Exploit a Habit and Rapid Reassessment, Counterstriker Reprisal, Bulwark, Hold the Line, Lampyris and Vorvoros Tier features, Borrowed Fire, Perfect Parallel Processing, Wall Breaker, Trap Sense, the Shield techniques, and the sub triggers Radar, Bagworm Tag, Enhanced Radar, Silencer and Timer (they have no effect in this simulator). Tier 5 specialisations are fixed to the first option. Chelidon has Gun Swap (rifle, shotgun or sidearm each attack), the Sidearm Block, Jet Pack and Strafing Run; the rules give Strafing Run no limit and it wins fights alone, so the simulator allows it once every 6 rounds. Lampyris has Piercing Shards (Tier 2), Marker Shards (Tier 4: allies get an Edge die against a marked target), Spotter (Tier 5: hidden enemies within 60 ft are seen) and the Tier 10 Shield; it always fires its Guns form, so Shield (before Tier 10) and Wings are not used. Vorvoros has Liquefy (twice a round at Tier 10, the second costs 2 more Trion), Gas Form (Tier 4, used when low on Trion; before Tier 8 it stops only the first attack) and Choking Cloud (Tier 5, used when it catches 2 or more enemies). Resist Heat is not modelled because the simulator has no fire. Borrowed Fire (Tier 7, once a fight, no Link cost) lends an ally the matching feature for a round. Escudo, Switchbox, Dummy Beacon, Idaten, Teleporter, Grasshopper, Chameleon, Bagworm and Geist are simplified. Black Triggers: a fighter marked + Black Trigger starts ignited (Edge die on attacks, Lethal +1, Block +3, lose 2 Trion a round). The Black Trigger bosses use the Monster Manual numbers with their powers simplified. Balance in this simulator: Attacker, Assassin and Counterstriker move 40 ft, Counterstriker and Assassin get +1 to hit, Lampyris Shard Guns are +0 to hit with Lethal 2 and ignore cover, Liquefy costs 2 Trion and Escudo gives Block +3. Map and movement rules are my first draft, built from your 30 ft move and weapon ranges, and are untested at the table. Treat the win rates as a sanity check on balance, not a prediction.</p>
+</div>
+<script>
+// World Trigger RPG fight engine: a JS port of the rough Tier 1 model used for the tier lists.
+const CFG={LIQ2:2,STRAFE_GAP:6,MELEE_MOVE:2,GEAR:6,TRAP_BLOCK:3,TRAP_SLOW:1,LIQ_COST:2,LAMP_HIT:0,LAMP_LETH:2,LAMP_PIERCE:1,KOG_BLOCK:2,RAY_BLOCK:2,BLOCK_CAP:6,SHIELD_COST:2,SLOWB:2,RIP:-1,SHOOTER_HIT:2};
+const CLASSES={
+ Attacker:{reach:1,trion:49,atk:3,hit:1,leth:2,dex:1,block:()=>Math.min(CFG.BLOCK_CAP,3+CFG.KOG_BLOCK),kind:'melee',note:'Kogetsu, Super Strength Basic Guard'},
+ Gunner:{reach:24,trion:50,atk:3,hit:1,leth:1,dex:3,block:2,kind:'ranged',note:'Assault Rifle'},
+ Shooter:{reach:12,trion:52,atk:3,hit:()=>CFG.SHOOTER_HIT,leth:1,dex:1,block:2,kind:'ranged',note:'Asteroid / Hound'},
+ Sniper:{reach:60,trion:46,atk:3,hit:-2,leth:2,dex:3,block:2,kind:'ranged',snipe:1,note:'Egret, hard to hit from range'},
+ Trapper:{reach:18,trion:57,atk:2,hit:1,leth:1,dex:1,block:()=>CFG.TRAP_BLOCK,kind:'ranged',trap:1,note:'Lead Bullet slows, Escudo'},
+ Assassin:{reach:1,trion:42,atk:3,hit:3,leth:1,dex:3,block:2,kind:'melee',ambush:1,note:'Scorpion, opening strike'},
+ Tactician:{reach:12,trion:46,atk:2,hit:2,leth:1,dex:2,block:2,kind:'ranged',tac:1,note:'Gives allies +1 to hit'},
+ Counterstriker:{reach:1,trion:49,atk:3,hit:1,leth:1,dex:1,block:()=>Math.min(CFG.BLOCK_CAP,2+CFG.RAY_BLOCK),kind:'melee',counter:1,note:'Raygust, Riposte'},
+ Chelidon:{reach:24,trion:50,atk:3,hit:1,leth:1,dex:3,block:2,kind:'ranged',shot:1,sig:1,note:'Aftokrator, gun-shifter'},
+ Lampyris:{reach:18,trion:49,atk:3,hit:()=>CFG.LAMP_HIT,leth:()=>CFG.LAMP_LETH,dex:1,block:2,kind:'ranged',sig:1,note:'Aftokrator, shard cloud'},
+ Vorvoros:{reach:1,trion:49,atk:3,hit:0,leth:1,dex:1,block:2,kind:'melee',liq:1,sig:1,note:'Aftokrator, liquid and gas'}
+};
+const ENEMIES={
+ M:{reach:1,label:'Minion',trion:18,atk:3,leth:0,block:0,att:1,to:1},
+ S:{reach:1,label:'Soldier',trion:44,atk:3,leth:1,block:0,att:1},
+ E:{reach:1,label:'Elite',trion:76,atk:3,leth:2,block:2,att:1},
+ K:{reach:12,label:'Black Trigger wielder',trion:90,atk:6,leth:2,block:3,att:2,to:1,burn:3,mv:1},
+ CH:{reach:12,label:'Cinderheart',trion:90,atk:6,leth:2,block:3,att:2,to:1,burn:3,mv:9,weak:1,sp:'ch'},
+ AL:{reach:1,label:'Alektor (Hyrein)',trion:90,atk:6,leth:2,block:3,att:2,to:1,burn:3,mv:1,weak:1,sp:'al'},
+ OR:{reach:12,label:'Organon (Viza)',trion:90,atk:6,leth:2,block:3,att:2,to:1,burn:3,mv:1,weak:1,sp:'or'},
+ SP:{reach:12,label:'Speiraskia (Mira)',trion:90,atk:6,leth:2,block:3,att:2,to:1,burn:3,mv:1,weak:1,sp:'sp'},
+ BE:{reach:1,label:'Beast',trion:18,atk:1,leth:0,block:0,att:1,to:1,beast:1},
+ PR:{reach:3,label:'Chelidon boss',trion:60,atk:5,leth:1,block:2,att:2,to:1,shot:1},
+ PH:{reach:3,label:'Lampyris boss',trion:60,atk:5,leth:1,block:2,att:2,to:1,rshield:1},
+ PE:{reach:3,label:'Vorvoros boss',trion:60,atk:5,leth:1,block:2,att:2,to:1,liq:1,gas:1}
+};
+const ENCOUNTERS={
+ '3 Soldiers + Minion':['S','S','S','M'],'2 Soldiers + 3 Minions':['S','S','M','M','M'],'Elite + Soldier':['E','S'],
+ 'Elite + 2 Soldiers':['E','S','S'],'6 Minions':['M','M','M','M','M','M'],
+ 'Black Trigger wielder':['K'],'Cinderheart':['CH'],'Alektor (Hyrein)':['AL'],'Organon (Viza)':['OR'],'Speiraskia (Mira)':['SP'],'Chelidon boss':['PR'],'Lampyris boss':['PH'],'Vorvoros boss':['PE']
+};
+
+const THEMES=[
+ {n:'Border HQ Courtyard',g:'cobble',h:210,f:{cover:1},o:'crate'},
+ {n:'Residential Streets',g:'road',h:35,f:{cover:2},o:'house'},
+ {n:'Rooftops',g:'roof',h:200,f:{open:1},o:'vent'},
+ {n:'Alley Maze',g:'alley',h:25,f:{cover:2,close:1},o:'wall'},
+ {n:'Warehouse',g:'warehouse',h:45,f:{cover:3},o:'crate'},
+ {n:'Industrial Yard',g:'industrial',h:15,f:{cover:2,rubble:1},o:'tank'},
+ {n:'Riverbank',g:'bank',h:190,f:{open:1,rubble:1},o:'rock'},
+ {n:'Fog Harbor',g:'dock',h:215,f:{fog:2,cover:1},o:'crate'},
+ {n:'Night City',g:'night',h:240,f:{fog:1,cover:1},o:'house'},
+ {n:'Gate Attack Ruins',g:'ruins',h:10,f:{rubble:1,cover:2},o:'rock'},
+ {n:'Open Field',g:'field',h:110,f:{open:1},o:'rock'},
+ {n:'Subway Tunnel',g:'tunnel',h:260,f:{close:1,cover:1},o:'wall'},
+ {n:'Park and Forest',g:'park',h:130,f:{cover:3,fog:1},o:'tree'},
+ {n:'Mall Atrium',g:'mall',h:300,f:{open:1,cover:1},o:'crate'},
+ {n:'Training Room',g:'training',h:180,f:{},o:'crate'},
+ {n:'Gate Crater',g:'crater',h:5,f:{open:1,rubble:1},o:'rock'},
+ {n:'Mountain Pass',g:'pass',h:95,f:{rubble:1,fog:1,cover:1},o:'rock'},
+ {n:'Dockyard Containers',g:'yard',h:20,f:{cover:3,close:1},o:'crate'}
+];
+function genMap(idx,seed){
+  const sd=seed==null?Math.floor(Math.random()*1e9):seed; const R=mkRng(sd);
+  const T=THEMES[idx==null||idx<0?Math.floor(R()*THEMES.length):idx];
+  const f=Object.assign({cover:0,close:0,open:0,fog:0,rubble:0},T.f);
+  // random twist so no two maps are quite alike
+  const tw=Math.floor(R()*5);
+  if(tw===0) f.cover=Math.min(3,f.cover+1); else if(tw===1) f.cover=Math.max(0,f.cover-1); else if(tw===2&&!f.open&&!f.close) f.fog=Math.min(2,f.fog+1); else if(tw===3) f.rubble=1-f.rubble;
+  const W=24,H=12,obs=[];
+  const n=2+f.cover*4+(f.close?4:0)+(f.rubble?3:0)-(f.open?2:0);
+  for(let i=0;i<Math.max(1,n);i++){
+    const w=T.o==='wall'?1+Math.floor(R()*4):1+Math.floor(R()*2),hh=T.o==='wall'?1:1+Math.floor(R()*2);
+    const x=5+Math.floor(R()*(W-10-w)),y=Math.floor(R()*(H-hh));
+    obs.push({x,y,w,h:hh,k:T.o});
+  }
+  if(f.close){ for(let x=0;x<W;x++){ if(R()<.55) obs.push({x,y:0,w:1,h:1,e:1,k:'wall'}); if(R()<.55) obs.push({x,y:H-1,w:1,h:1,e:1,k:'wall'}); } }
+  if(T.g==='bank'||T.g==='dock'||T.g==='yard'){ obs.push({x:4,y:H-2,w:W-8,h:2,k:'water',e:1}); }
+  if(T.g==='bank') obs.push({x:4,y:0,w:W-8,h:1,k:'water',e:1});
+  if(T.g==='crater') obs.push({x:10,y:4,w:4,h:4,k:'crater',e:1});
+  const tags=[];
+  if(f.cover) tags.push('Obstacles '+f.cover); if(f.close) tags.push('Tight lanes'); if(f.open) tags.push('Open ground');
+  if(f.fog) tags.push(f.fog>1?'Heavy fog (40 ft sight)':'Low light (75 ft sight)'); if(f.rubble) tags.push('Rubble (-10 ft move)');
+  return {name:T.n,ground:T.g,hue:T.h,seed:sd,idx:THEMES.indexOf(T),f,obs,W,H,tags,desc:describe(f)};
+}
+function describe(f){const d=[];
+ d.push(f.cover?'Plenty of obstacles: they block line of sight, and a fighter standing beside one has cover (+2 Evade against attacks from that side).':'Very few obstacles, so almost everything can see everything.');
+ if(f.close) d.push('Walls line the edges and narrow the lanes.');
+ if(f.fog) d.push(f.fog>1?'Heavy fog: nobody can attack beyond 40 ft.':'Low light: nobody can attack beyond 75 ft.');
+ if(f.rubble) d.push('Rubble: everyone moves 10 ft less each turn.');
+ return d.join(' ');}
+function flatMap(){return {name:'Open arena',ground:'training',seed:7,hue:180,f:{cover:0,close:0,open:1,fog:0,rubble:0},obs:[],W:24,H:12,tags:['No obstacles'],desc:'Nothing to hide behind. Pure range and speed.'};}
+const PARTS=['right leg','left leg','right arm','left arm','chest','weapon'];
+function mkRng(seed){ if(seed==null) return Math.random; let s=seed>>>0; return ()=>{s=(s+0x6D2B79F5)>>>0;let t=s;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296;};}
+const val=v=>typeof v==='function'?v():v;
+
+// Tier scaling (Handbook Tier Progression): Tier Bonus is added to every attack roll and to Evade.
+const TIERB=[0,0,1,1,2,2,3,3,4,4];
+const TIER_TRION={Attacker:5,Gunner:4,Shooter:4,Sniper:3,Trapper:5,Assassin:4,Tactician:4,Counterstriker:5,Chelidon:4,Lampyris:4,Vorvoros:4};
+const ENEMY_TIER_TRION={M:3,S:4,E:6,BE:3};   // Handbook: Minion +3, Soldier +4, Elite +6 per Tier above 1
+const BOSS_PER_PLAYER={PR:20,PH:20,PE:20,K:30,CH:30,AL:30,OR:30,SP:30}; // Handbook: Boss 20, Black Trigger 30 per player
+const tierBonus=t=>TIERB[Math.max(1,Math.min(10,t|0||1))-1];
+// reach is in 5 ft squares; hit = weapon hit bonus; shot = Lethal +1 within 15 ft (the shotgun rule, simplified)
+const WEAPONS={
+ 'Kogetsu':{st:'STR',hit:1,leth:2,reach:1,get block(){return CFG.KOG_BLOCK}},'Scorpion':{st:'DEX',hit:2,leth:1,reach:1},'Raygust':{st:'STR',hit:0,leth:1,reach:1,get block(){return CFG.RAY_BLOCK}},
+ 'Handgun':{st:'DEX',hit:2,leth:1,reach:12},'Assault Rifle':{st:'DEX',hit:1,leth:1,reach:24},'Shotgun':{st:'DEX',hit:0,leth:1,reach:6,shot:1},
+ 'Grenade Launcher':{st:'DEX',hit:-1,leth:0,reach:18},'Minigun':{st:'DEX',hit:0,leth:0,reach:24,att:2},
+ 'Ibis':{st:'DEX',hit:-3,leth:3,reach:60,snipe:1},'Lightning':{st:'DEX',hit:0,leth:0,reach:60,snipe:1,att:2},'Egret':{st:'DEX',hit:-2,leth:2,reach:60,snipe:1},
+ 'Asteroid':{st:'DEX',hit:2,leth:1,reach:12},'Meteora':{st:'DEX',hit:-1,leth:0,reach:12},'Hound':{st:'DEX',hit:3,leth:0,reach:12},'Viper':{st:'DEX',hit:0,leth:1,reach:12},
+ 'Lead Bullet':{st:'DEX',hit:1,leth:1,reach:18,trap:1},
+ 'Chelidon Rifle':{st:'DEX',hit:1,leth:1,reach:24,cls:'Chelidon'},'Chelidon Shotgun':{st:'DEX',hit:0,leth:1,reach:3,shot:1,cls:'Chelidon'},'Chelidon Sidearm':{st:'DEX',hit:1,leth:1,reach:12,cls:'Chelidon'},
+ 'Lampyris Shard Guns':{st:'DEX',hit:0,leth:2,reach:18,cls:'Lampyris'},'Vorvoros Lash':{st:'DEX',hit:0,leth:1,reach:3,cls:'Vorvoros'}
+};
+// Character code from the creator: WT1|name|class|tier|STR|DEX|STA|TRION|INT|CHA|weapons (comma)|sub triggers (comma)|ability
+function parseCode(txt){
+  const p=String(txt||'').trim().split('|'); if(p[0]!=='WT1'||p.length<12) return null;
+  const n=i=>{const v=parseInt(p[i],10);return isNaN(v)?0:Math.max(-3,Math.min(8,v));};
+  const tier=Math.max(1,Math.min(10,parseInt(p[3],10)||1));
+  const list=i=>(p[i]||'').split(',').map(x=>x.trim()).filter(Boolean);
+  return {custom:1,name:(p[1]||'Agent').slice(0,24),cls:p[2]||'Gunner',tier,str:n(4),dex:n(5),sta:n(6),tri:n(7),int:n(8),cha:n(9),weapons:list(10),subs:list(11),abl:p[12]||''};
+}
+function makeCustom(o,team,T){
+  T=o.tier||T||1; const tb=tierBonus(T);
+  const w0=o.weapons.map(x=>WEAPONS[x]).filter(Boolean)[0];
+  let cls=o.cls; if(cls==='Aftokrator') cls=(w0&&w0.cls)||'Chelidon';
+  const base=CLASSES[cls]||CLASSES.Gunner;
+  const gear=2*o.weapons.length+o.subs.length;
+  const mx=Math.max(10,40+5*o.tri+2*o.sta+(TIER_TRION[cls]||4)*(T-1)-gear);
+  const cb=(cls==='Assassin'||cls==='Counterstriker')?1:0;
+  const w=w0||{st:base.kind==='melee'?'STR':'DEX',hit:val(base.hit),leth:val(base.leth),reach:base.reach};
+  const statv=w.st==='STR'?o.str:o.dex;
+  const kind=(w.reach>1&&w.cls!=='Vorvoros')?'ranged':'melee';
+  const u=makeAgent(cls,team,o.name,T);
+  Object.assign(u,{name:o.name,custom:true,max:mx,tr:mx,atk:statv+tb+cb+w.hit,leth:w.leth+(base.sig&&cls==='Lampyris'?0:0),dex:o.dex,tb,kind,reach:w.reach,
+    block:Math.min(CFG.BLOCK_CAP,2+(w.block||0)+(base.cls_block||0)),shield:o.subs.indexOf('Shield')>=0?(cls==='Counterstriker'?3:2):0,shieldCost:Math.max(1,CFG.SHIELD_COST-(cls==='Counterstriker'?1:0)),
+    snipe:!!(w.snipe||base.snipe),trap:!!(w.trap||base.trap),shot:!!(w.shot||base.shot),att:w.att||1,attacks:w.att||1,tier:T,
+    ambush:!!base.ambush,tac:!!base.tac,counter:!!base.counter,liq:!!base.liq});
+  initFeat(u,o,cls,T,o.weapons.filter(x=>WEAPONS[x]));
+  return u;
+}
+// Premade fighters are full characters built with the same rules as imported ones: class features, a special ability and sub triggers.
+// stats order: STR, DEX, STA, TRION, INT, CHA (the starting +3, +2, +1, +1, 0, -1)
+const BUILDS={
+ Attacker:{st:[3,2,1,1,0,-1],w:['Kogetsu'],s:['Shield',"Gen'yō"],a:'Super Strength'},
+ Gunner:{st:[1,2,3,1,0,-1],w:['Assault Rifle'],s:['Grasshopper'],a:'Tireless Body'},
+ Shooter:{st:[0,3,2,1,1,-1],w:['Asteroid','Hound'],s:['Escudo'],a:'Sharp Eye'},
+ Sniper:{st:[0,3,2,1,1,-1],w:['Egret'],s:['Grasshopper'],a:'Sharp Eye'},
+ Trapper:{st:[0,3,2,1,1,-1],w:['Lead Bullet'],s:['Escudo'],a:'Sharp Eye'},
+ Assassin:{st:[1,3,2,1,0,-1],w:['Scorpion'],s:['Chameleon','Grasshopper'],a:'Quick Reflexes'},
+ Tactician:{st:[0,2,1,1,3,-1],w:['Handgun'],s:['Escudo','Grasshopper'],a:'Analytical Mind'},
+ Counterstriker:{st:[3,1,2,1,0,-1],w:['Raygust'],s:['Shield'],a:'Iron Grip'},
+ Chelidon:{st:[0,3,2,1,1,-1],w:['Chelidon Rifle'],s:[],a:'Sharp Eye'},
+ Lampyris:{st:[0,3,1,2,1,-1],w:['Lampyris Shard Guns'],s:[],a:'Sharp Eye'},
+ Vorvoros:{st:[0,3,1,2,1,-1],w:['Vorvoros Lash'],s:[],a:'Quick Reflexes'}
+};
+function premade(code,team,T){
+  const bt=/\+BT$/.test(code),cls=code.replace(/\+BT$/,''),b=BUILDS[cls];
+  const o={custom:1,name:cls,cls,tier:T,str:b.st[0],dex:b.st[1],sta:b.st[2],tri:b.st[3],int:b.st[4],cha:b.st[5],weapons:b.w.slice(),subs:b.s.slice(),abl:b.a};
+  const u=makeCustom(o,team,T);
+  if(bt){ u.bt=true; u.burn=(u.burn||0)+2; u.leth+=1; u.block=Math.max(3,u.block); u.name+=' (BT)'; }
+  return u;
+}
+function makeAgent(cls,team,label,T){
+  const bt=/\+BT$/.test(cls); cls=cls.replace(/\+BT$/,'');
+  const c=CLASSES[cls];
+  T=T||1; const tb=tierBonus(T);
+  let tr=c.trion-CFG.GEAR+(c.sig?Math.min(CFG.GEAR,2):0)+(TIER_TRION[cls]||4)*(T-1);
+  return {name:label||cls+(bt?' (BT)':''),cls,bt,burn:bt?2:0,mvb:0,tb,tier:T,team,agent:true,max:tr,tr,atk:c.atk+val(c.hit)+tb,leth:val(c.leth)+(bt?1:0),dex:c.dex,block:bt?Math.max(3,val(c.block)):val(c.block),cost:1,attacks:1,
+    kind:c.kind,reach:c.reach,legpen:0,w:{},ba:false,dead:false,mods:0,slow:0,riposte:false,assist:0,armpen:0,destroyed:new Set(),nd:false,
+    snipe:!!c.snipe,trap:!!c.trap,ambush:!!c.ambush,tac:!!c.tac,counter:!!c.counter,shot:!!c.shot,liq:!!c.liq,to:false,rshield:false,gas:false,gasr:false,liqused:false};
+}
+function makeEnemy(code,team,label,T,n){
+  const e=ENEMIES[code]; T=T||1; n=n||3; const tb=tierBonus(T);
+  const trn=BOSS_PER_PLAYER[code]?BOSS_PER_PLAYER[code]*n:e.trion+(ENEMY_TIER_TRION[code]||0)*(T-1);
+  return {name:label||e.label,cls:code,bt:false,sp:e.sp||null,weak:!!e.weak,beast:!!e.beast,awake:false,cubes:1,volleyed:false,evUntil:-1,rootUntil:-1,burn:e.burn||0,mvb:e.mv||0,tb,tier:T,team,agent:false,max:trn,tr:trn,atk:e.atk+tb,leth:e.leth,dex:0,block:e.block,cost:0,attacks:e.att,
+    kind:'melee',reach:e.reach,legpen:0,w:{},ba:false,dead:false,mods:0,slow:0,riposte:false,assist:0,armpen:0,destroyed:new Set(),nd:false,
+    snipe:false,trap:false,ambush:false,tac:false,counter:false,shot:!!e.shot,liq:!!e.liq,to:!!e.to,rshield:!!e.rshield,gas:!!e.gas,gasr:false,liqused:false};
+}
+
+function gridOf(m){
+  if(m._g) return m._g;
+  const W=m.W,H=m.H,blk=new Uint8Array(W*H);
+  m.obs.forEach(o=>{for(let x=o.x;x<o.x+o.w;x++)for(let y=o.y;y<o.y+o.h;y++)if(x>=0&&x<W&&y>=0&&y<H)blk[y*W+x]=1;});
+  // keep spawn zones clear
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(x<4||x>=W-4)blk[y*W+x]=0;
+  m._g={W,H,blk,los:new Uint8Array(W*H*W*H)};return m._g;
+}
+const cheb=(a,b)=>Math.max(Math.abs(a.x-b.x),Math.abs(a.y-b.y));
+function los(F,a,b){
+  const g=F.g,N=g.W*g.H,ia=a.y*g.W+a.x,ib=b.y*g.W+b.x,k=ia*N+ib;
+  let v=g.los[k]; if(v) return v===1;
+  let ok=true;const n=Math.max(Math.abs(b.x-a.x),Math.abs(b.y-a.y));
+  for(let i=1;i<n;i++){const x=Math.round(a.x+(b.x-a.x)*i/n),y=Math.round(a.y+(b.y-a.y)*i/n);if(g.blk[y*g.W+x]){ok=false;break;}}
+  g.los[k]=ok?1:2;g.los[ib*N+ia]=ok?1:2;return ok;
+}
+function sightCap(F){const f=F.map.f;return f.fog>1?8:f.fog?15:99;}
+function canShoot(F,a,t,pos){ // can a, standing at pos, attack t?
+  const dist=cheb(pos,t.pos); if(dist>a.reach||dist>sightCap(F)) return false;
+  return dist<=1||a.sp==='sp'||los(F,pos,t.pos);
+}
+function coverAt(F,t,from){ const g=F.g;
+  for(let dx=-1;dx<=1;dx++)for(let dy=-1;dy<=1;dy++){ if(!dx&&!dy)continue; const x=t.pos.x+dx,y=t.pos.y+dy;
+    if(x<0||y<0||x>=g.W||y>=g.H||!g.blk[y*g.W+x])continue;
+    if(dx*(from.x-t.pos.x)+dy*(from.y-t.pos.y)>0) return true; }
+  return false; }
+function speed(F,u){ if(u.rootUntil>=F.rnd) return 0; let sp=6+u.mvb+(u.agent&&u.reach<=1&&!u.liq?CFG.MELEE_MOVE:0)-(F.map.f.rubble&&!u.lf?2:0)-u.legpen;
+  const legs=['leg0','leg1'].filter(k=>u.destroyed.has(k)).length; for(let i=0;i<legs;i++) sp=Math.floor(sp/2);
+  if(u.slow>0) sp=Math.floor(sp/2); if(u.agent&&F.leader&&F.duskUntil>=F.rnd&&cheb(u.pos,F.leader.pos)<=6) sp=Math.floor(sp/2); return Math.max(1,sp); }
+function occupied(F,x,y,self){ for(const u of F.A.concat(F.B)) if(u!==self&&!u.dead&&u.pos.x===x&&u.pos.y===y) return true; return false; }
+function bfs(F,u,maxSteps){ // reachable tiles within maxSteps, 8-way
+  const g=F.g,W=g.W,H=g.H,dist=new Int16Array(W*H).fill(-1),q=[u.pos.y*W+u.pos.x];dist[q[0]]=0;
+  for(let h=0;h<q.length;h++){const c=q[h],cx=c%W,cy=(c/W)|0,dc=dist[c];if(dc>=maxSteps)continue;
+    for(let dx=-1;dx<=1;dx++)for(let dy=-1;dy<=1;dy++){if(!dx&&!dy)continue;const x=cx+dx,y=cy+dy;if(x<0||y<0||x>=W||y>=H)continue;const n=y*W+x;
+      if(dist[n]>=0||g.blk[n]||occupied(F,x,y,u))continue;dist[n]=dc+1;q.push(n);}}
+  return dist; }
+function distFrom(F,tp){ // path distance map from a tile ignoring units
+  const g=F.g,W=g.W,H=g.H,dist=new Int16Array(W*H).fill(-1),q=[tp.y*W+tp.x];dist[q[0]]=0;
+  for(let h=0;h<q.length;h++){const c=q[h],cx=c%W,cy=(c/W)|0;
+    for(let dx=-1;dx<=1;dx++)for(let dy=-1;dy<=1;dy++){if(!dx&&!dy)continue;const x=cx+dx,y=cy+dy;if(x<0||y<0||x>=W||y>=H)continue;const n=y*W+x;
+      if(dist[n]>=0||g.blk[n])continue;dist[n]=dist[c]+1;q.push(n);}}
+  return dist; }
+function nameAll(units){ // number duplicates
+  const cnt={};units.forEach(u=>cnt[u.name]=(cnt[u.name]||0)+1);
+  const seen={};units.forEach(u=>{if(cnt[u.name]>1){seen[u.name]=(seen[u.name]||0)+1;u.name+=' '+seen[u.name];}});
+}
+function newFight(sideA,sideB,opts={}){
+  const R=mkRng(opts.seed);
+  const T=opts.tier||1;
+  const mk=(c,tm)=>typeof c==='object'?makeCustom(c,tm,T):CLASSES[c.replace(/\+BT$/,'')]?premade(c,tm,T):makeEnemy(c,tm,null,T,sideA.length);
+  const A=sideA.map(c=>mk(c,'A'));
+  const B=sideB.map(c=>mk(c,'B'));
+  nameAll(A);nameAll(B);
+  const map=opts.map||flatMap();
+  const F={A,B,R,map,leader:null,duskUntil:-1,kite:opts.kite!==false,g:gridOf(map),log:opts.log?[]:null,rnd:0,escA:[],escB:[],manual:!!opts.manual,wait:null,pickFor:null,pickT:null,skipTurn:false,inRound:false,order:[],oi:0,over:false,winner:null,maxr:opts.maxr||(40+5*(T-1)),tier:T};
+  const place=(arr,x)=>{arr.forEach((u,i)=>{const col=arr.length>4?x+(i%2?(x<12?1:-1):0):x;u.pos={x:col,y:Math.max(0,Math.min(F.g.H-1,Math.round((i+1)*F.g.H/(arr.length+1)-.5)))};});};
+  if(F.manual) A.forEach(u=>u.human=true);
+  place(A,1);place(B,F.g.W-2);F.leader=B.find(u=>u.sp)||null;
+  return F;
+}
+const d=(F,n)=>1+Math.floor(F.R()*n);
+const lim=(u,share)=>Math.max(1,Math.round(u.max*share));
+function L(F,kind,text){ if(F.log) F.log.push({rnd:F.rnd,kind,text}); }
+function bail(F,u){ u.dead=true; u.tr=Math.min(u.tr,0); L(F,'bail',u.name+' is bailed out.'); }
+function survive(F,u,key){ if(u.htb>0&&!u.destroyed.has(key)){ u.htb--; u.w[key]=Math.min(u.w[key],lim(u,.1)-1); L(F,'big',`${u.name}'s limb survives as a hurt limb (Hard to Break).`); return true;} return false; }
+function wound(F,u,part,sev,Lt){
+  if(u.dead) return;
+  if(u.cham){u.cham=false;u.gSnag=false;}
+  const limb=part<4;
+  let s=Math.min(sev+Lt,limb?7:6);
+  if(u.to){
+    s=Math.min(s,6);
+    let n=part!==4?[1,1,1,2,2,3][s-1]:[2,2,2,4,4,8][s-1];
+    if(u.weak&&part===4&&s>=6){ n+=6; L(F,'big',`Weak spot! The core takes 6 extra Trion.`); }
+    u.tr-=n; L(F,'hit',`${u.name} takes ${n} wound${n>1?'s':''} (${u.tr<=0?'0':u.tr} Trion left).`);
+    if(u.tr<=0) bail(F,u); return;
+  }
+  if(u.nd){ L(F,'hit',`${u.name} is Nearly Dead and takes a wound.`); u.tr=0; bail(F,u); return; }
+  let n=0;const kill=7,w=u.w;
+  if(part===0||part===1){
+    const key='leg'+part; n=s<=3?1:s<kill?2:3; w[key]=(w[key]||0)+n;
+    if(s>=4&&s<kill){ if(u.pt&&!u.ptUsed) u.ptUsed=true; else u.legpen=Math.min(u.legpen+1,4); }
+    if((s>=kill||w[key]>=lim(u,.1))&&!survive(F,u,key)){ if(!u.destroyed.has(key)) L(F,'big',`${u.name}'s ${PARTS[part]} is destroyed!`); u.destroyed.add(key);} 
+  } else if(part===2||part===3){
+    const key='arm'+part; n=s<=3?1:s<kill?2:3; w[key]=(w[key]||0)+n;
+    if(s>=4&&s<kill){ if(u.pt&&!u.ptUsed) u.ptUsed=true; else u.armpen=Math.min(u.armpen+1,3); }
+    if((s>=kill||w[key]>=lim(u,.1))&&!survive(F,u,key)){ if(!u.destroyed.has(key)) L(F,'big',`${u.name}'s ${PARTS[part]} is destroyed!`); u.destroyed.add(key);} 
+  } else if(part===4){
+    n=s<=3?2:s<=5?4:8; w.chest=(w.chest||0)+n;
+    if(w.chest>=lim(u,.3)){ L(F,'big',`${u.name}'s chest is destroyed!`); u.tr=0; bail(F,u); return; }
+  } else {
+    if(s<=3){u.mods-=1;} else {u.mods-=2;n=1;}
+  }
+  u.tr-=n;
+  L(F,'hit',`${PARTS[part]} severity ${s}: ${u.name} takes ${n} wound${n===1?'':'s'}${part===5?' and the weapon is damaged (-'+(s<=3?1:2)+' to hit)':''} (${Math.max(u.tr,0)} Trion left).`);
+  const lost=[...u.destroyed].filter(x=>x.startsWith('leg')||x.startsWith('arm')).length;
+  if(lost>=2&&!u.nd){ u.tr=Math.min(u.tr,Math.max(5,Math.round(.1*u.max))); u.nd=true; L(F,'big',`${u.name} is Nearly Dead (Trion drops to ${Math.max(u.tr,0)}).`); }
+  if(u.tr<=0) bail(F,u);
+}
+function headHit(F,u,s){
+  s=Math.min(s,6);
+  if(s===6){ L(F,'big',`The wound goes through to ${u.name}'s head: bail out!`); u.tr=0; bail(F,u); return; }
+  const n=s<=3?2:4; u.tr-=n; L(F,'hit',`Damaged part: the hit goes to ${u.name}'s head for ${n} wounds (${Math.max(u.tr,0)} Trion left).`);
+  if(u.tr<=0) bail(F,u);
+}
+function applyHit(F,a,t,Lt){
+  let p=d(F,6)-1; let s=d(F,6);
+  if(a.cs>0&&p!==4){ const p2=d(F,6)-1; a.cs--; if(p2===4){ p=4; L(F,'info',`${a.name} picks the better body part roll (chest).`); } }
+  if(a.shot&&cheb(a.pos,t.pos)<=3){ Lt+=1; L(F,'info',`${a.name} is close: shotgun (+1 Lethal).`); }
+  L(F,'info',`Hit location: ${PARTS[p]}, severity die ${s}${Lt?' + Lethal '+Lt:''}.`);
+  const lmax=(t.f&&t.f.cls==='Vorvoros'&&t.f.T>=10)?2:1; if((t.liq||t.bfLiq)&&(t.liqc||0)<lmax){ t.liqused=true; t.liqc=(t.liqc||0)+1; (t.liqBy=t.liqBy||new Set()).add(a); if(!t.liq) t.bfLiq=false; s=Math.floor((s+Lt)/2); Lt=0; const lc=t.agent?CFG.LIQ_COST+((t.liqc||1)>1?CFG.LIQ2:0):1; t.tr-=lc; L(F,'info',`${t.name} uses Liquefy (-${lc} Trion): the hit is halved.`); }
+  const key=p<4?['leg0','leg1','arm2','arm3'][p]:null;
+  if(key&&t.destroyed.has(key)&&!t.to){ headHit(F,t,Math.min(s+Lt,6)); return; }
+  wound(F,t,p,s,Lt);
+}
+function attack(F,a,t,bonus,opt){
+  opt=opt||{}; if(t.f){ (t.hitBy=t.hitBy||new Set()).add(a); }
+  let r0=d(F,20); const snag=a.agent&&F.leader&&F.duskUntil>=F.rnd&&cheb(a.pos,F.leader.pos)<=6; if(a.bt&&!snag){ r0=Math.max(r0,d(F,20)); } else if(snag&&!a.bt){ r0=Math.min(r0,d(F,20)); } let r=r0+a.atk+bonus-a.armpen+a.mods+(opt.hit||0);
+  if(a.supp>0){ r-=2; a.supp--; }
+  if(a.cloudPen) r-=a.cloudPen;
+  if(t.distr>0&&t.distrOwner&&a!==t.distrOwner&&a.team===t.distrOwner.team){ r+=2; t.distr--; const dow=t.distrOwner; if(dow.f&&dow.f.T>=8&&dow.f.aoR!==F.rnd){ dow.f.aoR=F.rnd; opt.sev=(opt.sev||0)+1; } }
+  if(t.expo>0&&a.team!==t.team){ r+=3; t.expo--; opt.ign=true; }
+  const mE=!!(t.mShard&&t.mShard!==a&&!t.mShard.dead&&t.mShard.team===a.team);
+  { const eN=(opt.edge||a.edge>0||t.edgeVs||mE)?1:0, sN=(opt.snag||a.snagN>0||a.pressureOn===t||t.gSnag)?1:0; if(a.edge>0)a.edge--; if(a.snagN>0)a.snagN--; if(a.pressureOn===t)a.pressureOn=null; if(eN) r+=d(F,4); if(sN) r-=d(F,4); }
+  if(a.cost&&a.kind==='ranged'&&!opt.free) a.tr-=a.cost;
+  let ev=10+t.dex+(t.tb||0)-(t.slow>0?(t.slowPen||2):0)+(t.evB||0)-(t.evPen||0)+(a.kind==='ranged'?(t.es||0)+((t.f&&t.f.cls==='Sniper'&&t.f.T>=8&&cheb(a.pos,t.pos)>6)?2:0):0);
+  if(a.kind==='ranged'||a.reach>1){ if(!(CFG.LAMP_PIERCE&&((a.cls==='Lampyris'&&(!a.f||a.f.T>=2))||a.bf==='L'))&&!opt.cov&&coverAt(F,t,a.pos)){ ev+=2; L(F,'info',t.name+' is behind cover (+2 Evade).'); } }
+  const desc=`${a.name} attacks ${t.name} (${cheb(a.pos,t.pos)*5} ft): d20 ${r0} → ${r} vs Evade ${ev}`;
+  if(r<ev&&a.sharp>0&&a.kind==='ranged'){ a.sharp--; const n0=d(F,20); r=n0+(r-r0); r0=n0; L(F,'info',`${a.name} rerolls the miss (Sharp Eye): ${r}.`); }
+  if(r<ev&&a.pc>0&&a.tr>3){ a.pc--; a.tr-=1; const n0=d(F,20); r=n0+(r-r0); r0=n0; L(F,'info',`${a.name} rerolls the miss (Precision Cubes, -1 Trion): ${r}.`); }
+  if(r<ev){ if(a.f&&a.f.cls==='Tactician'&&a.f.T>=2&&!a.f.n.ct){ a.f.n.ct=1; a.evB=(a.evB||0)+1; } L(F,'miss',desc+' — miss.'); return false; }
+  let blk=t.block+(t.rshield&&a.kind==='ranged'?3:0);
+  if(t.f&&t.f.cls==='Lampyris'&&t.f.T>=10&&a.kind==='ranged') blk+=2;
+  if(t.sp==='or'&&!t.volleyed&&a.kind==='melee'&&a.reach<=2) blk+=1;
+  if(t.sp==='sp'&&a.kind==='melee'&&a.reach<=1){ blk+=1; a.tr-=1; L(F,'info',`Spike Form: ${a.name} takes 1 wound.`); }
+  if(t.gasr&&!(t.gasLeft<=0)){ if(t.gasLeft>0) t.gasLeft--; if(a.kind==='melee'){ L(F,'miss',desc+` — ${t.name} is gas, melee passes through.`); return false; } r-=2; if(r<ev){ L(F,'miss',desc+' — misses the gas cloud.'); return false; } }
+  if(opt.noWblk) blk-=(t.wblk||0);
+  blk=Math.min(CFG.BLOCK_CAP,blk);
+  if(!t.ba&&t.shield&&r>=ev+blk&&r<ev+Math.min(CFG.BLOCK_CAP,blk+t.shield)&&t.tr>t.shieldCost+2){ t.tr-=t.shieldCost; blk=Math.min(CFG.BLOCK_CAP,blk+t.shield); L(F,'info',`${t.name} raises the Shield (-${t.shieldCost} Trion).`); }
+  if(a.kind==='ranged'){ const escs=t.team==='A'?F.escA:F.escB; for(const e of escs){ if(e.n>0&&!e.own.dead&&cheb(e.own.pos,t.pos)<=2){ e.n--; blk+=3; L(F,'info',`${t.name} is behind the Escudo barrier (+3 Block).`); break; } } }
+  if(opt.ign) blk=0;
+  if(!t.ba&&r<ev+blk){ t.ba=true; if(t.counter) t.riposte=true; L(F,'block',desc+` — blocked by ${t.name} (Block +${blk}).`); return false; }
+  if(t.f&&t.f.abl==='Foresight'&&F.rnd>=(t.foreNext||0)){ t.foreNext=F.rnd+(t.f.T>=5?2:4); const n0=d(F,20); const r2=n0+(r-r0); if(r2<ev+(t.ba?0:blk)){ L(F,'miss',desc+` — Foresight: ${t.name} sees it coming and the reroll (${r2}) misses.`); return false; } }
+  if(t.counter&&t.f&&t.f.T>=10&&!t.aceUsed){ t.aceUsed=true; t.riposte=true; L(F,'block',desc+` — Ace Counter: ${t.name} turns the hit into a miss.`); return false; }
+  L(F,'hit',desc+' — HIT.');
+  if(mE){ t.mShard=null; L(F,'info',`${t.name}'s shard mark is spent: ${a.name} had an Edge die.`); }
+  else if(((a.f&&a.f.cls==='Lampyris'&&a.f.T>=4)||a.bf==='L')&&!t.mShard){ t.mShard=a; L(F,'info',`${t.name} is Marked by shards: allies get an Edge die against it.`); }
+  return true;
+}
+
+// Movement AI: choose a tile and a target, move there, return the target (or null if nothing is in reach).
+function plan(F,u,foes){
+  const sp=speed(F,u),g=F.g,W=g.W,dist=bfs(F,u,sp),start=u.pos;
+  const melee=u.reach<=3;
+  const threats=foes.filter(f=>f.reach<=3);
+  let best=null,bs=-1e9;
+  for(let i=0;i<dist.length;i++){ if(dist[i]<0) continue; const pos={x:i%W,y:(i/W)|0};
+    let safety=0; if(!melee&&threats.length){ let m=99; for(const th of threats){ const dd=cheb(pos,th.pos); if(dd<m)m=dd; } safety=F.kite?Math.min(m,10)*(u.agent?5:1):0; }
+    for(const t of foes){ if(!canShoot(F,u,t,pos)) continue;
+      let sc=100-dist[i]*(melee?3:0.5);
+      sc+= u.agent? -t.tr*0.5+(t.sp?35:0) : 0;
+      if(!melee) sc+=safety;
+      if(coverAt(F,{pos},t.pos)) sc+=6;
+      sc+=F.R()*0.5;
+      if(sc>bs){bs=sc;best={pos,t,steps:dist[i]};}
+    } }
+  if(!best){ // nothing reachable: close the gap on the target we would like most
+    const goal=u.agent?foes.reduce((m,x)=>x.tr<m.tr?x:m,foes[0]):foes.reduce((m,x)=>cheb(u.pos,x.pos)<cheb(u.pos,m.pos)?x:m,foes[0]);
+    const dm=distFrom(F,goal.pos); let bi=-1,bd=1e9;
+    for(let i=0;i<dist.length;i++){ if(dist[i]<0) continue; const dd=dm[i]<0?999:dm[i]; if(dd<bd||(dd===bd&&dist[i]<dist[bi])){bd=dd;bi=i;} }
+    if(bi>=0&&bi!==start.y*W+start.x){ const steps=dist[bi]; u.pos={x:bi%W,y:(bi/W)|0}; L(F,'move',`${u.name} moves ${steps*5} ft toward ${goal.name} (${cheb(u.pos,goal.pos)*5} ft away).`); }
+    else L(F,'move',`${u.name} cannot get closer.`);
+    return foes.filter(x=>canShoot(F,u,x,u.pos)).sort((p,q)=>p.tr-q.tr)[0]||null;
+  }
+  if(best.steps>0){ u.pos=best.pos; L(F,'move',`${u.name} moves ${best.steps*5} ft${!melee&&best.steps?' to line up a shot':''}.`); }
+  return best.t;
+}
+
+function strike(F,u,t,bonus,Lt){
+  if(attack(F,u,t,bonus)){ applyHit(F,u,t,Lt);
+    if(u.sp==='al'&&u.cubes>0&&!t.dead){ u.cubes--; t.mods-=3; L(F,'big',`Cubing Touch: ${t.name}'s weapon is cubed (-3 to hit).`); }
+    return true; }
+  return false; }
+function spawnBeasts(F,u,n){
+  let made=0; const g=F.g;
+  for(let r=1;r<=3&&made<n;r++)for(let dx=-r;dx<=r&&made<n;dx++)for(let dy=-r;dy<=r&&made<n;dy++){
+    const x=u.pos.x+dx,y=u.pos.y+dy; if(x<0||y<0||x>=g.W||y>=g.H||g.blk[y*g.W+x]||occupied(F,x,y,null)) continue;
+    if(F.B.filter(b=>b.beast&&!b.dead).length>=4) return made;
+    const b=makeEnemy('BE','B','Beast '+(F.B.length),F.tier); b.pos={x,y}; F.B.push(b); made++; }
+  if(made) L(F,'big',`${u.name} creates ${made} Beast${made>1?'s':''}.`); return made; }
+function turnBT(F,u,foes){
+  const rnd=F.rnd;
+  if(u.sp==='or') u.volleyed=false;
+  if(!u.awake&&u.tr<=u.max/2){ u.awake=true; u.leth=3; u.burn=5; L(F,'big',`${u.name} AWAKENS: Lethal +3, Burning Life now 5 Trion a round!`);
+    if(u.sp==='ch'){ const t=foes.filter(x=>canShoot(F,u,x,u.pos)).sort((a,b)=>a.tr-b.tr)[0]; if(t&&attack(F,u,t,0)){ t.rootUntil=rnd+1; t.evUntil=rnd+1; L(F,'big',`Ash Chains: ${t.name} cannot move and has -2 Evade.`); } }
+    if(u.sp==='al') spawnBeasts(F,u,2); }
+  if(u.sp==='al') u.cubes=u.awake?2:1;
+  if(u.sp==='ch'&&rnd%3===1&&foes.some(x=>cheb(x.pos,u.pos)<=6)){ F.duskUntil=rnd+1; L(F,'big','Cinderheart uses Dusk Weight: agents within 30 ft have a Snag die and half movement for 2 rounds.'); plan(F,u,foes); return; }
+  if(u.sp==='al'){ const alive=F.B.filter(b=>b.beast&&!b.dead).length; if(alive<=2&&rnd-(u.lastBeast??-9)>=2){ spawnBeasts(F,u,Math.min(2,4-alive)); u.lastBeast=rnd; plan(F,u,foes); return; } }
+  let tgt=plan(F,u,foes);
+  if(u.sp==='or'){
+    const near=foes.filter(x=>cheb(u.pos,x.pos)<=2&&canShoot(F,{...u,reach:2,sp:null},x,u.pos)).sort((a,b)=>a.tr-b.tr);
+    if(near.length){ for(let k=0;k<2;k++){ const t=near.find(x=>!x.dead); if(!t)break; strike(F,u,t,0,u.leth); } return; }
+    const far=foes.filter(x=>!x.dead&&canShoot(F,u,x,u.pos)).sort((a,b)=>a.tr-b.tr);
+    if(far.length){ u.volleyed=true; L(F,'big','Wheel Volley!'); const n=u.awake?5:Math.min(3,far.length); for(let k=0;k<n;k++){ const t=far[k%far.length]; if(t.dead&&!u.awake)continue; strike(F,u,t,0,1); } }
+    return; }
+  for(let k=0;k<2;k++){
+    if(!tgt||tgt.dead){ tgt=foes.filter(x=>!x.dead&&canShoot(F,u,x,u.pos)).sort((a,b)=>a.tr-b.tr)[0]; if(!tgt) break; }
+    strike(F,u,tgt,(u.sp==='ch'&&k===0)?2:0,u.leth);
+  }
+}
+// ---------- Class features, special abilities and sub triggers (imported agents only) ----------
+const FIREARMS=['Handgun','Assault Rifle','Shotgun','Grenade Launcher','Minigun'],SHOOTERS=['Asteroid','Meteora','Hound','Viper'],MELEEW=['Kogetsu','Scorpion','Raygust'];
+const hasS=(u,n)=>!!(u.f&&u.f.subs.has(n));
+const spend=(F,u,n,why)=>{u.tr-=n;L(F,'info',`${u.name} spends ${n} Trion on ${why}.`);};
+function seen(F,v,x){ if(x.marked) return true; for(const a of (v.team==='A'?F.A:F.B)){ if(!a.dead&&a.f&&a.f.cls==='Lampyris'&&a.f.T>=5&&cheb(a.pos,x.pos)<=12) return true; } return false; }
+function foesOf(F,u){return (u.team==='A'?F.B:F.A).filter(x=>!x.dead);}
+function alliesOf(F,u){return (u.team==='A'?F.A:F.B).filter(x=>!x.dead&&x!==u);}
+function initFeat(u,o,cls,T,wn){
+  const subs=new Set(o.subs),abl=o.abl||'',pw=wn[0]||'';
+  const f={cls,T,abl,subs,pw,wn,n:{},moved:false};
+  u.f=f;
+  const isM=MELEEW.indexOf(pw)>=0,isF=FIREARMS.indexOf(pw)>=0,isS=SHOOTERS.indexOf(pw)>=0;
+  let hit=0,blk=0;
+  if(cls==='Attacker'&&isM) hit+=2;
+  if(cls==='Attacker'&&T>=4&&isM){hit+=1;blk+=1;}
+  if(cls==='Gunner'&&isF) hit+=2+(T>=5?1:0);
+  if(cls==='Shooter'&&isS) hit+=1;
+  if(cls==='Trapper'&&T>=7&&pw==='Lead Bullet') hit+=1;
+  if(subs.has('Geist')){ if(isM) {hit+=2;u.leth+=1;} else if(isF){u.leth+=2;u.reach+=12;} else u.mvb+=4; u.burn=(u.burn||0)+5; if(!isM&&!isF) u.evB0=2; }
+  if(subs.has('Full Arms')&&wn.length>=2){ u.burn=(u.burn||0)+3; blk+=1; }
+  if(abl==='Super Strength'&&pw==='Kogetsu') blk+=(T>=5?2:1);
+  u.atk+=hit; u.block=Math.min(CFG.BLOCK_CAP,u.block+blk);
+  u.wblk=(WEAPONS[pw]&&WEAPONS[pw].block)||0;
+  u.init=abl==='Quick Reflexes'?(T>=5?5:3):0;
+  u.es=abl==='Emotional Sense'?(T>=5?2:1):0;
+  u.lf=abl==='Light Feet'?(T>=5?2:1):0; if(u.lf) u.mvb+=u.lf;
+  u.htb=abl==='Hard to Break'?(T>=5?2:1):0; u.pt=abl==='Pain Tolerance'?1:0;
+  if(cls==='Sniper'&&T>=5&&u.reach>1) u.reach+=6;
+  if(cls==='Trapper'&&T>=5) u.heavy=true;
+  u.ambush=false; u.tac=false;
+  if(cls==='Chelidon'){ // Gun Swap: all three guns are always available; Sidearm Block; Jet Pack
+    u.shot=false; const w0d=WEAPONS[pw]; if(w0d&&w0d.cls==='Chelidon'){ u.atk+=1-w0d.hit; u.leth=1; u.reach=24; }
+    if(T>=2) u.block=Math.min(CFG.BLOCK_CAP,u.block+1); if(T>=10) u.mvb+=2; }
+  u.sharp=abl==='Sharp Eye'?(T>=5?2:1):0;
+  u.cs=cls==='Sniper'&&T>=4?(T>=8?2:1):(cls==='Shooter'&&T>=10?1:0);
+  u.pc=cls==='Shooter'&&T>=4?1:0;
+  f.read=null;
+}
+// Edge die / Snag die rolls and per-turn setup for an imported agent
+function featStart(F,u,foes){
+  const f=u.f,T=f.T,c=f.cls,rnd=F.rnd,al=alliesOf(F,u);
+  f.freeUsed=false; f.act=false; f.hopped=false; f.gen=false; f.cube=false; f.nAtt=0; f.hitAll=0; f.th=false;
+  u.evB=u.evB0||0; u.evPen=0; u.gSnag=false; u.edgeVs=false; if(u.distrOwn) u.distrOwn=null;
+  f.moved0={x:u.pos.x,y:u.pos.y};
+  const dead=x=>!x||x.dead;
+  // abilities
+  if(f.abl==='Tireless Body'&&!f.n.tb&&u.tr<=u.max*.5){ f.n.tb=1; const g=T>=5?8:5; u.tr=Math.min(u.max,u.tr+g); L(F,'big',`${u.name} recovers ${g} Trion (Tireless Body).`); }
+  if(f.abl==='Rallying Voice'){ const a=al.sort((p,q)=>q.tr-p.tr)[0]; if(a){ a.edge=(a.edge||0)+1; L(F,'info',`${u.name} rallies ${a.name}: their next attack has an Edge die.`); } }
+  const near=()=>foes.slice().sort((p,q)=>cheb(u.pos,p.pos)-cheb(u.pos,q.pos)||p.tr-q.tr);
+  if(f.abl==='Analytical Mind'&&(f.n.am||0)<(T>=5?2:1)&&near()[0]&&cheb(u.pos,near()[0].pos)<=12){ f.n.am=(f.n.am||0)+1; u.edge=(u.edge||0)+1; L(F,'info',`${u.name} studies ${near()[0].name} (Analytical Mind): Edge die on the next attack.`); }
+  if(f.abl==='Silver Tongue'&&!f.n.st){ const x=near().find(e=>!e.sp&&!e.bt&&cheb(u.pos,e.pos)<=6); if(x){ f.n.st=1; x.snagN=(x.snagN||0)+1; L(F,'info',`${u.name} bluffs ${x.name}: its next attack has a Snag die.`); } }
+  if(f.abl==='Commanding Presence'&&!f.n.cp){ const x=near().find(e=>!e.sp&&!e.bt&&e.agent!==undefined&&cheb(u.pos,e.pos)<=6&&e.tr>0); if(x){ f.n.cp=1; x.force=u; L(F,'info',`${u.name} commands ${x.name}: it must target ${u.name}.`); } }
+  if(f.abl==='Weak Point'&&!f.n.wp){ f.n.wp=1; f.wpR=rnd; L(F,'info',`${u.name} finds a weak point: +1 Lethal this round.`); }
+  // class
+  if(c==='Tactician'){ if(!f.read||f.read.dead){ f.read=foes.slice().sort((p,q)=>p.tr-q.tr)[0]||null; if(f.read) L(F,'info',`${u.name} reads ${f.read.name} (+${T>=5?4:3} to hit against it).`); } u.read=f.read; u.readB=T>=5?4:3;
+    if(T>=10&&!f.n.mp&&rnd===1){ f.n.mp=1; for(const a of al.concat([u])) a.mpHit=2; L(F,'big',`Master Plan: ${u.name} and allies get +2 on their first attack.`); } }
+  if(c==='Assassin'&&T>=2){ const x=near().find(e=>cheb(u.pos,e.pos)<=6); if(x){ x.distr=2; x.distrOwner=u; x.distrR=rnd; L(F,'info',`${u.name} sets the opening: ${x.name} is Distracted (allies +2 to hit).`); }
+    if(T>=10&&!f.n.ps){ const y=near().sort((p,q)=>q.tr-p.tr)[0]; if(y&&cheb(u.pos,y.pos)<=6){ f.n.ps=1; y.expo=2; L(F,'big',`Perfect Setup: ${y.name} is Exposed (allies +3 to hit, ignore Block).`);} } }
+  if((c==='Assassin'||c==='Gunner')&&T>=(c==='Assassin'?1:2)){ const x=near().find(e=>cheb(u.pos,e.pos)<=6); if(x){ x.supp=(x.supp||0)+1; L(F,'info',`${u.name} ${c==='Assassin'?'misdirects':'suppresses'} ${x.name}: its next attack has -2 to hit.`);} }
+  if(c==='Sniper'){ u.observed=near()[0]||null; }
+  if(f.bfAlly){ f.bfAlly.bf=null; f.bfAlly.bfLiq=false; f.bfAlly=null; }
+  if(['Lampyris','Vorvoros','Chelidon'].includes(c)&&T>=7&&!f.n.bfd){ const al2=al.filter(a=>a.agent!==undefined&&cheb(a.pos,u.pos)<=6&&a.tr>0); let pick=null;
+    if(c==='Lampyris') pick=al2.filter(a=>a.kind==='ranged').sort((p,q)=>q.tr-p.tr)[0]; else if(c==='Vorvoros') pick=al2.filter(a=>!a.liq).sort((p,q)=>p.tr/p.max-q.tr/q.max)[0]; else pick=al2.filter(a=>a.reach<=3||a.kind==='melee').sort((p,q)=>q.tr-p.tr)[0];
+    if(pick){ f.n.bfd=1; f.bfAlly=pick; if(c==='Lampyris'){ pick.bf='L'; } else if(c==='Vorvoros'){ pick.bfLiq=true; } else pick.bf='C'; L(F,'big',`${u.name} lends ${pick.name} their trigger (Borrowed Fire: ${c==='Lampyris'?'shards that ignore cover and mark':c==='Vorvoros'?'one Liquefy':'shotgun Lethal'}).`); } }
+  if(c==='Vorvoros'&&T>=5&&!f.act&&rnd-(f.clR??-9)>=3&&u.tr>10){ let best=null,bn=1; for(const x of foes){ if(cheb(u.pos,x.pos)>8) continue; const n=foes.filter(y=>cheb(y.pos,x.pos)<=1).length; if(n>bn){bn=n;best=x;} } if(best){ (F.clouds=F.clouds||[]).push({team:u.team,pos:{x:best.pos.x,y:best.pos.y},until:rnd+1,own:u}); f.act=true; f.clR=rnd; L(F,'big',`${u.name} spreads a Choking Cloud over ${bn} enemies (2 rounds: -2 to hit, 1 wound a turn).`); } }
+  // bagworm / chameleon
+  u.hid=false;
+  if(hasS(u,'Bagworm')&&u.tr>6){ u.tr-=1; u.hid=true; u.bagOn=true; if(!f.n.bwl){f.n.bwl=1;L(F,'info',`${u.name} turns on Bagworm: hidden from ranged attackers beyond 30 ft until attacking.`);} } else u.bagOn=false;
+  if(hasS(u,'Chameleon')&&u.tr>8){ u.tr-=2; u.gSnag=true; u.cham=true; if(!f.n.chl){f.n.chl=1;L(F,'info',`${u.name} turns on Chameleon: attacks against them have a Snag die until they attack or are hurt.`);} } else u.cham=false;
+  if(hasS(u,'Dummy Beacon')&&!f.n.db&&u.tr>12&&foes.some(e=>e.reach>1)){ f.n.db=1; f.act=true; u.tr-=2; u.decoy=rnd+3; L(F,'info',`${u.name} places Dummy Beacons (-2 Trion): enemies aim at decoys half the time for 3 rounds.`); }
+  if(hasS(u,'Escudo')&&!f.n.es&&u.tr>14&&foes.some(e=>e.kind==='ranged')&&!f.act){ f.n.es=1; f.act=true; u.tr-=2; const e={own:u,n:3}; (u.team==='A'?F.escA:F.escB).push(e); L(F,'info',`${u.name} raises an Escudo barrier (-2 Trion): allies near it get +3 Block against ranged attacks (3 attacks).`); }
+  if(hasS(u,'Switchbox')&&!f.n.sb&&u.tr>14&&!f.act){ const x=near()[0]; if(x){ f.n.sb=1; f.act=true; u.tr-=2; u.marks=[{x:x.pos.x,y:x.pos.y},{x:Math.min(F.g.W-1,Math.max(0,x.pos.x+(x.pos.x>u.pos.x?-1:1))),y:x.pos.y}]; L(F,'info',`${u.name} places 2 Switchbox marks near ${x.name} (-2 Trion).`);} }
+  // blink: Idaten and Teleporter are actions that close a gap for melee agents
+  const nr=near()[0];
+  if(nr&&u.reach<=1&&!f.act&&u.tr>14&&cheb(u.pos,nr.pos)>speed(F,u)+1&&(hasS(u,'Idaten')||hasS(u,'Teleporter'))){
+    const idat=hasS(u,'Idaten'),st=idat?12:6; const dist=bfs(F,u,st); let bi=-1,bd=1e9; const W=F.g.W;
+    for(let i=0;i<dist.length;i++){ if(dist[i]<0) continue; const p={x:i%W,y:(i/W)|0}; const dd=cheb(p,nr.pos); if(dd<bd){bd=dd;bi=i;} }
+    if(bi>=0){ u.pos={x:bi%W,y:(bi/W)|0}; spend(F,u,2,idat?'Idaten (moves up to 60 ft)':'Teleporter'); u.edgeVs=true; if(idat) u.idaHit=2; L(F,'move',`${u.name} ${idat?'rushes':'teleports'} to ${bd*5} ft from ${nr.name}.`); f.blink=true; return; } }
+  f.blink=false;
+  if(hasS(u,'Grasshopper')&&u.tr>6){ u.mvb+=6; f.hopped=true; }
+}
+function featAfterPlan(F,u,foes,tgt){
+  const f=u.f; if(f.blink) return;
+  if(f.hopped){ u.mvb-=6; const moved=cheb(f.moved0,u.pos); const sp0=speed(F,u); if(moved>sp0){ u.tr-=1; L(F,'info',`${u.name} jumps with Grasshopper (-1 Trion).`); if(moved>=4) u.gSnag=true; } }
+  if(u.f.cls==='Sniper'&&cheb(f.moved0,u.pos)>0&&!(f.T>=5)) f.moved=true; else f.moved=false;
+  if(f.cls==='Sniper'&&f.moved&&f.T<2) u.observed=null;
+  if(!tgt||tgt.dead) return;
+  const ev=10+tgt.dex+(tgt.tb||0), T=f.T, c=f.cls, p=(b)=>Math.max(0,Math.min(1,(21-(ev-b))/20));
+  const pw=f.pw, firearm=FIREARMS.indexOf(pw)>=0, shooter=SHOOTERS.indexOf(pw)>=0;
+  if(c==='Shooter'&&shooter&&u.tr>12){
+    if(T>=7&&!f.n.bar&&u.tr>20){ f.n.bar=1; f.nAtt=3; f.hitAll=-3; u.evPen=2; L(F,'big',`${u.name} unleashes a Barrage: 3 shooter attacks at -3 (Evade -2).`); }
+    else if(T>=2&&2*p(u.atk-5)>p(u.atk)*1.1){ f.nAtt=2; f.hitAll=-5; L(F,'info',`${u.name} uses Cube Split: two attacks at -5.`); } }
+  if(c==='Gunner'&&firearm&&T>=7&&!f.n.fa&&u.tr>18){ f.n.fa=1; f.nAtt=3; u.evPen=2; L(F,'big',`${u.name} makes a Full Attack: 3 firearm attacks (Evade -2).`); }
+  if(c==='Chelidon'){ f.strafe=null; const flew=cheb(f.moved0,u.pos)>0; if(T>=5&&u.tr>12&&F.rnd-(f.srr??-9)>=CFG.STRAFE_GAP){ const others=foes.filter(x=>!x.dead&&x!==tgt&&canShoot(F,u,x,u.pos)); if(others.length){ f.strafe=others.sort((p,q)=>p.tr-q.tr)[0]; f.srr=F.rnd; f.nAtt=2; u.gSnag=true; L(F,'info',`${u.name} makes a Strafing Run: two targets.`); } } if(T>=4&&flew&&cheb(f.moved0,u.pos)<=(T>=10?8:4)) u.gSnag=true; }
+  if(f.abl==='Iron Grip'&&tgt&&cheb(u.pos,tgt.pos)<=1&&(f.n.ig||0)<1){ f.n.ig=1; tgt.rootUntil=F.rnd; L(F,'info',`${u.name} grabs ${tgt.name}: it cannot move away.`); }
+}
+// per-attack options for an imported agent
+function featAtk(F,u,t,k){
+  const f=u.f,T=f.T,c=f.cls,rnd=F.rnd,o={hit:f.hitAll||0,leth:0,sev:0,edge:0,snag:0,free:false,noWblk:false,ign:false,cov:false,second:false};
+  const firearm=FIREARMS.indexOf(f.pw)>=0, melee=u.reach<=1;
+  if(c==='Gunner'&&firearm&&!f.freeUsed){ o.free=true; f.freeUsed=true; }
+  if(c==='Chelidon'&&cheb(u.pos,t.pos)<=3){ o.hit-=1; o.leth+=(T>=8?2:1); }
+  if(c==='Gunner'&&T>=8&&!f.cov&&firearm){ f.cov=1; o.cov=true; }
+  if(c==='Assassin'&&!f.fa){ f.fa=1; o.hit+=2; }
+  if(c==='Assassin'&&t.distr>0&&t.distrOwner===u){ o.hit+=2; if(f.dl!==rnd){ f.dl=rnd; o.leth+=1; } }
+  if(c==='Sniper'&&k===0&&u.observed===t&&(T>=2||!f.moved)) o.edge=1;
+  if(c==='Sniper'&&T>=10&&u.observed===t&&!f.n.as){ f.n.as=1; o.ign=true; }
+  if(c==='Sniper'&&T>=7&&!t.noticed&&!f.n.hh){ f.n.hh=1; o.hit+=2; o.leth+=1; }
+  if(c==='Tactician'&&u.read===t){ o.hit+=u.readB; if(T>=4&&f.ctl!==rnd){ f.ctl=rnd; o.leth+=1; } if(T>=8&&k===0&&!f.rr){ } }
+  if(c==='Counterstriker'&&T>=8&&u.hitBy&&u.hitBy.has(t)) o.ign=true;
+  if(c==='Attacker'&&T>=10&&f.ao!==rnd){ f.ao=rnd; o.sev+=1; }
+  if(u.mpHit){ o.hit+=u.mpHit; u.mpHit=0; }
+  if(f.abl==='Weak Point'&&f.wpR===rnd) o.leth+=1;
+  if(c==='Trapper'&&u.hid&&!f.n.bf){ f.n.bf=1; o.hit+=2; }
+  if(u.bagOn&&melee) o.snag=1;
+  if(u.idaHit&&melee){ o.hit+=u.idaHit; u.idaHit=0; }
+  // sub triggers on this attack
+  if(hasS(u,'Gen\'yō')&&melee&&f.pw==='Kogetsu'&&!f.gen&&u.tr>6&&t.wblk>0){ f.gen=true; u.tr-=1; o.noWblk=true; L(F,'info',`${u.name} reshapes the blade (Gen'yō, -1 Trion): ignores ${t.name}'s weapon Block.`); }
+  if(hasS(u,'Makō')&&melee&&f.pw==='Kogetsu'&&!f.n.mk&&u.tr>8&&(t.block>=3)){ f.n.mk=1; u.tr-=2; o.ign=true; L(F,'info',`${u.name} uses Makō (-2 Trion): the attack bypasses Block.`); }
+  if(hasS(u,'Thruster')&&f.pw==='Raygust'&&!f.th&&u.tr>8){ f.th=true; u.tr-=1; o.edge=1; o.leth+=1; L(F,'info',`${u.name} uses Thruster (-1 Trion): Edge die and +1 Lethal.`); }
+  if(hasS(u,'Connector')&&f.pw==='Kogetsu'&&u.tr>25&&!f.con){ f.con=true; u.tr-=3; o.hit-=1; o.leth+=3; L(F,'info',`${u.name} merges the blades into an axe (-3 Trion): -1 to hit, +3 Lethal.`); }
+  if(hasS(u,'Starmaker')&&!melee&&u.tr>6&&foesOf(F,u).some(e=>e.hid&&!e.marked)){ u.tr-=1; o.star=true; }
+  return o;
+}
+function featSenku(F,u,foes){ // Kogetsu free-action reach: used only when nothing can be hit normally
+  const f=u.f; if(!hasS(u,'Senkū')||f.pw!=='Kogetsu'||u.tr<=6) return null;
+  const t=foes.filter(x=>!x.dead&&cheb(u.pos,x.pos)<=6&&los(F,u.pos,x.pos)).sort((p,q)=>p.tr-q.tr)[0]; return t||null; }
+function featHit(F,u,t,o){
+  const f=u.f,c=f.cls,T=f.T,rnd=F.rnd;
+  if(c==='Attacker'&&T>=7) t.pressureOn=u;
+  if(f.abl==='Super Strength'&&u.reach<=1&&((f.n.ss||0)<1||(T>=5&&F.rnd-(f.ssr||-9)>=3))){ f.n.ss=1; f.ssr=rnd; const n=T>=5?3:2; push(F,t,u,n); }
+  if(c==='Trapper'&&u.trap&&T>=10&&!f.n.at){ f.n.at=1; t.skipRnd=(t.actedRnd===rnd)?rnd+1:rnd; L(F,'big',`Ace Trapper: ${t.name} loses its next turn.`); }
+  if(o&&o.star){ t.marked=true; L(F,'info',`${t.name} is marked by Starmaker.`); }
+  if(u.cham){ u.cham=false; u.gSnag=false; }
+  if(u.bagOn) u.hid=false;
+}
+function push(F,t,from,n){ if(t.dead) return; for(let i=0;i<n;i++){ let best=null,bd=cheb(t.pos,from.pos); for(let dx=-1;dx<=1;dx++)for(let dy=-1;dy<=1;dy++){ if(!dx&&!dy)continue; const x=t.pos.x+dx,y=t.pos.y+dy; if(x<0||y<0||x>=F.g.W||y>=F.g.H||F.g.blk[y*F.g.W+x]||occupied(F,x,y,t))continue; const dd=cheb({x,y},from.pos); if(dd>bd){bd=dd;best={x,y};} } if(!best)break; t.pos=best; } L(F,'info',`${t.name} is pushed back (Super Strength).`); }
+function foeDecoy(F,a,t){ return t.decoy>=F.rnd&&a.agent!==undefined&&F.R()<.5; }
+
+function turnOf(F,u){
+  const {A,B}=F,rnd=F.rnd;
+    if(F.leader&&F.leader.dead){F.over=true;F.winner='A';return 'over';}
+    if(u.dead) return;
+    if(u.tr<=0){ L(F,'info',u.name+' has spent all their Trion.'); bail(F,u); return; }
+    const foes=(u.team==='A'?B:A).filter(x=>!x.dead);
+    if(!foes.length){ F.over=true;F.winner=u.team;return 'over'; }
+    if(u.sp){ turnBT(F,u,foes); return; }
+    u.actedRnd=rnd;
+    if(u.skipRnd===rnd){ L(F,'info',`${u.name} loses this turn.`); return; }
+    u.cloudPen=0; for(const c of (F.clouds||[])){ if(c.until>=rnd&&c.team!==u.team&&cheb(c.pos,u.pos)<=1){ u.cloudPen=2; u.tr-=1; L(F,'info',`${u.name} chokes in the cloud (-1 Trion, -2 to hit).`); if(u.tr<=0){ bail(F,u); return; } break; } }
+    if(u.f&&u.f.cls==='Vorvoros'&&u.f.T>=4){ u.gasr=false; if(u.tr<=u.max*.45&&rnd-(u.f.gasR??-9)>=2&&foes.some(e=>cheb(e.pos,u.pos)<=8)){ u.gasr=true; u.f.gasR=rnd; u.gasLeft=u.f.T>=8?99:1; L(F,'info',`${u.name} turns to gas ${u.f.T>=8?'(it lasts through the enemy turns)':'(it only stops the first attack)'} and does nothing else.`); return; } }
+    if(u.gas){ u.gasr=(rnd%3===0); if(u.gasr){ L(F,'info',`${u.name} turns to gas and does nothing else this turn.`); return; } }
+    if(u.agent&&u.tac){ for(const a of (u.team==='A'?A:B)) a.assist=1; L(F,'info',`${u.name} gives the team +1 to hit.`); }
+    if(u.human&&F.manual&&F.pickFor!==u){ F.wait=u; return 'wait'; }
+    const mine=u.human&&F.manual&&F.pickFor===u;
+    if(mine&&F.skipTurn){ F.skipTurn=false; L(F,'info',`${u.name} holds and does nothing this turn.`); return; }
+    if(u.f){ featStart(F,u,foes); if(u.f.blink){ if(u.hitBy) u.hitBy.clear(); return; } }
+    const pick=()=>foes.filter(x=>!x.dead&&canShoot(F,u,x,u.pos)&&!(x.hid&&u.kind==='ranged'&&cheb(u.pos,x.pos)>6&&!seen(F,u,x))).sort((p,q)=>p.tr-q.tr)[0];
+    let tgt=plan(F,u,mine&&F.pickT&&!F.pickT.dead?[F.pickT]:foes);
+    if(u.f) featAfterPlan(F,u,foes,tgt);
+    if(tgt&&tgt.hid&&u.kind==='ranged'&&cheb(u.pos,tgt.pos)>6&&!seen(F,u,tgt)) tgt=null;
+    if(u.force&&!u.force.dead&&canShoot(F,u,u.force,u.pos)){ tgt=u.force; }
+    u.force=null;
+    if(!tgt&&u.f){ const sx=featSenku(F,u,foes); if(sx){ u.tr-=1; L(F,'info',`${u.name} uses Senkū (-1 Trion): the blade reaches ${cheb(u.pos,sx.pos)*5} ft.`); if(attack(F,u,sx,-2,{})){ applyHit(F,u,sx,u.leth); } } }
+    const nAtt=(u.f&&u.f.nAtt)||u.attacks, noAct=u.f&&u.f.act;
+    for(let k=0;k<(noAct?0:nAtt);k++){
+      if(u.f&&u.f.strafe&&k===1&&!u.f.strafe.dead) tgt=u.f.strafe;
+      if(!tgt||tgt.dead){ tgt=pick(); if(!tgt) break; }
+      if(tgt.decoy>=rnd&&u.agent!==undefined&&F.R()<.5&&u.team!==tgt.team){ L(F,'miss',`${u.name} aims at a Dummy Beacon decoy instead of ${tgt.name}.`); if(u.cost&&u.kind==='ranged') u.tr-=u.cost; continue; }
+      let bonus=0;
+      if(u.ambush&&rnd===1) bonus+=2;
+      if(tgt.slow>0&&u.agent) bonus+=CFG.SLOWB;
+      if(u.agent&&u.assist&&!u.tac) bonus+=1;
+      const o=u.f?featAtk(F,u,tgt,k):{};
+      if(attack(F,u,tgt,bonus,o)){
+        applyHit(F,u,tgt,u.leth+(u.ambush&&rnd===1?1:0)+(o.leth||0)+(o.sev||0)+(u.bf==='C'&&cheb(u.pos,tgt.pos)<=3?1:0));
+        if(u.trap&&!tgt.dead){ tgt.slow=CFG.TRAP_SLOW; tgt.slowPen=u.heavy?3:2; L(F,'info',`${tgt.name} is slowed by the Lead Bullet.`); }
+        if(u.f) featHit(F,u,tgt,o);
+      } else if(u.f) { if(u.cham){ u.cham=false; u.gSnag=false; } if(u.bagOn) u.hid=false; }
+      if(tgt.riposte&&!tgt.dead){
+        tgt.riposte=false;
+        if(tgt.agent&&cheb(tgt.pos,u.pos)<=12&&los(F,tgt.pos,u.pos)){ const r=d(F,20)+tgt.atk+CFG.RIP; if(r>=10+u.dex){ L(F,'block',`${tgt.name} ripostes (${r}) and hits.`); applyHit(F,tgt,u,tgt.leth+(tgt.f&&tgt.f.T>=2?1:0));} else L(F,'miss',`${tgt.name} ripostes (${r}) and misses.`); }
+      }
+      if(u.dead) break;
+    }
+    if(u.f&&u.marks&&u.marks.length&&!u.dead){ for(let mi=0;mi<u.marks.length;mi++){ const m=u.marks[mi]; const x=foes.find(e=>!e.dead&&cheb(e.pos,m)<=1); if(x){ u.marks.splice(mi,1); L(F,'info',`${u.name} sets off a Switchbox blade at ${x.name}.`); if(attack(F,u,x,0,{free:true})) applyHit(F,u,x,1); break; } } }
+    if(u.hitBy) u.hitBy.clear();
+  }
+function step(F){ // play until the round ends or a human turn is needed; returns true if the fight is over
+  if(F.over) return true;
+  const {A,B}=F;
+  if(!F.inRound){
+    F.rnd++; L(F,'round','Round '+F.rnd);
+    for(const u of A.concat(B)){u.ba=false;u.liqused=false;u.liqc=0;u.liqBy=null;}
+    const order=[];
+    for(const u of A.concat(B)) if(!u.dead) order.push([d(F,20)+u.dex+(u.init||0),u]);
+    order.sort((x,y)=>y[0]-x[0]);
+    F.order=order; F.oi=0; F.inRound=true;
+  }
+  const rnd=F.rnd;
+  while(F.oi<F.order.length){
+    const u=F.order[F.oi][1];
+    const r=turnOf(F,u);
+    if(r==='over') return true;
+    if(r==='wait') return false;
+    if(F.pickFor===u){ F.pickFor=null; F.pickT=null; F.wait=null; }
+    F.oi++;
+  }
+  F.inRound=false;
+  for(const u of A.concat(B)){ if(u.slow>0) u.slow--; u.assist=0; if(u.burn&&!u.dead){ u.tr-=u.burn; if(u.tr<=0){ L(F,'big',`${u.name}'s Black Trigger burns out the last of their Trion.`); bail(F,u);} } }
+  if(F.leader&&F.leader.dead){F.over=true;F.winner='A';}
+  else if(!A.some(x=>!x.dead)){F.over=true;F.winner='B';}
+  else if(!B.some(x=>!x.dead)){F.over=true;F.winner='A';}
+  else if(rnd>=F.maxr){F.over=true;F.winner='T';}
+  return F.over;
+}
+function estHit(F,u,t){ const ev=10+t.dex+(t.tb||0)-(t.slow>0?(t.slowPen||2):0)+(t.evB||0)-(t.evPen||0)+(u.kind==='ranged'?(t.es||0):0)+(u.kind==='ranged'&&canShootCover(F,u,t)?2:0); const need=ev-(u.atk+u.mods-u.armpen); return Math.max(5,Math.min(95,Math.round((21-need)/20*100))); }
+function canShootCover(F,u,t){ return !!coverAt(F,t,u.pos); }
+function canReachTarget(F,u,t){ if(canShoot(F,u,t,u.pos)) return 'now'; const sp=speed(F,u),dist=bfs(F,u,sp),W=F.g.W; for(let i=0;i<dist.length;i++){ if(dist[i]<0) continue; if(canShoot(F,u,t,{x:i%W,y:(i/W)|0})) return 'move'; } return 'no'; }
+function playOut(F){ while(!step(F)); return F.winner; }
+function bulk(sideA,sideB,n,mapFn,kite,tier){
+  let a=0,b=0,t=0,rounds=0,bailsA=0,bailsB=0;
+  for(let i=0;i<n;i++){ const F=newFight(sideA,sideB,{map:mapFn?mapFn():null,kite:kite,tier:tier}); playOut(F); if(F.winner==='A')a++; else if(F.winner==='B')b++; else t++; rounds+=F.rnd; bailsA+=F.A.filter(u=>u.dead).length; bailsB+=F.B.filter(u=>u.dead).length; }
+  return {n,a,b,t,rounds:rounds/n,bailsA:bailsA/n,bailsB:bailsB/n};
+}
+
+// Original illustrated battle-map renderer (SVG). Everything here is drawn from scratch with shapes.
+const TS=40;
+function renderMap(m,opt){
+  opt=opt||{};
+  const W=m.W,H=m.H,PW=W*TS,PH=H*TS,seed=m.seed||1,id='m'+seed+(opt.suffix||'');
+  const R=mkRng((seed*2654435761)>>>0), rnd=()=>R(), ri=(a,b)=>a+Math.floor(rnd()*(b-a+1)), pick=a=>a[Math.floor(rnd()*a.length)];
+  const f=m.f||{},G=m.ground;
+  const hsl=(h,s,l,a)=>`hsl(${h} ${s}% ${l}%${a==null?'':' / '+a}`+')';
+  const P={ // ground palettes: base, light, dark
+    cobble:[215,14,56],road:[220,8,32],roof:[28,8,50],alley:[230,10,24],warehouse:[38,14,46],industrial:[30,6,44],bank:[96,38,36],dock:[32,26,30],night:[225,12,20],ruins:[28,10,38],field:[100,42,38],tunnel:[240,8,20],park:[112,40,30],mall:[30,18,80],training:[200,18,30],crater:[14,18,18],pass:[32,12,42],yard:[210,6,40]
+  }[G]||[210,10,40];
+  const [bh,bs,bl]=P;
+  let defs=`<defs>
+  <filter id="${id}n" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="${G==='field'||G==='park'||G==='bank'?'.55':'.85'}" numOctaves="3" seed="${seed%90}"/><feColorMatrix type="matrix" values="0 0 0 0 .5  0 0 0 0 .5  0 0 0 0 .5  0 0 0 1.4 -.35"/></filter>
+  <filter id="${id}b" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="3.2"/></filter>
+  <filter id="${id}sb"><feGaussianBlur stdDeviation="1.4"/></filter>
+  <filter id="${id}cl" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".008 .014" numOctaves="4" seed="${seed%50}"/><feColorMatrix type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 2.4 -.9"/></filter>
+  <radialGradient id="${id}v" cx="50%" cy="50%" r="75%"><stop offset="55%" stop-color="#000" stop-opacity="0"/><stop offset="100%" stop-color="#000" stop-opacity=".5"/></radialGradient>
+  <radialGradient id="${id}glow"><stop offset="0" stop-color="#ffe9a8" stop-opacity=".95"/><stop offset=".35" stop-color="#ffcf6b" stop-opacity=".35"/><stop offset="1" stop-color="#ffcf6b" stop-opacity="0"/></radialGradient>
+  <radialGradient id="${id}ember"><stop offset="0" stop-color="#ffb347" stop-opacity=".9"/><stop offset=".5" stop-color="#d1451e" stop-opacity=".4"/><stop offset="1" stop-color="#7a1fa0" stop-opacity="0"/></radialGradient>
+  <linearGradient id="${id}wat" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4fa3c7"/><stop offset="1" stop-color="#1c5f8a"/></linearGradient>
+  </defs>`;
+  let s='';
+  // ---------- ground ----------
+  s+=`<rect width="${PW}" height="${PH}" fill="${hsl(bh,bs,bl)}"/>`;
+  const gr=`<linearGradient id="${id}gg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".10"/><stop offset="1" stop-color="#000" stop-opacity=".18"/></linearGradient>`;
+  defs=defs.replace('</defs>',gr+'</defs>');
+  s+=`<rect width="${PW}" height="${PH}" fill="url(#${id}gg)"/>`;
+  const line=(x1,y1,x2,y2,c,w,o,extra)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${c}" stroke-width="${w}" stroke-opacity="${o}" ${extra||''}/>`;
+  if(G==='cobble'||G==='mall'){ // stone / marble paving
+    const sz=G==='mall'?TS:20; for(let y=0;y<PH;y+=sz)for(let x=0;x<PW;x+=sz){ const o=(((x+y)/sz)%2===0); const l=bl+(G==='mall'?(o?4:-6):ri(-5,5)); s+=`<rect x="${x+1}" y="${y+1}" width="${sz-2}" height="${sz-2}" rx="${G==='mall'?1:3}" fill="${hsl(bh,bs,l)}"/>`; }
+    if(G==='cobble') s+=`<circle cx="${PW/2}" cy="${PH/2}" r="${TS*3.6}" fill="none" stroke="#e8f4ff" stroke-opacity=".35" stroke-width="5"/><circle cx="${PW/2}" cy="${PH/2}" r="${TS*2.4}" fill="none" stroke="#6fd0e6" stroke-opacity=".35" stroke-width="3" stroke-dasharray="8 8"/>`;
+    if(G==='mall'){ for(let i=0;i<3;i++){const cx=(6+i*6)*TS+TS*0.0; } s+=`<circle cx="${PW/2}" cy="${PH/2}" r="${TS*2.4}" fill="${hsl(200,30,70)}" fill-opacity=".35" stroke="#fff" stroke-opacity=".6" stroke-width="4"/>`; }
+  } else if(G==='road'||G==='alley'||G==='night'){
+    // sidewalks + lane markings
+    s+=`<rect y="0" width="${PW}" height="${TS*1.2}" fill="${hsl(40,6,G==='alley'?30:52)}"/><rect y="${PH-TS*1.2}" width="${PW}" height="${TS*1.2}" fill="${hsl(40,6,G==='alley'?30:52)}"/>`;
+    for(let x=0;x<PW;x+=TS)s+=line(x,0,x,TS*1.2,'#000',1.2,.25)+line(x,PH-TS*1.2,x,PH,'#000',1.2,.25);
+    s+=line(0,TS*1.2,PW,TS*1.2,'#e7e0cc',3,.5)+line(0,PH-TS*1.2,PW,PH-TS*1.2,'#e7e0cc',3,.5);
+    s+=line(TS*4,PH/2,PW-TS*4,PH/2,'#f2c744',4,.8,'stroke-dasharray="26 18"');
+    for(let i=0;i<5;i++){const x=TS*(5+i*3.6);for(let k=0;k<5;k++)s+=`<rect x="${x}" y="${TS*1.4+k*9}" width="${TS*.9}" height="5" fill="#eee" fill-opacity=".45"/>`;}
+    if(G==='alley'){ for(let i=0;i<7;i++){const x=ri(5,W-6)*TS+ri(0,30),y=ri(2,H-3)*TS+ri(0,30);s+=`<ellipse cx="${x}" cy="${y}" rx="${ri(18,34)}" ry="${ri(8,14)}" fill="#7fb7d6" fill-opacity=".28"/><ellipse cx="${x-5}" cy="${y-3}" rx="${ri(6,12)}" ry="3" fill="#fff" fill-opacity=".25"/>`;} }
+  } else if(G==='roof'||G==='industrial'||G==='yard'||G==='warehouse'||G==='ruins'){
+    for(let x=0;x<=PW;x+=TS*2)s+=line(x,0,x,PH,'#000',1.4,.22); for(let y=0;y<=PH;y+=TS*2)s+=line(0,y,PW,y,'#000',1.4,.22);
+    if(G==='warehouse'||G==='yard'){ s+=line(TS*4,TS*1.2,PW-TS*4,TS*1.2,'#e6b422',5,.8,'stroke-dasharray="22 14"')+line(TS*4,PH-TS*1.2,PW-TS*4,PH-TS*1.2,'#e6b422',5,.8,'stroke-dasharray="22 14"'); }
+    if(G==='industrial'){ for(let i=0;i<9;i++){const x=ri(4,W-5)*TS+ri(0,36),y=ri(1,H-2)*TS+ri(0,36);s+=`<ellipse cx="${x}" cy="${y}" rx="${ri(10,26)}" ry="${ri(6,16)}" fill="#1a1410" fill-opacity=".35"/>`;} for(let i=0;i<5;i++){const y=ri(1,H-2)*TS+TS/2;s+=`<rect x="${TS*4}" y="${y-5}" width="${PW-TS*8}" height="10" rx="5" fill="#8c6a4a" fill-opacity=".55"/><rect x="${TS*4}" y="${y-5}" width="${PW-TS*8}" height="3" rx="2" fill="#fff" fill-opacity=".25"/>`; i=9;} }
+    if(G==='roof'){ s+=`<rect x="6" y="6" width="${PW-12}" height="${PH-12}" fill="none" stroke="#d8d2c5" stroke-width="10" stroke-opacity=".8"/><rect x="0" y="0" width="${PW}" height="${PH}" fill="none" stroke="#6b6355" stroke-width="12" stroke-opacity=".7"/>`; for(let i=0;i<30;i++)s+=`<circle cx="${ri(10,PW-10)}" cy="${ri(10,PH-10)}" r="${ri(1,3)}" fill="#fff" fill-opacity=".18"/>`; }
+    if(G==='ruins'){ for(let i=0;i<46;i++){const x=ri(4,PW-4),y=ri(4,PH-4),r=ri(3,11);s+=`<polygon points="${[0,1,2,3,4].map(k=>{const a=k/5*6.28+rnd();return (x+Math.cos(a)*r*(.6+rnd()*.6)).toFixed(1)+','+(y+Math.sin(a)*r*(.6+rnd()*.6)).toFixed(1)}).join(' ')}" fill="${hsl(28,8,ri(30,58))}" stroke="#000" stroke-opacity=".3"/>`;} for(let i=0;i<8;i++){const x=ri(5,W-6)*TS,y=ri(1,H-2)*TS;s+=`<ellipse cx="${x}" cy="${y}" rx="${ri(28,60)}" ry="${ri(14,26)}" fill="#0b0705" fill-opacity=".38"/>`;} for(let i=0;i<5;i++){const x=ri(5,PW-5),y=ri(5,PH-5);let d=`M${x},${y}`;for(let k=0;k<6;k++)d+=` l${ri(-18,18)},${ri(-14,14)}`;s+=`<path d="${d}" stroke="#000" stroke-opacity=".5" stroke-width="2" fill="none"/>`;} }
+  } else if(G==='field'||G==='park'||G==='bank'){
+    for(let i=0;i<160;i++){const x=ri(0,PW),y=ri(0,PH);s+=`<path d="M${x},${y} l-2,-${ri(5,9)} M${x},${y} l1,-${ri(6,10)} M${x},${y} l3,-${ri(4,8)}" stroke="${hsl(bh+ri(-8,10),bs+10,bl+ri(8,24))}" stroke-width="1.4" fill="none" stroke-opacity=".7"/>`;}
+    if(G==='field'||G==='park'){ for(let i=0;i<(G==='field'?70:30);i++){const x=ri(0,PW),y=ri(0,PH);s+=`<circle cx="${x}" cy="${y}" r="2.2" fill="${pick(['#fff3a0','#ffd1e8','#fff','#ffb199'])}" fill-opacity=".85"/>`;} }
+    if(G==='park'){ let d=`M0,${PH*.62}`;for(let x=0;x<=PW;x+=PW/8)d+=` Q${x+PW/16},${PH*.62+ri(-60,60)} ${x+PW/8},${PH*.5+ri(-30,30)}`; s+=`<path d="${d}" stroke="#b79b6b" stroke-width="26" fill="none" stroke-linecap="round" stroke-opacity=".75"/><path d="${d}" stroke="#d9c392" stroke-width="18" fill="none" stroke-linecap="round" stroke-opacity=".7"/>`; }
+    if(G==='bank'){ s+=`<path d="M${TS*4},${PH-TS*2.6} q${PW/6},-26 ${PW/4},0 t${PW/4},0 t${PW/4},0" fill="none" stroke="#e9d9a0" stroke-width="22" stroke-opacity=".75" stroke-linecap="round"/>`; }
+  } else if(G==='dock'){
+    for(let y=0;y<PH;y+=12){s+=`<rect x="0" y="${y}" width="${PW}" height="11" fill="${hsl(30,28,26+ri(0,9))}"/>`;} for(let i=0;i<120;i++){s+=line(ri(0,PW),ri(0,PH/12|0)*12,0,0,'#000',0,0)||'';} for(let y=0;y<PH;y+=12){for(let x=ri(0,80);x<PW;x+=ri(90,200))s+=line(x,y,x,y+11,'#000',1,.45);}
+  } else if(G==='tunnel'){
+    s+=`<rect y="${PH*.3}" width="${PW}" height="${PH*.4}" fill="#26262e"/>`; for(let x=0;x<PW;x+=26)s+=`<rect x="${x}" y="${PH*.3}" width="10" height="${PH*.4}" fill="#4a3b2c" fill-opacity=".9"/>`;
+    s+=line(0,PH*.4,PW,PH*.4,'#b9bdc6',4,.9)+line(0,PH*.6,PW,PH*.6,'#b9bdc6',4,.9)+line(0,PH*.4+3,PW,PH*.4+3,'#fff',1,.5)+line(0,PH*.6+3,PW,PH*.6+3,'#fff',1,.5);
+    s+=`<rect y="0" width="${PW}" height="${PH*.18}" fill="#3a3a44"/><rect y="${PH*.82}" width="${PW}" height="${PH*.18}" fill="#3a3a44"/>`; for(let x=TS*3;x<PW;x+=TS*4){s+=`<rect x="${x}" y="${PH*.18-6}" width="10" height="6" fill="#ffd34d"/><circle cx="${x+5}" cy="${PH*.5}" r="${TS*1.6}" fill="url(#${id}glow)" opacity=".28"/>`;}
+  } else if(G==='training'){
+    for(let x=0;x<=PW;x+=TS)s+=line(x,0,x,PH,'#8fe9ff',1,.22); for(let y=0;y<=PH;y+=TS)s+=line(0,y,PW,y,'#8fe9ff',1,.22);
+    s+=`<rect x="${TS*4}" y="${TS*.7}" width="${PW-TS*8}" height="${PH-TS*1.4}" rx="14" fill="none" stroke="#9ff2ff" stroke-width="4" stroke-opacity=".7"/><circle cx="${PW/2}" cy="${PH/2}" r="${TS*2}" fill="none" stroke="#9ff2ff" stroke-width="3" stroke-opacity=".55"/><line x1="${PW/2}" y1="${TS*.7}" x2="${PW/2}" y2="${PH-TS*.7}" stroke="#9ff2ff" stroke-width="3" stroke-opacity=".5"/>`;
+  } else if(G==='crater'){
+    for(let i=0;i<70;i++){const x=ri(0,PW),y=ri(0,PH),r=ri(3,9);s+=`<circle cx="${x}" cy="${y}" r="${r}" fill="${hsl(14,14,ri(10,26))}"/>`;} for(let i=0;i<10;i++){let x=PW/2+ri(-30,30),y=PH/2+ri(-30,30),d=`M${x},${y}`;for(let k=0;k<9;k++){d+=` l${ri(-34,34)},${ri(-26,26)}`;}s+=`<path d="${d}" stroke="#ff8a3d" stroke-width="2.4" fill="none" stroke-opacity=".75"/><path d="${d}" stroke="#ffd9a0" stroke-width="1" fill="none" stroke-opacity=".8"/>`;} s+=`<circle cx="${PW/2}" cy="${PH/2}" r="${TS*5}" fill="url(#${id}ember)" opacity=".5"/>`;
+  } else if(G==='pass'){
+    for(let i=0;i<60;i++){const x=ri(0,PW),y=ri(0,PH),r=ri(4,14);s+=`<ellipse cx="${x}" cy="${y}" rx="${r}" ry="${r*.6}" fill="${hsl(30,8,ri(32,56))}" fill-opacity=".7"/>`;} for(let i=0;i<12;i++){const x=ri(0,PW),y=ri(0,PH);s+=`<ellipse cx="${x}" cy="${y}" rx="${ri(22,52)}" ry="${ri(10,24)}" fill="#f4f8ff" fill-opacity=".8"/>`;} let d=`M0,${PH*.55}`;for(let x=0;x<=PW;x+=PW/6)d+=` Q${x+PW/12},${PH*.55+ri(-50,50)} ${x+PW/6},${PH*.5+ri(-26,26)}`;s+=`<path d="${d}" stroke="#a48a67" stroke-width="30" fill="none" stroke-opacity=".6"/>`;
+  }
+  // grain
+  s+=`<rect width="${PW}" height="${PH}" filter="url(#${id}n)" opacity=".16" style="mix-blend-mode:overlay"/>`;
+  // tile grid (tactical)
+  let grid='';for(let x=0;x<=PW;x+=TS)grid+=`M${x},0V${PH}`;for(let y=0;y<=PH;y+=TS)grid+=`M0,${y}H${PW}`;
+  s+=`<path d="${grid}" stroke="#fff" stroke-opacity=".10" stroke-width="1" fill="none"/>`;
+  // start zones
+  s+=`<rect width="${TS*4}" height="${PH}" fill="#2f7ef0" fill-opacity=".16"/><rect x="${PW-TS*4}" width="${TS*4}" height="${PH}" fill="#ee6a3c" fill-opacity=".16"/><line x1="${TS*4}" y1="0" x2="${TS*4}" y2="${PH}" stroke="#2f7ef0" stroke-opacity=".6" stroke-width="2.5" stroke-dasharray="10 8"/><line x1="${PW-TS*4}" y1="0" x2="${PW-TS*4}" y2="${PH}" stroke="#ee6a3c" stroke-opacity=".6" stroke-width="2.5" stroke-dasharray="10 8"/>`;
+  // ---------- obstacles ----------
+  const obs=m.obs||[]; let sh='',ob='';
+  const roofs=[[10,52,44],[212,10,40],[48,22,34],[28,36,42],[205,30,46],[0,0,50]];
+  obs.forEach(o=>{
+    const x=o.x*TS,y=o.y*TS,w=o.w*TS,h=o.h*TS,k=o.k||'crate';
+    if(k==='water'||k==='crater'){ return; }
+    sh+=`<rect x="${x+7}" y="${y+9}" width="${w}" height="${h}" rx="6" fill="#000" fill-opacity=".38"/>`;
+  });
+  obs.forEach(o=>{
+    const x=o.x*TS,y=o.y*TS,w=o.w*TS,h=o.h*TS,k=o.k||'crate';
+    if(k==='water'){ // river / harbour water
+      ob+=`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="url(#${id}wat)"/>`;
+      for(let i=0;i<Math.max(8,w/22|0);i++){const wx=x+ri(4,w-30),wy=y+ri(4,h-4);ob+=`<path d="M${wx},${wy} q8,-6 16,0 t16,0" stroke="#d9f1ff" stroke-width="1.8" fill="none" stroke-opacity="${(.3+rnd()*.4).toFixed(2)}"/>`;}
+      ob+=`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="none" stroke="#e9f6ff" stroke-width="4" stroke-opacity=".55"/>`;
+      for(let i=0;i<w/18;i++){ob+=`<circle cx="${x+i*18+ri(0,10)}" cy="${y+(o.y>H/2?3:h-3)}" r="${ri(3,6)}" fill="${hsl(30,8,ri(34,50))}"/>`;}
+      return;}
+    if(k==='crater'){ const cx=x+w/2,cy=y+h/2;
+      ob+=`<circle cx="${cx}" cy="${cy}" r="${w/2+8}" fill="#2b1a14"/><circle cx="${cx}" cy="${cy}" r="${w/2}" fill="#120a0c"/><circle cx="${cx}" cy="${cy}" r="${w/2-14}" fill="url(#${id}ember)"/><circle cx="${cx}" cy="${cy}" r="${w/2}" fill="none" stroke="#ff9248" stroke-opacity=".7" stroke-width="3"/>`;
+      for(let i=0;i<18;i++){const a=rnd()*6.28,r=w/2+ri(4,26);ob+=`<polygon points="${[0,1,2,3].map(q=>{const aa=q*1.57+rnd();return (cx+Math.cos(a)*r+Math.cos(aa)*6).toFixed(1)+','+(cy+Math.sin(a)*r+Math.sin(aa)*5).toFixed(1)}).join(' ')}" fill="${hsl(14,12,ri(16,32))}" stroke="#000" stroke-opacity=".4"/>`;}
+      return;}
+    if(k==='house'){ const c=pick(roofs); const hh=c[0],ss=c[1],ll=c[2];
+      ob+=`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" fill="${hsl(hh,ss,ll)}" stroke="#000" stroke-opacity=".45" stroke-width="2"/>`;
+      const horiz=w>=h; const n=horiz?w/9:h/9;
+      for(let i=1;i<n;i++){ob+=horiz?line(x+i*9,y+2,x+i*9,y+h-2,'#000',1,.18):line(x+2,y+i*9,x+w-2,y+i*9,'#000',1,.18);}
+      ob+=horiz?`<rect x="${x+2}" y="${y+h/2-2}" width="${w-4}" height="4" fill="#fff" fill-opacity=".28"/><rect x="${x+2}" y="${y+h/2+2}" width="${w-4}" height="${h/2-4}" fill="#000" fill-opacity=".14"/>`:`<rect x="${x+w/2-2}" y="${y+2}" width="4" height="${h-4}" fill="#fff" fill-opacity=".28"/><rect x="${x+w/2+2}" y="${y+2}" width="${w/2-4}" height="${h-4}" fill="#000" fill-opacity=".14"/>`;
+      ob+=`<rect x="${x+6}" y="${y+6}" width="9" height="9" fill="${hsl(0,0,30)}" stroke="#000" stroke-opacity=".5"/><rect x="${x+w-17}" y="${y+h-15}" width="11" height="9" rx="1" fill="${hsl(200,6,66)}" stroke="#000" stroke-opacity=".4"/>`;
+      if(G==='night'){for(let i=0;i<w/14;i++)ob+=`<rect x="${x+4+i*14}" y="${y+h-4}" width="7" height="4" fill="#ffd36b"/><circle cx="${x+8+i*14}" cy="${y+h+3}" r="14" fill="url(#${id}glow)" opacity=".5"/>`;}
+    } else if(k==='crate'){
+      if(w>=TS*2||h>=TS*2){ const horiz=w>=h; const cols=[[8,70,44],[205,60,38],[150,38,32],[28,86,50],[210,8,52],[178,50,34]]; const n=Math.max(1,Math.round((horiz?w:h)/(TS*2))); const L=(horiz?w:h)/n;
+        for(let i=0;i<n;i++){const c=pick(cols);const cx=horiz?x+i*L:x, cy=horiz?y:y+i*L, cw=horiz?L:w, ch=horiz?h:L;
+          ob+=`<rect x="${cx+1}" y="${cy+1}" width="${cw-2}" height="${ch-2}" rx="3" fill="${hsl(c[0],c[1],c[2])}" stroke="#000" stroke-opacity=".5" stroke-width="2"/>`;
+          const steps=(horiz?cw:ch)/6;for(let j=1;j<steps;j++)ob+=horiz?line(cx+j*6,cy+3,cx+j*6,cy+ch-3,'#000',1.4,.28):line(cx+3,cy+j*6,cx+cw-3,cy+j*6,'#000',1.4,.28);
+          ob+=horiz?`<rect x="${cx+1}" y="${cy+1}" width="${cw-2}" height="4" fill="#fff" fill-opacity=".3"/><rect x="${cx+cw-6}" y="${cy+3}" width="3" height="${ch-6}" fill="#000" fill-opacity=".4"/>`:`<rect x="${cx+1}" y="${cy+1}" width="4" height="${ch-2}" fill="#fff" fill-opacity=".3"/><rect x="${cx+3}" y="${cy+ch-6}" width="${cw-6}" height="3" fill="#000" fill-opacity=".4"/>`;}
+      } else { for(let tx=0;tx<o.w;tx++)for(let ty=0;ty<o.h;ty++){const cx=x+tx*TS,cy=y+ty*TS;ob+=`<rect x="${cx+3}" y="${cy+3}" width="${TS-6}" height="${TS-6}" rx="3" fill="${hsl(32,46,ri(36,46))}" stroke="#2a180b" stroke-opacity=".7" stroke-width="2"/>`+[1,2,3].map(j=>line(cx+4,cy+3+j*(TS-6)/4,cx+TS-4,cy+3+j*(TS-6)/4,'#2a180b',1,.35)).join('')+`<path d="M${cx+6},${cy+6}L${cx+TS-6},${cy+TS-6}M${cx+TS-6},${cy+6}L${cx+6},${cy+TS-6}" stroke="#2a180b" stroke-opacity=".5" stroke-width="2.4"/><rect x="${cx+3}" y="${cy+3}" width="${TS-6}" height="4" rx="2" fill="#fff" fill-opacity=".25"/>`;} }
+    } else if(k==='vent'){
+      ob+=`<rect x="${x+2}" y="${y+2}" width="${w-4}" height="${h-4}" rx="5" fill="${hsl(210,8,62)}" stroke="#000" stroke-opacity=".45" stroke-width="2"/>`;
+      for(let tx=0;tx<o.w;tx++)for(let ty=0;ty<o.h;ty++){const cx=x+tx*TS+TS/2,cy=y+ty*TS+TS/2;ob+=`<circle cx="${cx}" cy="${cy}" r="14" fill="#2a2f38" stroke="#aab" stroke-width="2"/>`+[0,1,2,3,4,5].map(j=>`<path d="M${cx},${cy}L${(cx+Math.cos(j*1.047)*12).toFixed(1)},${(cy+Math.sin(j*1.047)*12).toFixed(1)}" stroke="#cfd6de" stroke-width="3.2" stroke-linecap="round"/>`).join('')+`<circle cx="${cx}" cy="${cy}" r="3" fill="#778"/>`;}
+      ob+=`<rect x="${x+4}" y="${y+4}" width="${w-8}" height="4" rx="2" fill="#fff" fill-opacity=".35"/>`;
+    } else if(k==='wall'){
+      ob+=`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="3" fill="${hsl(25,10,50)}" stroke="#000" stroke-opacity=".5" stroke-width="2"/>`;
+      for(let yy=0;yy<h;yy+=10){ob+=line(x+2,y+yy,x+w-2,y+yy,'#000',1,.25);for(let xx=(yy/10%2)*10;xx<w;xx+=20)ob+=line(x+xx,y+yy,x+xx,y+yy+10,'#000',1,.22);}
+      ob+=`<rect x="${x}" y="${y}" width="${w}" height="4" rx="2" fill="#fff" fill-opacity=".3"/>`;
+    } else if(k==='tank'){
+      for(let tx=0;tx<o.w;tx++)for(let ty=0;ty<o.h;ty++){const cx=x+tx*TS+TS/2,cy=y+ty*TS+TS/2;ob+=`<circle cx="${cx}" cy="${cy}" r="${TS/2-2}" fill="${hsl(18,18,46)}" stroke="#000" stroke-opacity=".5" stroke-width="2"/><circle cx="${cx}" cy="${cy}" r="${TS/2-8}" fill="none" stroke="#fff" stroke-opacity=".3" stroke-width="2"/><circle cx="${cx}" cy="${cy}" r="${TS/2-14}" fill="${hsl(18,10,34)}"/><circle cx="${cx-5}" cy="${cy-6}" r="5" fill="#fff" fill-opacity=".22"/><rect x="${cx-1.5}" y="${cy-TS/2+3}" width="3" height="10" fill="#c93"/>`;}
+    } else if(k==='rock'){
+      for(let tx=0;tx<o.w;tx++)for(let ty=0;ty<o.h;ty++){const cx=x+tx*TS+TS/2+ri(-3,3),cy=y+ty*TS+TS/2+ri(-3,3),r=TS/2-2;const pts=[...Array(9)].map((_,q)=>{const a=q/9*6.283;const rr=r*(.72+rnd()*.3);return [cx+Math.cos(a)*rr,cy+Math.sin(a)*rr];});const ll=ri(38,54);
+        ob+=`<polygon points="${pts.map(p=>p.map(v=>v.toFixed(1)).join(',')).join(' ')}" fill="${hsl(30,8,ll)}" stroke="#000" stroke-opacity=".55" stroke-width="2"/><polygon points="${pts.slice(0,5).concat([[cx,cy]]).map(p=>p.map(v=>v.toFixed(1)).join(',')).join(' ')}" fill="#fff" fill-opacity=".18"/><polygon points="${pts.slice(5).concat([[cx,cy]]).map(p=>p.map(v=>v.toFixed(1)).join(',')).join(' ')}" fill="#000" fill-opacity=".2"/>`;
+        if(G==='pass')ob+=`<ellipse cx="${cx-3}" cy="${cy-6}" rx="9" ry="5" fill="#fff" fill-opacity=".85"/>`;}
+    } else if(k==='tree'){
+      for(let tx=0;tx<o.w;tx++)for(let ty=0;ty<o.h;ty++){const cx=x+tx*TS+TS/2,cy=y+ty*TS+TS/2;const gh=ri(100,125);
+        ob+=`<circle cx="${cx}" cy="${cy}" r="${TS*.56}" fill="${hsl(gh,48,20)}"/>`;
+        for(let q=0;q<7;q++){const a=q/7*6.283+rnd(),rr=TS*.24;ob+=`<circle cx="${cx+Math.cos(a)*rr}" cy="${cy+Math.sin(a)*rr}" r="${TS*.24}" fill="${hsl(gh,46,ri(26,34))}" stroke="#0b2a0b" stroke-opacity=".35"/>`;}
+        ob+=`<circle cx="${cx-5}" cy="${cy-6}" r="${TS*.2}" fill="${hsl(gh-8,60,48)}" fill-opacity=".8"/><circle cx="${cx+7}" cy="${cy-9}" r="3" fill="#fff" fill-opacity=".25"/>`;}
+    }
+  });
+  s+=`<g filter="url(#${id}b)">${sh}</g>${ob}`;
+  // props that do not block: lamps for night
+  if(G==='night'||G==='road'){ for(let i=0;i<5;i++){const x=ri(5,W-6)*TS+TS/2,y=(i%2?PH-TS*.6:TS*.6);s+=`<circle cx="${x}" cy="${y}" r="${G==='night'?TS*2.2:TS*.9}" fill="url(#${id}glow)" opacity="${G==='night'?.8:.25}"/><circle cx="${x}" cy="${y}" r="5" fill="#fff6d0" stroke="#444"/>`;} }
+  // light & weather
+  if(G==='night')s+=`<rect width="${PW}" height="${PH}" fill="#0a1236" opacity=".42" style="mix-blend-mode:multiply"/>`;
+  if(f.fog===1&&G!=='night')s+=`<rect width="${PW}" height="${PH}" fill="#7f93b8" opacity=".14"/>`;
+  if(f.fog>=2)s+=`<rect width="${PW}" height="${PH}" filter="url(#${id}cl)" opacity=".62"/><rect width="${PW}" height="${PH}" fill="#c9d5e6" opacity=".16"/>`;
+  s+=`<rect width="${PW}" height="${PH}" fill="url(#${id}v)"/>`;
+  // zone labels and plaque
+  const lab=(x,t,c)=>`<text x="${x}" y="${PH/2}" transform="rotate(-90 ${x} ${PH/2})" text-anchor="middle" font-family="Space Grotesk,Inter,sans-serif" font-size="17" font-weight="700" letter-spacing="6" fill="${c}" fill-opacity=".7">${t}</text>`;
+  s+=lab(TS*.6,'BLUE START','#cfe1ff')+lab(PW-TS*.6,'ORANGE START','#ffd9c8');
+  const tx=TS*4.4,ty=PH-34;
+  s+=`<g transform="translate(${tx},${ty})"><rect width="280" height="26" rx="13" fill="#0b1426" fill-opacity=".72"/><text x="14" y="18" font-family="Space Grotesk,Inter,sans-serif" font-size="14" font-weight="700" fill="#fff">${m.name}</text><text x="266" y="18" text-anchor="end" font-family="Inter,sans-serif" font-size="11" fill="#b7c6e2">${W*5} × ${H*5} ft</text></g>`;
+  s+=`<g transform="translate(${PW-TS*4.4-180},${PH-34})"><rect width="180" height="26" rx="13" fill="#0b1426" fill-opacity=".72"/><rect x="14" y="10" width="${TS*3}" height="6" fill="#fff"/><rect x="${14+TS*1.5}" y="10" width="${TS*1.5}" height="6" fill="#0b1426" stroke="#fff"/><text x="${14+TS*3+8}" y="18" font-family="Inter,sans-serif" font-size="11" fill="#dbe6fa">15 ft</text></g>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${PW} ${PH}" role="img" aria-label="Battle map: ${m.name}">${defs}${s}<g id="units"></g></svg>`;
+}
+
+const $=id=>document.getElementById(id);
+const HUE={Attacker:8,Gunner:38,Shooter:150,Sniper:200,Trapper:275,Assassin:330,Tactician:60,Counterstriker:100,Chelidon:185,Lampyris:290,Vorvoros:130};
+const CL=Object.keys(CLASSES);
+
+let MAP=null;
+(function(){const m=$('mapSel');m.innerHTML='<option value="none">Open arena (no obstacles)</option><option value="rand" selected>Random map</option>'+THEMES.map((t,i)=>'<option value="'+i+'">'+t.n+'</option>').join('');})();
+function drawMap(m){return renderMap(m);}
+function showMap(){const v=$('mapSel').value;MAP=v==='none'?flatMap():genMap(v==='rand'?null:+v);
+ $('mapsvg').innerHTML=drawMap(MAP);
+ $('mapTags').innerHTML=`<span class="chip tag2"><b>${MAP.name}</b></span>`+MAP.tags.map(t=>'<span class="chip">'+t+'</span>').join('');
+ $('mapDesc').textContent=MAP.desc;}
+function lab(u){return /\d$/.test(u.name)?u.name[0]+u.name.slice(-1):u.name.slice(0,2);}
+function renderUnits(){const g=document.getElementById('units');if(!g||!F)return;const all=F.A.concat(F.B);
+ if(g.childElementCount!==all.length||g.dataset.f!==String(F.id)){g.innerHTML=all.map((u,i)=>`<g class="un" id="u${i}"><circle r="15" fill="${u.team==='A'?'var(--a)':'var(--b)'}"/><text y="4.6">${lab(u)}</text></g>`).join('');g.dataset.f=F.id;}
+ all.forEach((u,i)=>{const el=document.getElementById('u'+i);el.style.transform=`translate(${u.pos.x*40+20}px,${u.pos.y*40+20}px)`;el.classList.toggle('dead',u.dead);});}
+$('mapSel').onchange=()=>{showMap();onchg();};$('kite').onchange=()=>onchg();
+$('reroll').onclick=()=>{if($('mapSel').value==='none')$('mapSel').value='rand';else if($('mapSel').value!=='rand'){} showMap();onchg();};
+const DEF_A=['Attacker','Gunner','Sniper'],DEF_B=['Counterstriker','Trapper','Shooter'];
+let mode='pvp',F=null,timer=null,shown=0;
+let TIER=1,CHARS=[];
+try{CHARS=(JSON.parse(localStorage.getItem('wt_chars')||'[]')||[]).filter(c=>c&&c.custom).slice(0,6);}catch(e){CHARS=[];}
+function saveChars(){try{localStorage.setItem('wt_chars',JSON.stringify(CHARS));}catch(e){}}
+(function(){const s=$('tierSel');s.innerHTML=[1,2,3,4,5,6,7,8,9,10].map(n=>'<option value="'+n+'">Tier '+n+' (Tier Bonus +'+tierBonus(n)+')</option>').join('');s.onchange=()=>{TIER=+s.value;onchg();};})();
+const res=l=>l.map(x=>/^C:/.test(x)?CHARS[+x.slice(2)]:x).filter(Boolean);
+function myList(){$('myList').innerHTML=CHARS.map((c,i)=>'<span class="chip tag2">'+c.name.replace(/</g,'&lt;')+' · '+c.cls+' T'+c.tier+' <a href="#" data-rm="'+i+'" style="color:var(--hit);margin-left:6px" aria-label="Remove '+c.name.replace(/"/g,'')+'">remove</a></span>').join('')||'<span class="sm">No agents added yet.</span>';
+ $('myList').querySelectorAll('[data-rm]').forEach(a=>a.onclick=e=>{e.preventDefault();CHARS.splice(+a.dataset.rm,1);saveChars();myList();refreshSel();});}
+function refreshSel(){['selA','selB'].forEach(id=>{const host=$(id);host.querySelectorAll('select').forEach(s=>{const cur=s.value;s.querySelectorAll('option[data-c]').forEach(o=>o.remove());
+  if(!(id==='selB'&&mode==='pve')){CHARS.forEach((c,i)=>{const o=document.createElement('option');o.value='C:'+i;o.dataset.c=1;o.textContent='★ '+c.name+' ('+c.cls+', Tier '+c.tier+')';s.insertBefore(o,s.firstChild);});}
+  s.value=[...s.options].some(o=>o.value===cur)?cur:s.options[s.options.length?0:0].value;});});}
+$('codeAdd').onclick=()=>{const c=parseCode($('codeIn').value);if(!c){$('codeMsg').textContent='That is not a character code. In the creator, press Copy character code and paste the whole line.';return;}
+ if(CHARS.length>=6)CHARS.shift();CHARS.push(c);saveChars();$('codeIn').value='';TIER=c.tier;$('tierSel').value=String(TIER);
+ $('codeMsg').textContent=c.name+' added. Fight tier set to '+TIER+'. Pick '+c.name+' in a fighter list below (marked with a star).';myList();refreshSel();
+ const a=$('selA').querySelectorAll('select')[0];if(a){a.value='C:'+(CHARS.length-1);}onchg();};
+myList();
+function sel(host,vals,n,onchg){host.innerHTML='';for(let i=0;i<n;i++){const s=document.createElement('select');s.setAttribute('aria-label','Fighter '+(i+1));CL.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c+(CLASSES[c].sig?' (Aftokrator)':'');s.appendChild(o);});CL.forEach(c=>{const o=document.createElement('option');o.value=c+'+BT';o.textContent=c+' + Black Trigger';s.appendChild(o);});if(host.id==='selA'||mode==='pvp')CHARS.forEach((c,k)=>{const o=document.createElement('option');o.value='C:'+k;o.dataset.c=1;o.textContent='★ '+c.name+' ('+c.cls+', Tier '+c.tier+')';s.insertBefore(o,s.firstChild);});s.value=vals[i];s.onchange=onchg;host.appendChild(s);}}
+function encSel(host,onchg){host.innerHTML='';const s=document.createElement('select');s.setAttribute('aria-label','Enemy group');Object.keys(ENCOUNTERS).forEach(k=>{const o=document.createElement('option');o.value=k;o.textContent=k;s.appendChild(o);});s.onchange=onchg;host.appendChild(s);}
+const getA=()=>[...$('selA').querySelectorAll('select')].map(s=>s.value);
+const getB=()=>mode==='pvp'?[...$('selB').querySelectorAll('select')].map(s=>s.value):ENCOUNTERS[$('selB').querySelector('select').value];
+function hints(){const af=l=>l.filter(c=>CLASSES[c.replace('+BT','')]&&CLASSES[c.replace('+BT','')].sig).length;
+ $('hA').textContent=af(getA())>1?'Rules allow one Aftokrator per team.':'';
+ $('hB').textContent=mode==='pvp'&&af(getB())>1?'Rules allow one Aftokrator per team.':'';
+ if(mode==='pve'){const k=$('selB').querySelector('select').value;$('hB').textContent=ENCOUNTERS[k].reduce((s,c)=>s+ENEMIES[c].trion,0)+' Trion in total across the enemies.';}}
+function setup(){stop();F=null;
+ sel($('selA'),getA().length?getA():DEF_A,3,onchg);
+ if(mode==='pvp')sel($('selB'),DEF_B,3,onchg);else encSel($('selB'),onchg);
+ $('bTitle').textContent=$('cBt').textContent=mode==='pvp'?'Orange team':'Enemies';
+ onchg();}
+function onchg(){stop();shown=0;if(!document.querySelector('#selA option[data-c]')&&CHARS.length)refreshSel();F=newFight(res(getA()),res(getB()),{log:true,map:MAP,kite:$('kite').checked,tier:TIER,manual:$('manual').checked});hints();render();$('log').innerHTML='';$('result').textContent='';$('stats').innerHTML='';}
+function setMode(m){mode=m;$('m-pvp').setAttribute('aria-pressed',m==='pvp');$('m-pve').setAttribute('aria-pressed',m==='pve');const a=getA();sel($('selA'),a,3,onchg);if(m==='pvp')sel($('selB'),DEF_B,3,onchg);else encSel($('selB'),onchg);$('bTitle').textContent=$('cBt').textContent=m==='pvp'?'Orange team':'Enemies';onchg();}
+$('m-pvp').onclick=()=>setMode('pvp');$('m-pve').onclick=()=>setMode('pve');
+function card(u,col){const pct=Math.max(0,u.tr)/u.max*100;const c=u.dead?'out':'';
+ const chips=[];if(u.dead)chips.push('<span class="chip bad">Bailed out</span>');
+ [...u.destroyed].forEach(k=>chips.push('<span class="chip bad">'+({leg0:'Right leg',leg1:'Left leg',arm2:'Right arm',arm3:'Left arm'})[k]+' destroyed</span>'));
+ if(u.nd&&!u.dead)chips.push('<span class="chip bad">Nearly Dead</span>');
+ if(u.slow>0)chips.push('<span class="chip">Slowed</span>');
+ if(u.armpen)chips.push('<span class="chip">Arm hurt −'+u.armpen+' to hit</span>');
+ if(u.mods)chips.push('<span class="chip">Weapon damaged '+u.mods+'</span>');
+ if(F.wait===u)chips.push('<span class="chip" style="background:var(--a);color:#fff">Your turn</span>');
+ if(u.f){if(u.f.abl)chips.push('<span class="chip">'+u.f.abl+'</span>');[...u.f.subs].forEach(s=>chips.push('<span class="chip">'+s+'</span>'));}
+ if(u.w.chest)chips.push('<span class="chip">Chest '+u.w.chest+' wounds</span>');
+ const h=HUE[u.cls]??22;
+ const tag=CLASSES[u.cls]?CLASSES[u.cls].note:'Enemy';
+ return `<div class="card ${c}" style="--c:${col};--h:${h}"><div class="top"><b>${u.name}</b><span class="tag">${CLASSES[u.cls]?u.cls:ENEMIES[u.cls].label}</span></div><div class="tr"><i style="width:${pct}%;background:${pct>50?'var(--ok)':pct>25?'#d6a21f':'var(--hit)'}"></i></div><div class="trn"><span>${Math.max(0,u.tr)} / ${u.max} Trion</span><span>Evade ${10+u.dex+(u.tb||0)-(u.slow>0?2:0)} · Block +${u.block} · Move ${speed(F,u)*5} ft</span></div><div class="chips">${chips.join('')}</div></div>`;}
+let FID=0;
+function render(){if(!F)return;if(F.id==null)F.id=++FID;renderUnits();$('cA').innerHTML=F.A.map(u=>card(u,'var(--a)')).join('');$('cB').innerHTML=F.B.map(u=>card(u,'var(--b)')).join('');}
+function appendLog(){const box=$('log');const L=F.log;let html='';for(;shown<L.length;shown++){const e=L[shown];html+=`<div class="ln ${e.kind}">${e.text}</div>`;}box.insertAdjacentHTML('beforeend',html);box.scrollTop=box.scrollHeight;}
+function stepOnce(){if(!F)return true;if(F.over)return true;const over=step(F);appendLog();render();if(over)finish();showTurn();return over;}
+function showTurn(){const p=$('turnPanel');if(!F||!F.wait||F.over){p.hidden=true;return;}const u=F.wait;p.hidden=false;$('turnTitle').textContent='Your turn: '+u.name+' (Round '+F.rnd+')';const foes=(u.team==='A'?F.B:F.A).filter(x=>!x.dead);
+ $('turnBtns').innerHTML=foes.map((t,i)=>{const r=canReachTarget(F,u,t);const note=r==='now'?'in range':r==='move'?'move, then attack':'out of reach, will move closer';return '<button class="btn" data-t="'+i+'">Attack '+t.name+' · '+cheb(u.pos,t.pos)*5+' ft · '+Math.max(0,t.tr)+' Trion · about '+estHit(F,u,t)+'% to hit · '+note+'</button>';}).join('')+'<button class="btn" data-hold="1">Hold position</button>';
+ $('turnBtns').onclick=e=>{const b=e.target.closest('button');if(!b||!F||!F.wait)return;F.pickFor=F.wait;if(b.dataset.hold){F.skipTurn=true;F.pickT=null;}else F.pickT=foes[+b.dataset.t];p.hidden=true;stop();$('play').textContent='Pause';timer=setTimeout(tick,150);};}
+$('manual').onchange=()=>onchg();
+function finish(){const w=F.winner;const nm=w==='A'?'Blue team wins':w==='B'?(mode==='pvp'?'Orange team wins':'The enemies win'):'Draw: the fight hit '+F.maxr+' rounds';$('result').textContent=nm+' in '+F.rnd+' rounds.';stop();}
+function fresh(){stop();F=newFight(res(getA()),res(getB()),{log:true,map:MAP,kite:$('kite').checked,tier:TIER,manual:$('manual').checked});shown=0;$('log').innerHTML='';$('result').textContent='';render();}
+const delay=()=>[1800,1100,700,380,140][$('speed').value-1];
+function stop(){if(timer){clearTimeout(timer);timer=null;}$('play').textContent='Play fight';}
+function tick(){if(stepOnce())return;if(F.wait){stop();return;}timer=setTimeout(tick,delay());}
+$('play').onclick=()=>{if(timer){stop();return;}if(F.over)fresh();$('play').textContent='Pause';timer=setTimeout(tick,200);};
+$('next').onclick=()=>{stop();if(F.over)fresh();stepOnce();};
+$('skip').onclick=()=>{stop();if(F.over)fresh();F.manual=false;F.wait=null;while(!stepOnce());};
+$('rand').onclick=()=>{const r=()=>CL[Math.floor(Math.random()*CL.length)];const A=getA().map(r);const aS=$('selA').querySelectorAll('select');A.forEach((v,i)=>aS[i].value=v);if(mode==='pvp'){$('selB').querySelectorAll('select').forEach(s=>s.value=r());}else{const s=$('selB').querySelector('select');s.selectedIndex=Math.floor(Math.random()*s.options.length);}onchg();};
+$('bulk').onclick=()=>{stop();const n=1000;const A=res(getA()),B=res(getB());const each=$('mapEach').checked;const sv=$('mapSel').value;const kt=$('kite').checked;const r=bulk(A,B,n,each&&sv!=='none'?()=>genMap(sv==='rand'?null:+sv):()=>MAP,kt,TIER);const pa=r.a/n*100,pb=r.b/n*100,pt=r.t/n*100;const bn=mode==='pvp'?'Orange':'Enemies';
+ $('stats').innerHTML=`<div class="wb" role="img" aria-label="Blue ${pa.toFixed(0)} percent, ${bn} ${pb.toFixed(0)} percent"><div style="width:${pa}%;background:var(--a)">${pa>=8?'Blue '+pa.toFixed(1)+'%':''}</div><div style="width:${pt}%;background:#7b8799"></div><div style="width:${pb}%;background:var(--b)">${pb>=8?bn+' '+pb.toFixed(1)+'%':''}</div></div>
+ <div class="sm">${n.toLocaleString()} fights. Average ${r.rounds.toFixed(1)} rounds. Bail-outs per fight: Blue ${r.bailsA.toFixed(1)}, ${bn} ${r.bailsB.toFixed(1)}.${r.t?' '+r.t+' draws at the round limit.':''}</div>`;};
+showMap();setup();
+</script>
+</body></html>
