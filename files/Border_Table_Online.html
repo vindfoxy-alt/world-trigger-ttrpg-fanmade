@@ -162,7 +162,7 @@ body.online #nick,body.online label:has(#nick){display:none}
       </details>
       <details id="vault" style="margin-bottom:10px">
         <summary style="cursor:pointer;font-weight:600">My saved characters</summary>
-        <p class="hint" style="margin:6px 0">Your characters are saved on this device under your name and personal code, so you can take them to any table. To use them on another device, copy the backup code and paste it there.</p>
+        <p class="hint" style="margin:6px 0">Your characters are saved on this device under your name, so you can take them to any table you join from this device. To use them on another device, copy the backup code and paste it there.</p>
         <div id="vaultmsg" class="hint"></div>
         <div class="row" style="margin-top:6px"><button id="vrestore">Restore saved characters</button><button id="vcopy">Copy backup code</button></div>
         <textarea id="vin" rows="2" placeholder="Paste a backup code (starts with WTV1:)" style="margin-top:6px"></textarea>
@@ -200,9 +200,9 @@ body.online #nick,body.online label:has(#nick){display:none}
       <label class="hint row"><input type="checkbox" id="encmap" checked> Load the map layout too</label>
       <div id="enclist"></div>
       <div class="lbl" style="margin-top:12px">Players (names and personal codes)</div>
-      <p class="hint" style="margin:0 0 6px">Only you can see this. Codes are stored in this browser. If a friend forgets theirs, change it here and tell them. Their characters stay on the table.</p>
+      <p class="hint" style="margin:0 0 6px">Only you can see this. Codes are made by the table (random, never chosen by people), so nobody has a password to reuse. If a friend forgets theirs, make a new one here and tell them. Their characters stay on the table.</p>
       <div id="players"></div>
-      <div class="row" style="margin-top:6px"><input id="pname" placeholder="New player name" maxlength="20" style="flex:1;min-width:110px"><input id="ppin" placeholder="Code" maxlength="40" style="width:90px"><button id="pmake" title="Make a random code">Random</button><button id="padd" class="pri">Add</button></div>
+      <div class="row" style="margin-top:6px"><input id="pname" placeholder="New player name" maxlength="20" style="flex:1;min-width:110px"><button id="padd" class="pri">Add and make a code</button></div>
       <div class="lbl" style="margin-top:12px">Register (every game, name and code)</div>
       <p class="hint" style="margin:0 0 6px">Filled in automatically whenever someone joins or you add or change a code. It covers every game you have hosted in this browser. It contains personal codes, so keep downloads private.</p>
       <div id="register" style="overflow-x:auto"></div>
@@ -216,14 +216,14 @@ body.online #nick,body.online label:has(#nick){display:none}
 <div id="landing">
  <div class="lcard">
   <h1 class="disp">BORDER <span>TABLE ONLINE</span></h1>
-  <p class="hint" style="font-size:14px">Play together over the internet. No accounts. The Operator opens a table and shares a room code, and everyone else joins with that code and a personal code they make up.</p>
+  <p class="hint" style="font-size:14px">Play together over the internet. No accounts. The Operator opens a table and shares a room code, and everyone else joins with that code and a personal code the table gives them.</p>
   <div class="lgrid">
    <section>
     <h2>Join a table</h2>
     <label for="jcode">Room code</label><input id="jcode" maxlength="8" autocomplete="off" autocapitalize="characters">
     <label for="jname">Your name</label><input id="jname" maxlength="20" autocomplete="off">
-    <label for="jpin">Your personal code</label><input id="jpin" type="password" maxlength="40" autocomplete="off">
-    <p class="hint" style="margin:6px 0 0">Make one up and remember it. Use the same name and personal code next time to get your characters back. Nobody else can change your sheet.</p>
+    <label for="jpin">Your personal code</label><input id="jpin" maxlength="40" autocomplete="off" autocapitalize="characters" placeholder="Leave empty the first time">
+    <p class="hint" style="margin:6px 0 0">First time: leave the code empty and the table gives you one. Write it down. Next time, enter your name and that code to get your characters back. Nobody else can change your sheet.</p>
     <button id="jgo" class="pri">Join</button>
    </section>
    <section>
@@ -240,6 +240,15 @@ body.online #nick,body.online label:has(#nick){display:none}
    </section>
   </div>
   <div id="lmsg" aria-live="polite"></div>
+ </div>
+</div>
+<div id="newcode" hidden style="position:fixed;inset:0;z-index:45;background:var(--bg);display:grid;place-items:center;padding:16px">
+ <div class="lcard" style="text-align:center">
+  <h1 class="disp" style="font-size:24px">Your personal code</h1>
+  <p class="hint" style="font-size:14px">Write this down. You need your name and this code to come back and get your characters.</p>
+  <div id="newcodeval" style="font:700 34px 'Space Grotesk',monospace;letter-spacing:.06em;margin:14px 0"></div>
+  <p class="hint" id="newcodeinfo"></p>
+  <div class="row" style="justify-content:center"><button id="newcodecopy">Copy</button><button id="newcodeok" class="pri">I wrote it down</button></div>
  </div>
 </div>
 <div id="toast" class="toast" hidden></div>
@@ -776,20 +785,32 @@ function allowed(pid,m){
   return false
 }
 function deny(conn,path){try{conn.send({t:'deny'});if(path.indexOf('encounters/')===0)return;var ex=local.peek(path);conn.send(ex?{t:'w',k:'set',path:path,data:ex}:{t:'w',k:'delete',path:path})}catch(e){}}
+var WORDS=['WOLF','FOX','HAWK','PINE','ROCK','MOON','STAR','WAVE','IRON','JADE','MINT','OAK','SNOW','RAIN','DUSK','DAWN','SAGE','LYNX','CRAB','DUNE','FERN','GLOW','HAZE','KITE','LARK','MOSS','NOVA','OPAL','PEAK','REEF','SILK','TIDE','ASH','BEAR','CEDAR','DRIFT','EMBER','FLINT','GROVE','HERON','IVY','JUNIPER','KELP','LOTUS','MAPLE','NORTH','ORCA','PEARL','QUARTZ','RAVEN','STONE','TIGER','UMBER','VALE','WILLOW','XENON','YARROW','ZEPHYR','AMBER','BIRCH','COBALT','DELTA','ECHO'];
+function genCode(){var a=new Uint32Array(2);crypto.getRandomValues(a);var d=String(a[1]%100000);while(d.length<5)d='0'+d;return WORDS[a[0]%WORDS.length]+'-'+d}
 function hello(conn,m){
   var name=String(m.name||'').trim().slice(0,20),h=String(m.h||'').slice(0,80),sl=slug(name);
   function rej(w){try{conn.send({t:'reject',why:w})}catch(e){}setTimeout(function(){try{conn.close()}catch(e){}},400)}
-  if(!name||!h)return rej('Enter a name and a personal code.');
+  function accept(code){
+    regUpsert(sl,name,NET.reg[sl].pin,true);
+    if(NET.entered)setTimeout(renderPlayers,0);
+    conn._ok=true;conn._pid=sl;NET.conns[conn.peer]=conn;NET.pres[conn.peer]={nick:name,col:colorFor(sl)};
+    var w={t:'welcome',pid:sl,id:conn.peer,data:snapshot(),list:peerList()};if(code)w.code=code;
+    conn.send(w);pushPeers()
+  }
+  if(!name)return rej('Enter your name.');
   if(sl==='operator'||sl==='host')return rej('Pick another name.');
   var r=NET.reg[sl];
-  if(r&&r.h!==h)return rej('That name is already used at this table with a different personal code.');
-  var pin=String(m.pin||'').slice(0,40);
-  if(!r){NET.reg[sl]={h:h,name:name,pin:pin};scheduleSave()}
-  else if(!r.pin&&pin){r.pin=pin;scheduleSave()}
-  regUpsert(sl,name,NET.reg[sl].pin||pin,true);
-  if(NET.entered)setTimeout(renderPlayers,0);
-  conn._ok=true;conn._pid=sl;NET.conns[conn.peer]=conn;NET.pres[conn.peer]={nick:name,col:colorFor(sl)};
-  conn.send({t:'welcome',pid:sl,id:conn.peer,data:snapshot(),list:peerList()});pushPeers()
+  if(!h){
+    if(r)return rej('That name is already taken at this table. Enter your code, or pick another name.');
+    var gen=genCode();
+    sha(NET.code+':'+sl+':'+gen).then(function(hh){NET.reg[sl]={h:hh,name:name,pin:gen};scheduleSave();accept(gen)});
+    return
+  }
+  if(!r)return rej('That name is not registered at this table. Leave the code empty to get a new one.');
+  var now=Date.now();NET.fails=NET.fails||{};var f=(NET.fails[sl]||[]).filter(function(t){return now-t<600000});
+  if(f.length>=5)return rej('Too many wrong codes. Wait 10 minutes, or ask the Operator.');
+  if(r.h!==h){f.push(now);NET.fails[sl]=f;return rej('That is not the right code for this name. Ask the Operator if you forgot it.')}
+  accept(null)
 }
 function onConn(conn){
   conn.on('data',function(m){
@@ -832,7 +853,14 @@ function hostStart(code,name,game){
 function retryLater(){clearTimeout(NET.rt);if(NET.stop)return;NET.rt=setTimeout(function(){if(NET.peer&&!NET.peer.destroyed&&NET.myId)connect()},2500)}
 function cdata(m){
   if(!m||typeof m!=='object')return;
-  if(m.t==='welcome'){NET.pid=m.pid;NET.myId=m.id;local.load(m.data||{});applyPeers(m.list||[]);banner('');if(!NET.entered)enter(false)}
+  if(m.t==='welcome'){
+    NET.pid=m.pid;NET.myId=m.id;local.load(m.data||{});applyPeers(m.list||[]);banner('');
+    var cd=m.code||(NET.creds&&NET.creds.pin)||'';
+    if(m.code){NET.creds.pin=m.code;sha(NET.code+':'+m.pid+':'+m.code).then(function(h){NET.creds.h=h})}
+    try{localStorage.setItem('bt_me',JSON.stringify({room:NET.code,name:NET.name,pin:cd}))}catch(e){}
+    if(!NET.entered)Promise.resolve('n_'+m.pid).then(function(v){VK=v;enter(false);if(m.code)showNewCode(m.code)});
+    else if(m.code)showNewCode(m.code)
+  }
   else if(m.t==='reject'){NET.stop=true;say(String(m.why||'Could not join.'));try{NET.peer.destroy()}catch(e){}}
   else if(m.t==='w')local.apply({k:m.k,path:m.path,data:m.data});
   else if(m.t==='peers')applyPeers(m.list||[]);
@@ -843,7 +871,7 @@ function connect(){
   var conn=NET.peer.connect('wtbt-'+NET.code.toLowerCase(),{serialization:'json',reliable:true});
   NET.hostConn=conn;
   var to=setTimeout(function(){if(!conn.open){try{conn.close()}catch(e){}if(!NET.entered)say('Could not reach the table. Check the room code, or try again. Some school and work networks block this.');else retryLater()}},15000);
-  conn.on('open',function(){clearTimeout(to);conn.send({t:'hello',name:NET.creds.name,h:NET.creds.h,pin:NET.creds.pin})});
+  conn.on('open',function(){clearTimeout(to);conn.send({t:'hello',name:NET.creds.name,h:NET.creds.h||''})});
   conn.on('data',cdata);
   conn.on('close',function(){if(NET.hostConn===conn&&!NET.stop){banner('Lost the connection to the Operator. Reconnecting…');retryLater()}});
   conn.on('error',function(){})
@@ -852,9 +880,8 @@ function clientStart(code,name,pin){
   if(typeof Peer==='undefined'){say('Could not load the connection library. Check your internet and reload the page.');return}
   NET.code=code;NET.name=name;
   local.writer(function(op){if(NET.hostConn&&NET.hostConn.open){NET.hostConn.send({t:'w',k:op.k,path:op.path,data:op.data});return Promise.resolve()}return Promise.reject({code:'unavailable'})});
-  sha('v:'+slug(name)+':'+pin).then(function(v){VK=v});
-  sha(code+':'+slug(name)+':'+pin).then(function(h){
-    NET.creds={name:name,h:h,pin:pin};
+  var go=function(h){
+    NET.creds={name:name,h:h,pin:pin||''};
     var peer=NET.peer=new Peer({debug:0});
     peer.on('open',function(id){NET.myId=id;connect()});
     peer.on('error',function(e){
@@ -863,7 +890,8 @@ function clientStart(code,name,pin){
       else if(!NET.entered)say('Could not connect ('+e.type+').')
     });
     peer.on('disconnected',function(){try{peer.reconnect()}catch(e){}})
-  })
+  };
+  if(pin)sha(code+':'+slug(name)+':'+pin).then(go);else go(null)
 }
 function roomInfo(host){
   var h=$('#roominfo');h.textContent='';
@@ -945,14 +973,11 @@ function renderPlayers(){
     if(on[k]){var o=el('span','hint','● online');o.style.color='var(--good)';top.appendChild(o)}
     c.appendChild(top);
     var cd=el('div',null,'Code: ');var v=el('b',null,r.pin||'unknown');v.style.fontFamily='monospace';cd.appendChild(v);
-    if(!r.pin)cd.appendChild(el('span','hint',' (they joined before codes were saved: set a new one)'));c.appendChild(cd);
+    if(!r.pin)cd.appendChild(el('span','hint',' (older player: make a new code)'));c.appendChild(cd);
     var row=el('div','row');row.style.marginTop='6px';
-    var ch=el('button',null,'Change code');
-    ch.addEventListener('click',function(){
-      row.textContent='';var i=el('input');i.placeholder='New code';i.maxLength=40;i.style.width='110px';
-      var rn=el('button',null,'Random');rn.addEventListener('click',function(){i.value=codeGen()});
-      var sv=el('button','pri','Save');sv.addEventListener('click',function(){setPlayer(r.name||k,i.value.trim())});
-      var cn=el('button',null,'Cancel');cn.addEventListener('click',renderPlayers);row.append(i,rn,sv,cn);i.focus()});
+    var ch=el('button',null,'New code');var arm=false;
+    ch.addEventListener('click',function(){if(!arm){arm=true;ch.textContent='Tap again: replaces '+(r.name||k)+"'s code";setTimeout(function(){arm=false;ch.textContent='New code'},3000);return}
+      setPlayer(r.name||k,genCode()).then(function(ok){if(ok)toast('New code made. Tell '+(r.name||k)+'.')})});
     var cp=el('button',null,'Copy login info');
     cp.addEventListener('click',function(){var t=loginText(r);function fb(){toast('Could not copy. Code: '+(r.pin||'unknown'))}try{navigator.clipboard.writeText(t).then(function(){toast('Login info copied')},fb)}catch(e){fb()}});
     var rm=el('button','bad','Remove');var armed=false;
@@ -961,10 +986,10 @@ function renderPlayers(){
   })
 }
 function bindPlayers(){
-  $('#pmake').addEventListener('click',function(){$('#ppin').value=codeGen()});
-  $('#padd').addEventListener('click',function(){var n=$('#pname').value.trim(),p=$('#ppin').value.trim();
-    if(NET.reg[slug(n)]){toast('That name already exists. Use Change code on it.');return}
-    setPlayer(n,p).then(function(ok){if(ok){$('#pname').value='';$('#ppin').value=''}})});
+  $('#padd').addEventListener('click',function(){var n=$('#pname').value.trim();
+    if(!n){toast('Type a name first');return}
+    if(NET.reg[slug(n)]){toast('That name already exists. Use New code on it.');return}
+    setPlayer(n,genCode()).then(function(ok){if(ok)$('#pname').value=''})});
   renderPlayers()
 }
 
@@ -1005,6 +1030,11 @@ function bindRegister(){
   renderRegister()
 }
 
+function showNewCode(code){
+  $('#newcodeval').textContent=code;$('#newcodeinfo').textContent='Name: '+NET.name+' · Room: '+NET.code;$('#newcode').hidden=false;
+  $('#newcodecopy').onclick=function(){var t='Border Table\nRoom: '+NET.code+'\nName: '+NET.name+'\nCode: '+code;try{navigator.clipboard.writeText(t).then(function(){toast('Copied')},function(){toast('Could not copy. Write it down.')})}catch(e){toast('Could not copy. Write it down.')}};
+  $('#newcodeok').onclick=function(){$('#newcode').hidden=true}
+}
 /* landing screen */
 var last={};try{last=JSON.parse(localStorage.getItem('bt_last')||'{}')}catch(e){}
 $('#jname').value=last.name||'';$('#hname').value=last.hname||'';$('#hgame').value=last.hgame||'';
@@ -1058,10 +1088,16 @@ $('#hpw').addEventListener('keydown',function(e){if(e.key==='Enter')$('#hgo').cl
   try{var ks=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&(k.indexOf('bt_room_')===0||k.indexOf('bt_game_')===0||k==='bt_register'||k==='bt_op'))ks.push(k)}ks.forEach(function(k){localStorage.removeItem(k)})}catch(e){}
   $('#hlist').textContent='';$('#hpw').value='';opHint();say('Everything saved on this device was erased. You can set a new Operator password.');f.textContent='Forgot the password? Erase everything saved';armed=false})})();
 $('#jgo').addEventListener('click',function(){
-  var c=cleanCode($('#jcode').value),n=$('#jname').value.trim(),p=$('#jpin').value;
-  if(c.length<4||!n||p.length<3){say('Fill in the room code, your name and a personal code (at least 3 characters).');return}
+  var c=cleanCode($('#jcode').value),n=$('#jname').value.trim(),p=$('#jpin').value.trim().toUpperCase();
+  if(c.length<4||!n){say('Fill in the room code and your name.');return}
+  if(p&&p.length<3){say('That code looks too short. Leave it empty if this is your first time.');return}
   say('Connecting…');saveLast();NET.stop=false;clientStart(c,n,p)
 });
+var pinAuto=false;
+function prefillMe(){try{var me=JSON.parse(localStorage.getItem('bt_me')||'null'),ok=me&&cleanCode($('#jcode').value)===me.room&&slug($('#jname').value)===slug(me.name);
+  if(ok&&!$('#jpin').value){$('#jpin').value=me.pin||'';pinAuto=true}
+  else if(!ok&&pinAuto){$('#jpin').value='';pinAuto=false}}catch(e){}}
+['jname','jcode'].forEach(function(id){$('#'+id).addEventListener('input',prefillMe)});$('#jpin').addEventListener('input',function(){pinAuto=false});prefillMe();
 ['jpin','jname','jcode'].forEach(function(id){$('#'+id).addEventListener('keydown',function(e){if(e.key==='Enter')$('#jgo').click()})});
 })();
 </script>
