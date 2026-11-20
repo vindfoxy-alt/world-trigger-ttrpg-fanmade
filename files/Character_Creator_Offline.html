@@ -218,4 +218,18 @@ function lvup(){var old=document.getElementById('lvup');if(old)old.remove();var 
  d.innerHTML='<b>If you reach Level '+n+':</b><ul style="margin:6px 0 0 18px;padding:0"><li>'+items.join('</li><li>')+'</li></ul><span style="font-size:12px;color:#5b7690">See the Handbook, <a class="pgl" href="https://vindfoxy-alt.github.io/world-trigger-ttrpg-fanmade/files/Players_Handbook.pdf#page=30" target="_blank" rel="noopener">p. 30</a>. Change Level above to apply it.</span>';
  var c=document.getElementById('calc');c.parentNode.insertBefore(d,c.nextSibling)}
 var r1=render;render=function(){r1.apply(this,arguments);try{lvup()}catch(e){}};render();
-})()</script></body></html>
+})()</script><script>(function(){
+function box(){if(document.getElementById('finder'))return;var calc=document.getElementById('calc');if(!calc)return;var d=document.createElement('div');d.id='finder';d.style.cssText='margin:12px 0;padding:12px 16px;border-radius:12px;background:#eaf4fb;border:1px solid #bcd9ea;color:#0d2a44;font-size:14px';
+ d.innerHTML='<b>Find a weapon or sub trigger</b><br><input id="fq" placeholder="Type a name or a word like shield, sniper, 60 ft..." style="width:100%;margin:6px 0;padding:8px 10px;border:1px solid #bcd9ea;border-radius:8px;font:inherit"><div id="fr"></div>';calc.parentNode.insertBefore(d,calc);
+ document.getElementById('fq').oninput=run}
+function slot(pref,n,cust){for(var i=0;i<n;i++)if(!S[pref+i]||S[pref+i]==='None')return pref+i;return null}
+function run(){var q=this.value.trim().toLowerCase(),o=document.getElementById('fr');if(q.length<2){o.innerHTML='';return}
+ var rs=[];D.wp.forEach(function(w){if((w[0]+' '+w[1]+' '+w[4]).toLowerCase().indexOf(q)>=0)rs.push(['w',w[0],w[1]+' attack '+(w[2]>=0?'+':'')+w[2]+', Lethal '+w[3]+'. '+w[4]])});
+ D.sub.forEach(function(s){if((s[0]+' '+s[2]).toLowerCase().indexOf(q)>=0)rs.push(['o',s[0],'Cost '+s[1]+'. '+s[2]])});
+ o.innerHTML='';rs.slice(0,8).forEach(function(r){var row=document.createElement('div');row.style.cssText='display:flex;gap:8px;align-items:flex-start;padding:6px 0;border-top:1px solid #d7e8f3';var t=document.createElement('div');t.style.flex='1';t.innerHTML='<b>'+esc(r[1])+'</b> <span style="font-size:12px;color:#5b7690">'+(r[0]=='w'?'weapon':'sub trigger')+'</span><br><span style="font-size:13px">'+esc(r[2])+'</span>';var b=document.createElement('button');b.textContent='Add';b.onclick=function(){var k=slot(r[0],4);if(!k){b.textContent='Slots full';return}S[k]=r[1];save();render();b.textContent='Added'};row.appendChild(t);row.appendChild(b);o.appendChild(row)});
+ if(!rs.length)o.textContent='Nothing found.';}
+var r2=render;render=function(){r2.apply(this,arguments);try{box()}catch(e){}};render();
+})()</script><style>html.dk{filter:invert(.92) hue-rotate(180deg);background:#fff}html.dk img,html.dk video,html.dk canvas,html.dk svg,html.dk .hero,html.dk #dmbtn{filter:invert(1) hue-rotate(180deg)}#dmbtn{position:fixed;right:12px;top:12px;z-index:99999;font:700 12px system-ui,sans-serif;padding:6px 11px;border-radius:999px;border:1px solid #12809f;background:#fff;color:#0b3a63;cursor:pointer;opacity:.85}@media print{#dmbtn{display:none!important}html.dk{filter:none!important}}</style><script>(function(){var k='wt_dark';function ap(on){document.documentElement.classList.toggle('dk',on);var b=document.getElementById('dmbtn');if(b)b.textContent=on?'Light mode':'Dark mode'}
+var on=false;try{on=localStorage.getItem(k)==='1'}catch(e){}
+var b=document.createElement('button');b.id='dmbtn';b.type='button';b.onclick=function(){on=!on;try{localStorage.setItem(k,on?'1':'0')}catch(e){}ap(on)};
+function go(){document.body.appendChild(b);ap(on)}if(document.body)go();else document.addEventListener('DOMContentLoaded',go)})()</script></body></html>
