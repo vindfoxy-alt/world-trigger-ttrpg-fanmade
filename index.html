@@ -53,6 +53,31 @@ footer{font-size:.82rem;color:var(--muted);border-top:1px solid var(--line);padd
 .fb .wide{grid-column:1/-1}
 .fb input,.fb select,.fb textarea{font:400 .95rem var(--body);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:8px 10px;width:100%;min-width:0}
 .fb textarea{resize:vertical}
+
+/* art */
+body{background-image:radial-gradient(1100px 460px at 50% -120px,rgba(34,184,207,.18),transparent 70%)}
+.sideart{display:none;position:fixed;top:0;bottom:0;width:max(0px,calc((100vw - 900px)/2 - 12px));overflow:hidden;pointer-events:none;z-index:0}
+.sideart svg{width:100%;height:100%;display:block}
+.sideart.l{left:0;border-right:2px solid rgba(95,212,228,.3)}.sideart.r{right:0;border-left:2px solid rgba(95,212,228,.3)}
+@media (min-width:1200px){.sideart{display:block}}
+.wrap{position:relative;z-index:1}
+header.hero{position:relative;overflow:hidden;border-radius:18px;padding:34px 32px;background:linear-gradient(100deg,#06182c,#0b3a63 65%,#12809f);border:1px solid rgba(95,212,228,.4);box-shadow:0 10px 30px rgba(6,40,70,.35);color:#fff}
+header.hero .hsvg{position:absolute;right:0;top:0;height:100%;width:62%;z-index:0;-webkit-mask-image:linear-gradient(90deg,transparent,#000 35%);mask-image:linear-gradient(90deg,transparent,#000 35%)}
+header.hero>*:not(.hsvg){position:relative;z-index:1}
+header.hero h1{color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.5)}
+header.hero .eyebrow{color:#5fd4e4}
+header.hero .lead{color:#cfe6f1}
+header.hero .facts li{background:rgba(6,24,44,.6);border-color:rgba(95,212,228,.4);color:#dff2f9}
+@media (max-width:700px){header.hero{padding:22px 18px}header.hero .hsvg{width:100%;opacity:.45}}
+h2{display:flex;align-items:center;gap:10px}
+h2::before{content:"";width:20px;height:23px;flex:none;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 22'%3E%3Cpath d='M10 1 L19 6 V16 L10 21 L1 16 V6Z' fill='%235fd4e4' stroke='%231186b8' stroke-width='1.5'/%3E%3C/svg%3E") center/contain no-repeat}
+.band h2::before{display:none}
+.card{border-top:3px solid #1186b8;box-shadow:0 4px 14px rgba(6,40,70,.12)}
+.band{background:linear-gradient(120deg,#0a2a4d,#0e4a7a 70%,#12809f);box-shadow:0 8px 26px rgba(6,40,70,.3)}
+.classes{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:12px}
+.classes a{display:block;border-radius:10px;overflow:hidden;box-shadow:0 5px 16px rgba(6,40,70,.28);transition:transform .15s}
+.classes a:hover{transform:translateY(-2px)}
+.classes img{display:block;width:100%;height:auto}
 @media (prefers-reduced-motion:no-preference){.btn{transition:filter .15s}}
 .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:16px}
 .step{display:flex;gap:12px;align-items:flex-start;min-width:0}
@@ -65,8 +90,8 @@ footer{font-size:.82rem;color:var(--muted);border-top:1px solid var(--line);padd
 .mapgal{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-top:18px}.mapgal figure{margin:0}.mapgal img{width:100%;aspect-ratio:2/1;object-fit:cover;border-radius:10px;display:block;border:1px solid var(--line,#ccd)}.mapgal figcaption{font-size:.85rem;margin-top:4px;opacity:.8}
 </style>
 
-<div class="wrap">
-  <header>
+<div class="sideart l"><svg viewBox="0 0 200 1100" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><pattern id="hx" width="56" height="97" patternUnits="userSpaceOnUse" patternTransform="scale(.8)"><path d="M28 0 L56 16 L56 48 L28 64 L0 48 L0 16 Z M28 64 L28 97 M0 48 L0 81 L28 97 L56 81 L56 48" fill="none" stroke="#7fd3ea" stroke-opacity=".16" stroke-width="1.2"/></pattern><radialGradient id="gl"><stop offset="0" stop-color="#22c3dc" stop-opacity=".55"/><stop offset="1" stop-color="#22c3dc" stop-opacity="0"/></radialGradient><linearGradient id="bgg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#06182c"/><stop offset=".55" stop-color="#0b3a63"/><stop offset="1" stop-color="#12809f"/></linearGradient></defs><rect width="200" height="1100" fill="url(#bgg)"/><rect width="200" height="1100" fill="url(#hx)"/><ellipse cx="100" cy="560" rx="70" ry="130" fill="url(#gl)"/><ellipse cx="100" cy="560" rx="38" ry="88" fill="#040d17" stroke="#c9f6ff" stroke-width="3"/><ellipse cx="100" cy="560" rx="54" ry="104" fill="none" stroke="#5fd4e4" stroke-opacity=".6" stroke-dasharray="7 6"/><g><polygon points="60,70 77.4,80 60,90 42.6,80" fill="#27c4dc"/><polygon points="42.6,80 60,90 60,110 42.6,100" fill="#17808f"/><polygon points="77.4,80 60,90 60,110 77.4,100" fill="#1da0b3"/></g><g><polygon points="140,248 150.44,254 140,260 129.56,254" fill="#bff4ff"/><polygon points="129.56,254 140,260 140,272 129.56,266" fill="#6aa9b8"/><polygon points="150.44,254 140,260 140,272 150.44,266" fill="#8ec3d0"/></g><g><polygon points="40,414 53.92,422 40,430 26.08,422" fill="#f6a03a"/><polygon points="26.08,422 40,430 40,446 26.08,438" fill="#b2661a"/><polygon points="53.92,422 40,430 40,446 53.92,438" fill="#d4842a"/></g><g><polygon points="150,588 169.14,599 150,610 130.86,599" fill="#7fb8ff"/><polygon points="130.86,599 150,610 150,632 130.86,621" fill="#3b6fb8"/><polygon points="169.14,599 150,610 150,632 169.14,621" fill="#5b93e0"/></g><g><polygon points="70,767 81.31,773.5 70,780 58.69,773.5" fill="#27c4dc"/><polygon points="58.69,773.5 70,780 70,793 58.69,786.5" fill="#17808f"/><polygon points="81.31,773.5 70,780 70,793 81.31,786.5" fill="#1da0b3"/></g><g><polygon points="160,923 174.79,931.5 160,940 145.21,931.5" fill="#bff4ff"/><polygon points="145.21,931.5 160,940 160,957 145.21,948.5" fill="#6aa9b8"/><polygon points="174.79,931.5 160,940 160,957 174.79,948.5" fill="#8ec3d0"/></g></svg></div><div class="sideart r"><svg viewBox="0 0 200 1100" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><pattern id="hx" width="56" height="97" patternUnits="userSpaceOnUse" patternTransform="scale(.8)"><path d="M28 0 L56 16 L56 48 L28 64 L0 48 L0 16 Z M28 64 L28 97 M0 48 L0 81 L28 97 L56 81 L56 48" fill="none" stroke="#7fd3ea" stroke-opacity=".16" stroke-width="1.2"/></pattern><radialGradient id="gl"><stop offset="0" stop-color="#22c3dc" stop-opacity=".55"/><stop offset="1" stop-color="#22c3dc" stop-opacity="0"/></radialGradient><linearGradient id="bgg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#06182c"/><stop offset=".55" stop-color="#0b3a63"/><stop offset="1" stop-color="#12809f"/></linearGradient></defs><rect width="200" height="1100" fill="url(#bgg)"/><rect width="200" height="1100" fill="url(#hx)"/><ellipse cx="100" cy="560" rx="70" ry="130" fill="url(#gl)"/><ellipse cx="100" cy="560" rx="38" ry="88" fill="#040d17" stroke="#c9f6ff" stroke-width="3"/><ellipse cx="100" cy="560" rx="54" ry="104" fill="none" stroke="#5fd4e4" stroke-opacity=".6" stroke-dasharray="7 6"/><g><polygon points="140,100 157.4,110 140,120 122.6,110" fill="#7fb8ff"/><polygon points="122.6,110 140,120 140,140 122.6,130" fill="#3b6fb8"/><polygon points="157.4,110 140,120 140,140 157.4,130" fill="#5b93e0"/></g><g><polygon points="60,278 70.44,284 60,290 49.56,284" fill="#f6a03a"/><polygon points="49.56,284 60,290 60,302 49.56,296" fill="#b2661a"/><polygon points="70.44,284 60,290 60,302 70.44,296" fill="#d4842a"/></g><g><polygon points="160,444 173.92,452 160,460 146.08,452" fill="#bff4ff"/><polygon points="146.08,452 160,460 160,476 146.08,468" fill="#6aa9b8"/><polygon points="173.92,452 160,460 160,476 173.92,468" fill="#8ec3d0"/></g><g><polygon points="50,618 69.14,629 50,640 30.86,629" fill="#27c4dc"/><polygon points="30.86,629 50,640 50,662 30.86,651" fill="#17808f"/><polygon points="69.14,629 50,640 50,662 69.14,651" fill="#1da0b3"/></g><g><polygon points="130,797 141.31,803.5 130,810 118.69,803.5" fill="#7fb8ff"/><polygon points="118.69,803.5 130,810 130,823 118.69,816.5" fill="#3b6fb8"/><polygon points="141.31,803.5 130,810 130,823 141.31,816.5" fill="#5b93e0"/></g><g><polygon points="40,953 54.79,961.5 40,970 25.21,961.5" fill="#f6a03a"/><polygon points="25.21,961.5 40,970 40,987 25.21,978.5" fill="#b2661a"/><polygon points="54.79,961.5 40,970 40,987 54.79,978.5" fill="#d4842a"/></g></svg></div><div class="wrap">
+  <header class="hero"><svg class="hsvg" viewBox="0 0 980 200" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><pattern id="hx" width="56" height="97" patternUnits="userSpaceOnUse" patternTransform="scale(.8)"><path d="M28 0 L56 16 L56 48 L28 64 L0 48 L0 16 Z M28 64 L28 97 M0 48 L0 81 L28 97 L56 81 L56 48" fill="none" stroke="#7fd3ea" stroke-opacity=".16" stroke-width="1.2"/></pattern><radialGradient id="gl"><stop offset="0" stop-color="#22c3dc" stop-opacity=".55"/><stop offset="1" stop-color="#22c3dc" stop-opacity="0"/></radialGradient><linearGradient id="bgg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#06182c"/><stop offset=".55" stop-color="#0b3a63"/><stop offset="1" stop-color="#12809f"/></linearGradient></defs><rect width="980" height="200" fill="url(#bgg)"/><rect width="980" height="200" fill="url(#hx)"/><ellipse cx="800" cy="100" rx="64.6" ry="75" fill="url(#gl)"/><ellipse cx="800" cy="100" rx="45.9" ry="62.5" fill="none" stroke="#5fd4e4" stroke-opacity=".5" stroke-width="2"/><ellipse cx="800" cy="100" rx="39.1" ry="56" fill="none" stroke="#5fd4e4" stroke-opacity=".7" stroke-width="2" stroke-dasharray="9 7"/><ellipse cx="800" cy="100" rx="34" ry="50" fill="#040d17" stroke="#c9f6ff" stroke-width="4"/><g><polygon points="660,44 673.92,52 660,60 646.08,52" fill="#bff4ff"/><polygon points="646.08,52 660,60 660,76 646.08,68" fill="#6aa9b8"/><polygon points="673.92,52 660,60 660,76 673.92,68" fill="#8ec3d0"/></g><g><polygon points="930,38 940.44,44 930,50 919.56,44" fill="#f6a03a"/><polygon points="919.56,44 930,50 930,62 919.56,56" fill="#b2661a"/><polygon points="940.44,44 930,50 930,62 940.44,56" fill="#d4842a"/></g><g><polygon points="700,140 708.7,145 700,150 691.3,145" fill="#27c4dc"/><polygon points="691.3,145 700,150 700,160 691.3,155" fill="#17808f"/><polygon points="708.7,145 700,150 700,160 708.7,155" fill="#1da0b3"/></g><g><polygon points="905,136 917.18,143 905,150 892.82,143" fill="#7fb8ff"/><polygon points="892.82,143 905,150 905,164 892.82,157" fill="#3b6fb8"/><polygon points="917.18,143 905,150 905,164 917.18,157" fill="#5b93e0"/></g><g><polygon points="575,111 582.83,115.5 575,120 567.17,115.5" fill="#f6a03a"/><polygon points="567.17,115.5 575,120 575,129 567.17,124.5" fill="#b2661a"/><polygon points="582.83,115.5 575,120 575,129 582.83,124.5" fill="#d4842a"/></g><g fill="#040d17" transform="translate(800,0)"><circle cx="0" cy="104" r="6"/><path d="M-8 112 L8 112 L10 136 L-10 136Z"/></g><rect x="806" y="112" width="4" height="24" fill="#c9f6ff" transform="rotate(35 806 112)"/></svg>
     <span class="eyebrow">Unofficial fan game · Playtest draft</span>
     <h1>World Trigger Tabletop RPG</h1>
     <p class="lead">A d20 role-playing game of Border agents, Trion bodies and Neighbor invasions, built for teams of three. Wounds and Trion are one pool, every agent can bail out, and nobody dies.</p>
@@ -74,7 +99,7 @@ footer{font-size:.82rem;color:var(--muted);border-top:1px solid var(--line);padd
       <li>d20 + d6 / d4</li>
       <li>3 players + an Operator (game master)</li>
       <li>9 classes, Levels 1 to 10</li>
-      <li>Version: 18 Nov 2026</li>
+      <li>Version: 20 Nov 2026</li>
     </ul>
     <p class="note">All numbers are first drafts and have not been played at a table yet. Balance was only checked with a simple computer simulation. Tell us what feels wrong.</p>
   </header>
@@ -82,8 +107,8 @@ footer{font-size:.82rem;color:var(--muted);border-top:1px solid var(--line);padd
   <section class="band" aria-labelledby="start">
     <h2 id="start">New player? Do these three things</h2>
     <div class="steps">
-      <div class="step"><span class="num">1</span><div><h3>Read the rules</h3><p>The Players Handbook. Short chapters, with sample characters.</p><a class="btn" href="files/Players_Handbook.pdf?v=202611201953" target="_blank" rel="noopener">Open the Handbook</a></div></div>
-      <div class="step"><span class="num">2</span><div><h3>Make your agent</h3><p>Pick from dropdowns. The sheet does the maths.</p><a class="btn" href="files/Character_Creator_Offline.html?v=202611201953" target="_blank" rel="noopener">Open the character creator</a></div></div>
+      <div class="step"><span class="num">1</span><div><h3>Read the rules</h3><p>The Players Handbook. Short chapters, with sample characters.</p><a class="btn" href="files/Players_Handbook.pdf?v=202611201954" target="_blank" rel="noopener">Open the Handbook</a></div></div>
+      <div class="step"><span class="num">2</span><div><h3>Make your agent</h3><p>Pick from dropdowns. The sheet does the maths.</p><a class="btn" href="files/Character_Creator_Offline.html?v=202611201954" target="_blank" rel="noopener">Open the character creator</a></div></div>
       <div class="step"><span class="num">3</span><div><h3>Try a fight</h3><p>Paste your agent in and fight on a battle map. Enemies have fixed stats and each Boss has a recommended Level.</p><a class="btn" href="https://claude.ai/artifact/BedMt2Zx3Uq8nGA6nkU4fS" target="_blank" rel="noopener">Open the fight simulator</a></div></div>
     </div>
     <p style="font-size:.88rem">This page is always the newest version. Bookmark it, and the links never change.</p>
@@ -100,6 +125,12 @@ footer{font-size:.82rem;color:var(--muted);border-top:1px solid var(--line);padd
     <p class="lead" style="font-size:.95rem">Making an agent takes about ten minutes. Stats start at 0: add +3, +2, +1, +1 and -1. Pick a special ability (three for every stat); it needs +3 in its stat, so your +3 decides which abilities you can take. Max Trion is 40 + 5 x TRION + 2 x STA + your class's Trion per Level above 1, minus 2 for each weapon and 1 for each sub trigger you carry. The character creator does the maths. If you are unsure of a rule, the Operator decides and the game keeps moving.</p>
   </section>
 
+  <section aria-labelledby="classes">
+    <h2 id="classes">The nine classes</h2>
+    <p class="lead" style="font-size:.95rem">Tap a class to open its page in the Players Handbook.</p>
+    <div class="classes"><a href="files/Players_Handbook.pdf#page=9" title="Attacker, Handbook page 9"><img src="files/art/banner_attacker.jpg" alt="Attacker class banner" loading="lazy"></a><a href="files/Players_Handbook.pdf#page=10" title="Gunner, Handbook page 10"><img src="files/art/banner_gunner.jpg" alt="Gunner class banner" loading="lazy"></a><a href="files/Players_Handbook.pdf#page=11" title="Shooter, Handbook page 11"><img src="files/art/banner_shooter.jpg" alt="Shooter class banner" loading="lazy"></a><a href="files/Players_Handbook.pdf#page=12" title="Sniper, Handbook page 12"><img src="files/art/banner_sniper.jpg" alt="Sniper class banner" loading="lazy"></a><a href="files/Players_Handbook.pdf#page=13" title="Trapper, Handbook page 13"><img src="files/art/banner_trapper.jpg" alt="Trapper class banner" loading="lazy"></a><a href="files/Players_Handbook.pdf#page=14" title="Assassin, Handbook page 14"><img src="files/art/banner_assassin.jpg" alt="Assassin class banner" loading="lazy"></a><a href="files/Players_Handbook.pdf#page=15" title="Tactician, Handbook page 15"><img src="files/art/banner_tactician.jpg" alt="Tactician class banner" loading="lazy"></a><a href="files/Players_Handbook.pdf#page=16" title="Counterstriker, Handbook page 16"><img src="files/art/banner_counterstriker.jpg" alt="Counterstriker class banner" loading="lazy"></a><a href="files/Players_Handbook.pdf#page=17" title="Aftokrator, Handbook page 17"><img src="files/art/banner_aftokrator.jpg" alt="Aftokrator class banner" loading="lazy"></a></div>
+  </section>
+
   <section aria-labelledby="books">
     <h2 id="books">The books</h2>
     <div class="cards">
@@ -108,7 +139,7 @@ footer{font-size:.82rem;color:var(--muted);border-top:1px solid var(--line);padd
         <h3>Players Handbook</h3>
         <span class="meta">PDF 2.3 MB · 48 pages</span>
         <p>Start here. Character creation, classes, 18 special abilities, weapons, triggers and the combat rules, with sample characters.</p>
-        <a class="btn" href="files/Players_Handbook.pdf?v=202611201953" target="_blank" rel="noopener">Download PDF</a>
+        <a class="btn" href="files/Players_Handbook.pdf?v=202611201954" target="_blank" rel="noopener">Download PDF</a>
         <span class="status" aria-live="polite"></span>
       </div>
       <div class="card">
@@ -116,7 +147,7 @@ footer{font-size:.82rem;color:var(--muted);border-top:1px solid var(--line);padd
         <h3>Operator Guide</h3>
         <span class="meta">PDF 4.3 MB · 76 pages</span>
         <p>For the person running the game. Full rules, the setting, three ready-to-run missions and balance notes.</p>
-        <a class="btn" href="files/Operator_Guide.pdf?v=202611201953" target="_blank" rel="noopener">Download PDF</a>
+        <a class="btn" href="files/Operator_Guide.pdf?v=202611201954" target="_blank" rel="noopener">Download PDF</a>
         <span class="status" aria-live="polite"></span>
       </div>
       <div class="card">
@@ -124,7 +155,7 @@ footer{font-size:.82rem;color:var(--muted);border-top:1px solid var(--line);padd
         <h3>Monster Manual</h3>
         <span class="meta">PDF 5.0 MB · 51 pages</span>
         <p>Trion soldiers, Neighbors, Aftokrator bosses and Black Trigger enemies, with stats and tactics.</p>
-        <a class="btn" href="files/Monster_Manual.pdf?v=202611201953" target="_blank" rel="noopener">Download PDF</a>
+        <a class="btn" href="files/Monster_Manual.pdf?v=202611201954" target="_blank" rel="noopener">Download PDF</a>
         <span class="status" aria-live="polite"></span>
       </div>
     </div>
@@ -134,7 +165,7 @@ footer{font-size:.82rem;color:var(--muted);border-top:1px solid var(--line);padd
     <h2 id="creator">Character creator</h2>
     <p>Works in any browser, with no account and nothing to install. Pick a class, Level, stats, weapons and triggers from the dropdowns. Trion, Evade, attack bonuses and wound limits are worked out for you. Your character is saved in your browser. Press Copy character code to paste your agent into Border Table Online or the fight simulator.</p>
     <div class="row">
-      <a class="btn" href="files/Character_Creator_Offline.html?v=202611201953" target="_blank" rel="noopener">Open the character creator (no account)</a>
+      <a class="btn" href="files/Character_Creator_Offline.html?v=202611201954" target="_blank" rel="noopener">Open the character creator (no account)</a>
       <a class="btn ghost" href="https://claude.ai/artifact/KKLaE24eA4FhCLqegpJ8Hw" target="_blank" rel="noopener">Online Sheets version (needs a claude.ai account)</a>
     </div>
     <p style="font-size:.88rem">The offline version is one file. Save it, then open it in any browser. No internet needed, and it remembers your sheet.</p>
@@ -145,7 +176,7 @@ footer{font-size:.82rem;color:var(--muted);border-top:1px solid var(--line);padd
     <h2 id="table">Play online: Border Table</h2>
     <p class="lead" style="font-size:.95rem">A shared tabletop for playing together over the internet. Everyone opens the same link and sees the same map, tokens, dice rolls and chat live. Paste in the character code from the creator to make a sheet, put it on the map as a token, and roll attacks and severity with Edge and Snag. Open it on a laptop, tablet or phone. No account needed: the Operator opens a table and shares a room code, and players join with their name and a personal code the table gives them (random, so nobody has a password to reuse), and their characters are saved on their own device so they can take them to any table. The Operator keeps the page open while playing.</p>
     <div class="row">
-      <a class="btn" href="files/Border_Table_Online.html?v=202611201953" target="_blank" rel="noopener">Open Border Table Online (no account)</a>
+      <a class="btn" href="files/Border_Table_Online.html?v=202611201954" target="_blank" rel="noopener">Open Border Table Online (no account)</a>
       <a class="btn ghost" href="https://claude.ai/artifact/Qgj9YwXdkN2rmMdXo75JXK" target="_blank" rel="noopener">claude.ai version (needs an account)</a>
     </div>
   </section>
@@ -154,7 +185,7 @@ footer{font-size:.82rem;color:var(--muted);border-top:1px solid var(--line);padd
     <p class="lead" style="font-size:.95rem">Paste in the character code from the creator and your own agent fights, with enemies scaled to your Level. Or pick two teams of three, or a team and an enemy group, then choose a map. Watch the fighters move, take cover and fight round by round, or run 1,000 fights to see win rates. It includes the Aftokrator and Black Trigger bosses. It models class features, special abilities and sub triggers (some simplified, listed on the page), so use it as a balance check, not a prediction.</p>
     <div class="row">
       <a class="btn" href="https://claude.ai/artifact/BedMt2Zx3Uq8nGA6nkU4fS" target="_blank" rel="noopener">Open fight simulator</a>
-      <a class="btn ghost" href="files/Fight_Simulator.html?v=202611201953" target="_blank" rel="noopener">Download offline version</a>
+      <a class="btn ghost" href="files/Fight_Simulator.html?v=202611201954" target="_blank" rel="noopener">Download offline version</a>
     </div>
     <span class="status" id="sim-status" aria-live="polite"></span>
   </section>
@@ -162,7 +193,7 @@ footer{font-size:.82rem;color:var(--muted);border-top:1px solid var(--line);padd
   <section aria-labelledby="maps">
     <h2 id="maps">Battle maps</h2>
     <p class="lead" style="font-size:.95rem">18 original illustrated maps, 120 × 60 ft on a 5 ft grid. Open one to save the full-size image for Discord or a virtual tabletop. The fight simulator uses the same maps. Water and the crater block movement.</p>
-    <div class="row"><a class="btn" href="files/maps/00_Contact_Sheet.jpg" target="_blank" rel="noopener">Contact sheet</a><a class="btn ghost" href="files/World_Trigger_Maps_Player_copy.pdf?v=202611201953" target="_blank" rel="noopener">Printable maps (players)</a><a class="btn ghost" href="files/World_Trigger_Maps_Operator_copy.pdf?v=202611201953" target="_blank" rel="noopener">Printable maps (Operator)</a></div>
+    <div class="row"><a class="btn" href="files/maps/00_Contact_Sheet.jpg" target="_blank" rel="noopener">Contact sheet</a><a class="btn ghost" href="files/World_Trigger_Maps_Player_copy.pdf?v=202611201954" target="_blank" rel="noopener">Printable maps (players)</a><a class="btn ghost" href="files/World_Trigger_Maps_Operator_copy.pdf?v=202611201954" target="_blank" rel="noopener">Printable maps (Operator)</a></div>
     <div class="mapgal"><figure><a href="files/maps/01_Border_HQ_Courtyard.jpg" target="_blank" rel="noopener"><img src="files/maps/01_Border_HQ_Courtyard.jpg" loading="lazy" alt="Battle map: Border HQ Courtyard"></a><figcaption>Border HQ Courtyard</figcaption></figure><figure><a href="files/maps/02_Residential_Streets.jpg" target="_blank" rel="noopener"><img src="files/maps/02_Residential_Streets.jpg" loading="lazy" alt="Battle map: Residential Streets"></a><figcaption>Residential Streets</figcaption></figure><figure><a href="files/maps/03_Rooftops.jpg" target="_blank" rel="noopener"><img src="files/maps/03_Rooftops.jpg" loading="lazy" alt="Battle map: Rooftops"></a><figcaption>Rooftops</figcaption></figure><figure><a href="files/maps/04_Alley_Maze.jpg" target="_blank" rel="noopener"><img src="files/maps/04_Alley_Maze.jpg" loading="lazy" alt="Battle map: Alley Maze"></a><figcaption>Alley Maze</figcaption></figure><figure><a href="files/maps/05_Warehouse.jpg" target="_blank" rel="noopener"><img src="files/maps/05_Warehouse.jpg" loading="lazy" alt="Battle map: Warehouse"></a><figcaption>Warehouse</figcaption></figure><figure><a href="files/maps/06_Industrial_Yard.jpg" target="_blank" rel="noopener"><img src="files/maps/06_Industrial_Yard.jpg" loading="lazy" alt="Battle map: Industrial Yard"></a><figcaption>Industrial Yard</figcaption></figure><figure><a href="files/maps/07_Riverbank.jpg" target="_blank" rel="noopener"><img src="files/maps/07_Riverbank.jpg" loading="lazy" alt="Battle map: Riverbank"></a><figcaption>Riverbank</figcaption></figure><figure><a href="files/maps/08_Fog_Harbor.jpg" target="_blank" rel="noopener"><img src="files/maps/08_Fog_Harbor.jpg" loading="lazy" alt="Battle map: Fog Harbor"></a><figcaption>Fog Harbor</figcaption></figure><figure><a href="files/maps/09_Night_City.jpg" target="_blank" rel="noopener"><img src="files/maps/09_Night_City.jpg" loading="lazy" alt="Battle map: Night City"></a><figcaption>Night City</figcaption></figure><figure><a href="files/maps/10_Gate_Attack_Ruins.jpg" target="_blank" rel="noopener"><img src="files/maps/10_Gate_Attack_Ruins.jpg" loading="lazy" alt="Battle map: Gate Attack Ruins"></a><figcaption>Gate Attack Ruins</figcaption></figure><figure><a href="files/maps/11_Open_Field.jpg" target="_blank" rel="noopener"><img src="files/maps/11_Open_Field.jpg" loading="lazy" alt="Battle map: Open Field"></a><figcaption>Open Field</figcaption></figure><figure><a href="files/maps/12_Subway_Tunnel.jpg" target="_blank" rel="noopener"><img src="files/maps/12_Subway_Tunnel.jpg" loading="lazy" alt="Battle map: Subway Tunnel"></a><figcaption>Subway Tunnel</figcaption></figure><figure><a href="files/maps/13_Park_and_Forest.jpg" target="_blank" rel="noopener"><img src="files/maps/13_Park_and_Forest.jpg" loading="lazy" alt="Battle map: Park and Forest"></a><figcaption>Park and Forest</figcaption></figure><figure><a href="files/maps/14_Mall_Atrium.jpg" target="_blank" rel="noopener"><img src="files/maps/14_Mall_Atrium.jpg" loading="lazy" alt="Battle map: Mall Atrium"></a><figcaption>Mall Atrium</figcaption></figure><figure><a href="files/maps/15_Training_Room.jpg" target="_blank" rel="noopener"><img src="files/maps/15_Training_Room.jpg" loading="lazy" alt="Battle map: Training Room"></a><figcaption>Training Room</figcaption></figure><figure><a href="files/maps/16_Gate_Crater.jpg" target="_blank" rel="noopener"><img src="files/maps/16_Gate_Crater.jpg" loading="lazy" alt="Battle map: Gate Crater"></a><figcaption>Gate Crater</figcaption></figure><figure><a href="files/maps/17_Mountain_Pass.jpg" target="_blank" rel="noopener"><img src="files/maps/17_Mountain_Pass.jpg" loading="lazy" alt="Battle map: Mountain Pass"></a><figcaption>Mountain Pass</figcaption></figure><figure><a href="files/maps/18_Dockyard_Containers.jpg" target="_blank" rel="noopener"><img src="files/maps/18_Dockyard_Containers.jpg" loading="lazy" alt="Battle map: Dockyard Containers"></a><figcaption>Dockyard Containers</figcaption></figure></div>
   </section>
 
