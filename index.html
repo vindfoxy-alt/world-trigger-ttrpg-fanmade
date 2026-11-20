@@ -106,7 +106,7 @@ footer{font-size:.82rem;color:var(--muted);border-top:1px solid var(--line);padd
       <div class="card">
         <span class="tag">For everyone</span>
         <h3>Players Handbook</h3>
-        <span class="meta">PDF 2.3 MB · 47 pages</span>
+        <span class="meta">PDF 2.3 MB · 48 pages</span>
         <p>Start here. Character creation, classes, 18 special abilities, weapons, triggers and the combat rules, with sample characters.</p>
         <a class="btn" href="files/Players_Handbook.pdf" target="_blank" rel="noopener">Download PDF</a>
         <span class="status" aria-live="polite"></span>
@@ -114,7 +114,7 @@ footer{font-size:.82rem;color:var(--muted);border-top:1px solid var(--line);padd
       <div class="card">
         <span class="tag">For the Operator only</span>
         <h3>Operator Guide</h3>
-        <span class="meta">PDF 4.2MB · 75 pages</span>
+        <span class="meta">PDF 4.3 MB · 76 pages</span>
         <p>For the person running the game. Full rules, the setting, three ready-to-run missions and balance notes.</p>
         <a class="btn" href="files/Operator_Guide.pdf" target="_blank" rel="noopener">Download PDF</a>
         <span class="status" aria-live="polite"></span>
@@ -185,6 +185,13 @@ footer{font-size:.82rem;color:var(--muted);border-top:1px solid var(--line);padd
     </form>
   </section>
 
+  <p id="upd" class="meta" style="text-align:center;margin:18px 0 0">Updated automatically whenever the books, tools or rules change.</p>
+  <script>
+  (function(){var el=document.getElementById('upd');if(!el||!window.fetch)return;
+    fetch('https://api.github.com/repos/vindfoxy-alt/world-trigger-ttrpg-fanmade/commits?per_page=1').then(function(r){return r.ok?r.json():null}).then(function(j){
+      if(!j||!j[0])return;var c=j[0].commit,d=new Date(c.committer.date),m=String(c.message).split('\n')[0].slice(0,110);
+      el.textContent='Latest update: '+d.toLocaleDateString(undefined,{day:'numeric',month:'long',year:'numeric'})+' '+d.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'})+' · '+m}).catch(function(){})})();
+  </script>
   <footer>An unofficial fan game. World Trigger is the work of Daisuke Ashihara. The rules and stats here are interpretations made for this game, not official material. Art spots in the books are placeholders.</footer>
 </div>
 
