@@ -52,6 +52,11 @@ header h1 span{color:var(--acc)}
 .tkn{position:absolute;top:100%;left:50%;transform:translateX(-50%);font-size:11px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:0 5px;pointer-events:none}
 .cur{position:absolute;width:10px;height:10px;border-radius:50%;pointer-events:none;transform:translate(-50%,-50%);z-index:9;border:2px solid #fff}
 .cur b{position:absolute;left:12px;top:-4px;font:600 11px Inter;background:var(--panel);color:var(--fg);border-radius:4px;padding:0 4px;white-space:nowrap}
+#mlgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:8px;margin-top:8px}
+.mc{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:6px;cursor:pointer;text-align:left;display:block;color:inherit;font:inherit;min-width:0}
+.mc.on{outline:2px solid var(--accent,#3b82f6)}.mc .th{width:100%;aspect-ratio:16/10;border-radius:6px;background:#2d3a33 center/cover;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:22px;color:#fff;overflow:hidden}
+.mc .th.fo{background:#3d93c9}.mc .th.gr{background-image:linear-gradient(rgba(255,255,255,.18) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.18) 1px,transparent 1px);background-size:14px 14px;background-color:#2d3a33}
+.mc .nm{margin-top:6px;font-size:12px;font-weight:600;overflow-wrap:anywhere}
 .insp{margin-top:8px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--panel2)}
 .row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
 .row+.row{margin-top:6px}
@@ -193,7 +198,12 @@ body.online #nick,body.online label:has(#nick){display:none}
     </div>
     <div class="pane" id="p-op">
       <p class="hint" style="margin:0 0 8px">Only you (and Editors) see this tab. Saved encounters are hidden from players until you load them.</p>
-      <div class="lbl">Save the current table</div>
+      <div class="lbl">Map library</div>
+      <div class="row" id="mlbar" style="gap:6px"><button id="mlback" hidden>&larr; Back</button><b id="mlpath">Maps</b><span style="flex:1"></span><button id="mlnewf">New folder</button></div>
+      <div class="row" style="margin-top:6px"><input id="mlname" placeholder="Name for the map on the table now" style="flex:1;min-width:0"><button id="mlsave" class="pri">Save map here</button></div>
+      <div id="mlgrid"></div>
+      <div id="mlact"></div>
+      <div class="lbl" style="margin-top:14px">Save the current table</div>
       <input id="encname" placeholder="Encounter name, e.g. Mission 1, scene 3" style="width:100%">
       <textarea id="encnote" rows="2" placeholder="Notes for you: goals, tricks, what happens next"></textarea>
       <label class="hint row"><input type="checkbox" id="encall"> Also save player-team tokens (default: enemies and neutral only)</label>
@@ -201,6 +211,10 @@ body.online #nick,body.online label:has(#nick){display:none}
       <div class="lbl" style="margin-top:12px">Saved encounters</div>
       <label class="hint row"><input type="checkbox" id="encmap" checked> Load the map layout too</label>
       <div id="enclist"></div>
+      <div class="lbl" style="margin-top:12px">Operator password</div>
+      <p class="hint" style="margin:0 0 6px">This is the password you typed to open this table. It is stored scrambled on this device, so it cannot be shown back to you, not even here. Use it every time you host. If you want a new one, change it here.</p>
+      <div class="row"><input id="opold" type="password" placeholder="Current password" autocomplete="off" style="flex:1;min-width:110px"><input id="opnew" type="password" placeholder="New password (4+ characters)" autocomplete="off" style="flex:1;min-width:110px"></div>
+      <div class="row" style="margin-top:6px"><button id="opchg" class="pri">Change password</button><span id="opmsg" class="hint"></span></div>
       <div class="lbl" style="margin-top:12px">Players (names and personal codes)</div>
       <p class="hint" style="margin:0 0 6px">Only you can see this. Codes are made by the table (random, never chosen by people), so nobody has a password to reuse. If a friend forgets theirs, make a new one here and tell them. Their characters stay on the table.</p>
       <div id="players"></div>
@@ -304,7 +318,7 @@ var timers={};
 function debounce(key,ms,fn){clearTimeout(timers[key]);timers[key]=setTimeout(fn,ms)}
 function patchToken(id,p){W('tokens/'+id,function(){return DB.doc('tokens/'+id).update(p)})}
 function patchSheet(id,p){W('sheets/'+id,function(){return DB.doc('sheets/'+id).update(p)})}
-function setMap(p){S.map=Object.assign({},S.map,p);renderMap();W('game/map',function(){return DB.doc('game/map').set(S.map)})}
+function setMap(p){var nm=S.map=Object.assign({},S.map,p);renderMap();W('game/map',function(){return DB.doc('game/map').set(nm)})}
 function setTurn(p){S.turn=Object.assign({},S.turn,p);renderTokens();renderTurnLbl();W('game/turn',function(){return DB.doc('game/turn').set(S.turn)})}
 
 /* ---------- subscriptions ---------- */
@@ -313,6 +327,7 @@ function subscribe(){
   var err=function(e){if(e&&e.code==='revoked')return;banner('Shared data is not reachable right now ('+((e&&e.code)||'error')+'). You can keep looking around.')};
   var first=function(){S.synced=true};
   unsubs.push(DB.collection('tokens').onSnapshot(function(s){S.tokens={};s.docs.forEach(function(d){S.tokens[d.id]=d.data()});first();renderTokens();renderInspector();renderTurnLbl()},err));
+  if(opVisible())unsubs.push(DB.collection('maps').onSnapshot(function(s){S.maps={};s.docs.forEach(function(d){S.maps[d.id]=d.data()});renderMaps()},function(){}));
   if(opVisible())unsubs.push(DB.collection('encounters').onSnapshot(function(s){S.enc={};s.docs.forEach(function(d){S.enc[d.id]=d.data()});renderEnc()},function(){}));
   unsubs.push(DB.collection('sheets').onSnapshot(function(s){S.sheets={};s.docs.forEach(function(d){S.sheets[d.id]=d.data()});renderSheetList();if(window.vaultSync)vaultSync();renderSheet();renderAs();renderTokens();renderInspector()},err));
   unsubs.push(DB.collection('log').orderBy('t','desc').limit(150).onSnapshot(function(s){S.log=s.docs.map(function(d){var o=d.data();o._id=d.id;return o}).reverse();renderLog();prune()},err));
@@ -610,7 +625,7 @@ function importCode(){
 /* ---------- Operator: saved encounters and enemy library ---------- */
 /* [code,name,group,Trion (3-agent total for bosses),attack,Lethal,Block,Evade,recommended Level] */
 var LIB=[["SK","Skitter","Minions",9,1,0,0,10,0],["EC","Echo","Minions",10,1,0,0,10,0],["BD","Bado","Minions",18,1,0,0,10,0],["BA","Bamster","Minions",18,1,0,0,10,0],["BE","Beast","Minions",18,1,0,0,10,0],["CN","Charon","Minions",18,1,0,0,10,0],["M","Minion","Minions",18,1,0,0,10,0],["RD","Rad","Minions",18,1,0,0,10,0],["DS","Scout Dog","Minions",18,1,0,0,11,0],["SC","Spilco","Minions",18,3,0,0,10,0],["AR","Arugda","Soldiers",48,3,1,2,10,0],["GL","Glider","Soldiers",48,3,0,2,11,0],["DG","Guard Dog","Soldiers",48,3,1,3,10,0],["HB","Hollow Blade","Soldiers",48,3,1,2,10,0],["DH","Hunter Dog","Soldiers",48,3,1,2,10,0],["ID","Idra","Soldiers",48,3,1,3,10,0],["LA","Lancer","Soldiers",48,3,1,0,10,0],["MM","Marmod","Soldiers",48,3,1,2,10,0],["SS","Shade Stalker","Soldiers",48,3,1,2,10,0],["VD","Vander","Soldiers",48,3,1,2,10,0],["PN","Pneura","Soldiers",52,4,1,2,11,0],["S","Soldier","Soldiers",52,4,1,2,11,0],["BU","Bulwark","Elites",94,6,2,4,11,0],["E","Elite","Elites",94,6,2,4,11,0],["IL","Ilgar","Elites",94,6,2,4,11,0],["GV","Gieve","Elites",100,7,2,4,12,0],["LI","Lilith","Elites",100,7,2,4,12,0],["GC","Gatecrawler","Bosses",45,5,1,2,10,1],["MW","Mirrorwarden","Bosses",51,6,1,2,11,2],["RB","Rabbit","Bosses",60,7,1,2,12,3],["PR","Chelidon boss","Bosses",114,7,1,2,12,7],["PH","Lampyris boss","Bosses",126,7,1,2,12,7],["PE","Vorvoros boss","Bosses",180,7,1,2,12,9],["PG","Pergrande","Bosses",192,9,1,2,14,10],["K","Black Trigger wielder","Black Triggers",126,9,2,3,13,5],["AL","Alektor (Hyrein)","Black Triggers",132,9,2,3,13,10],["OR","Organon (Viza)","Black Triggers",132,9,2,3,13,5],["CH","Cinderheart","Black Triggers",156,9,2,3,13,5],["SP","Speiraskia (Mira)","Black Triggers",162,9,2,3,13,7]];
-S.enc={};S.local=true;
+S.enc={};S.maps={};S.local=true;
 function opVisible(){return S.local||S.isAdmin}
 function updateOpTab(){var b=$('#optab');b.hidden=!opVisible();if(b.hidden&&S.tab==='op')$('#tabs button[data-t=chat]').click()}
 function freeSpot(){var used={};Object.keys(S.tokens).forEach(function(k){var t=S.tokens[k];used[Math.round(t.x)+','+Math.round(t.y)]=1});
@@ -675,6 +690,62 @@ function renderEnc(){
 }
 
 
+
+/* ---------- map library: named maps in folders (Operator) ---------- */
+var ML={cur:'',sel:''};
+function assetUsed(id){if(!id)return false;if(S.map.imgId===id&&S.map.bg==='image')return true;return Object.keys(S.maps).some(function(k){var m=S.maps[k];return m.map&&m.map.imgId===id})}
+function dropAssetIfUnused(id){if(id&&!assetUsed(id))W('assets/'+id,function(){return DB.doc('assets/'+id).delete()})}
+function mapThumb(cb){var m=S.map,a=m.bg==='image'?S.assets[m.imgId]:null;
+  if(a&&okJpeg(a.data)){var i=new Image();i.onload=function(){var w=240,h=Math.max(100,Math.min(240,Math.round(240*(m.aspect||.62))));cb(toJpeg(i,w,h,.7,false))};i.onerror=function(){cb('')};i.src=a.data}else cb('')}
+function curMapData(){return {bg:S.map.bg,seed:S.map.seed,cols:S.map.cols,rows:S.map.rows,imgId:S.map.bg==='image'?S.map.imgId:'',aspect:S.map.aspect||0}}
+function saveMapLib(){
+  var name=$('#mlname').value.trim();if(!name){toast('Give the map a name first');return}
+  if(S.map.bg==='image'&&!S.assets[S.map.imgId]){toast('The picture is still loading, try again');return}
+  mapThumb(function(th){var id=uid();
+    var o={kind:'map',name:name.slice(0,40),folder:ML.cur||'',thumb:th&&th.length<30000?th:'',map:curMapData(),t:Date.now()};
+    W('maps/'+id,function(){return DB.doc('maps/'+id).set(o)});$('#mlname').value='';ML.sel=id;toast('Map saved')})}
+function newFolder(){
+  var n=($('#mlname').value.trim())||'';if(!n){toast('Type a folder name in the name box, then press New folder');return}
+  if(ML.cur){toast('Folders go in the main list');return}
+  var id=uid();W('maps/'+id,function(){return DB.doc('maps/'+id).set({kind:'folder',name:n.slice(0,40),folder:'',t:Date.now()})});$('#mlname').value='';toast('Folder made')}
+function loadMapLib(id){var m=S.maps[id];if(!m||!m.map)return;var old=S.map.imgId,mm=m.map;
+  if(mm.bg==='image'){var a=S.assets[mm.imgId];if(!a||!okJpeg(a.data)){toast('That map picture is missing');return}
+    W('assets/'+mm.imgId,function(){return DB.doc('assets/'+mm.imgId).set({data:a.data})})}
+  setMap({bg:mm.bg,seed:mm.seed,cols:mm.cols,rows:mm.rows,imgId:mm.imgId||'',aspect:mm.aspect||0});
+  if(old&&old!==mm.imgId)dropAssetIfUnused(old);toast('Loaded '+m.name)}
+function renderMaps(){
+  var grid=$('#mlgrid');if(!grid)return;grid.textContent='';var act=$('#mlact');act.textContent='';
+  var f=S.maps[ML.cur];if(ML.cur&&(!f||f.kind!=='folder'))ML.cur='';
+  $('#mlback').hidden=!ML.cur;$('#mlpath').textContent=ML.cur?'Maps / '+S.maps[ML.cur].name:'Maps';$('#mlnewf').hidden=!!ML.cur;
+  var ids=Object.keys(S.maps).filter(function(k){return (S.maps[k].folder||'')===ML.cur});
+  ids.sort(function(a,b){var A=S.maps[a],B=S.maps[b];if((A.kind==='folder')!==(B.kind==='folder'))return A.kind==='folder'?-1:1;return (B.t||0)-(A.t||0)});
+  if(!ids.length)grid.appendChild(el('p','hint',ML.cur?'This folder is empty. Save a map here.':'No saved maps yet. Import or pick a map, name it, press Save.'));
+  ids.forEach(function(id){var m=S.maps[id],isF=m.kind==='folder',c=el('button','mc'+(ML.sel===id?' on':''));c.type='button';
+    var th=el('div','th'+(isF?' fo':(m.thumb?'':' gr')));
+    if(isF){th.textContent=String(Object.keys(S.maps).filter(function(k){return S.maps[k].folder===id}).length)}
+    else if(m.thumb&&okJpeg(m.thumb))th.style.backgroundImage='url('+m.thumb+')';
+    c.appendChild(th);c.appendChild(el('div','nm',m.name));
+    c.addEventListener('click',function(){if(isF){ML.cur=id;ML.sel='';renderMaps()}else{ML.sel=ML.sel===id?'':id;renderMaps()}});grid.appendChild(c)});
+  var sel=S.maps[ML.sel];var tgt=sel||(ML.cur?f:null);if(!tgt)return;var tid=sel?ML.sel:ML.cur;
+  var box=el('div','insp');box.appendChild(el('div',null,tgt.name)).style.fontWeight='600';
+  var r=el('div','row');r.style.marginTop='6px';
+  if(tgt.kind==='map'){
+    var l=el('button','pri','Use on table');l.addEventListener('click',function(){loadMapLib(tid)});
+    var u=el('button',null,'Update');u.title='Overwrite with the map on the table now';u.addEventListener('click',function(){mapThumb(function(th){var o={map:curMapData(),thumb:th&&th.length<30000?th:'',t:Date.now()};var old=tgt.map&&tgt.map.imgId;
+      W('maps/'+tid,function(){return DB.doc('maps/'+tid).update(o)});S.maps[tid]=Object.assign({},tgt,o);if(old&&old!==o.map.imgId)dropAssetIfUnused(old);toast('Updated')})});
+    r.append(l,u)}
+  var rn=el('button',null,'Rename');rn.addEventListener('click',function(){var n=$('#mlname').value.trim();if(!n){toast('Type the new name in the name box first');return}W('maps/'+tid,function(){return DB.doc('maps/'+tid).update({name:n.slice(0,40)})});$('#mlname').value=''});r.appendChild(rn);
+  if(tgt.kind==='map'){var mv=el('select');var o0=el('option',null,'Move to…');o0.value='';mv.appendChild(o0);
+    var o1=el('option',null,'Main list');o1.value='__root';mv.appendChild(o1);
+    Object.keys(S.maps).filter(function(k){return S.maps[k].kind==='folder'}).forEach(function(k){var o=el('option',null,S.maps[k].name);o.value=k;mv.appendChild(o)});
+    mv.addEventListener('change',function(){if(!mv.value)return;var to=mv.value==='__root'?'':mv.value;W('maps/'+tid,function(){return DB.doc('maps/'+tid).update({folder:to})});ML.sel=''});r.appendChild(mv)}
+  var d=el('button','bad','Delete');var armed=false;d.addEventListener('click',function(){
+    if(tgt.kind==='folder'&&Object.keys(S.maps).some(function(k){return S.maps[k].folder===tid})){toast('Empty the folder first (move the maps out)');return}
+    if(!armed){armed=true;d.textContent='Tap again';setTimeout(function(){armed=false;d.textContent='Delete'},2500);return}
+    var img=tgt.map&&tgt.map.imgId;delete S.maps[tid];W('maps/'+tid,function(){return DB.doc('maps/'+tid).delete()});if(tgt.kind==='folder')ML.cur='';ML.sel='';dropAssetIfUnused(img);renderMaps()});
+  r.appendChild(d);box.appendChild(r);act.appendChild(box)}
+function bindMaps(){$('#mlsave').addEventListener('click',saveMapLib);$('#mlnewf').addEventListener('click',newFolder);$('#mlback').addEventListener('click',function(){ML.cur='';ML.sel='';renderMaps()})}
+
 /* ---------- pictures: import map images and token pictures (button or drag and drop) ---------- */
 function loadImg(file){return new Promise(function(res,rej){
   if(!file||!/^image\//.test(file.type)){rej('That is not a picture file.');return}
@@ -698,8 +769,7 @@ function importMap(file){
     var aspect=img.naturalHeight/img.naturalWidth,cols=Math.max(8,Math.min(40,S.map.cols||24)),rows=Math.max(6,Math.min(40,Math.round(cols*aspect)));
     var id=uid(),old=S.map.imgId;S.assets[id]={data:d};
     W('assets/'+id,function(){return DB.doc('assets/'+id).set({data:d})});
-    if(old&&old!==id)W('assets/'+old,function(){return DB.doc('assets/'+old).delete()});
-    setMap({bg:'image',imgId:id,aspect:+aspect.toFixed(4),cols:cols,rows:rows});toast('Map picture imported')
+    setMap({bg:'image',imgId:id,aspect:+aspect.toFixed(4),cols:cols,rows:rows});dropAssetIfUnused(old);toast('Map picture imported')
   }).catch(function(e){toast(String(e))})}
 function tokenPicture(id,file){
   loadImg(file).then(function(img){var d=toJpeg(img,128,128,.8,true);if(d.length>24000)d=toJpeg(img,96,96,.7,true);patchToken(id,{img:d});toast('Picture set')}).catch(function(e){toast(String(e))})}
@@ -763,7 +833,7 @@ function bind(){
   $('#tabs').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;S.tab=b.dataset.t;
     document.querySelectorAll('#tabs button').forEach(function(x){x.classList.toggle('on',x===b)});
     document.querySelectorAll('.pane').forEach(function(p){p.classList.toggle('on',p.id==='p-'+S.tab)});
-    if(S.tab==='sheets'){renderSheetList();renderSheet(true)}if(S.tab==='op'){renderEnc();renderLib()}});
+    if(S.tab==='sheets'){renderSheetList();renderSheet(true)}if(S.tab==='op'){renderEnc();renderLib();renderMaps()}});
   var dice=$('#dice');[4,6,8,10,12,20,100].forEach(function(n){var b=el('button',null,'d'+n);b.addEventListener('click',function(){postRoll('d'+n,'d'+n)});dice.appendChild(b)});
   $('#impgo').addEventListener('click',importCode);$('#encsave').addEventListener('click',saveEncounter);
   $('#rollx').addEventListener('click',function(){var v=$('#expr').value;if(v)postRoll('Roll',v)});
@@ -802,7 +872,7 @@ function bind(){
 var NET={host:false,code:'',conns:{},hostConn:null,pres:{},myId:null,pid:null,name:'',peer:null,reg:{},entered:false,handlers:{},presT:null,saveT:null,creds:null,stop:false,rt:null};
 S.local=false;
 var local=DB=localDb();
-bind();bindDrop();updateOpTab();renderMap();renderTurnLbl();renderAs();renderSheetList();renderTableForm();renderLib();
+bind();bindDrop();bindMaps();updateOpTab();renderMap();renderTurnLbl();renderAs();renderSheetList();renderTableForm();renderLib();
 
 function say(t){$('#lmsg').textContent=t||''}
 function cleanCode(v){return String(v||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,8)}
@@ -814,8 +884,8 @@ function sha(str){
   var h=5381;for(var i=0;i<str.length;i++)h=((h<<5)+h+str.charCodeAt(i))|0;return Promise.resolve('d'+(h>>>0).toString(16))
 }
 function broadcast(msg,except){Object.keys(NET.conns).forEach(function(id){var c=NET.conns[id];if(c&&c.open&&id!==except){try{c.send(msg)}catch(e){}}})}
-function snapshot(){var d=local.dump(),o={};Object.keys(d).forEach(function(k){if(k.indexOf('encounters/')!==0&&k.indexOf('assets/')!==0)o[k]=d[k]});return o}
-function sendAssets(conn){var d=local.dump();Object.keys(d).forEach(function(k){if(k.indexOf('assets/')===0){try{conn.send({t:'w',k:'set',path:k,data:d[k]})}catch(e){}}})}
+function snapshot(){var d=local.dump(),o={};Object.keys(d).forEach(function(k){if(k.indexOf('encounters/')!==0&&k.indexOf('assets/')!==0&&k.indexOf('maps/')!==0)o[k]=d[k]});return o}
+function sendAssets(conn){var d=local.dump(),gm=d['game/map'],cur=gm&&gm.bg==='image'&&gm.imgId?'assets/'+gm.imgId:'';Object.keys(d).forEach(function(k){if(k===cur){try{conn.send({t:'w',k:'set',path:k,data:d[k]})}catch(e){}}})}
 function scheduleSave(){clearTimeout(NET.saveT);NET.saveT=setTimeout(function(){try{localStorage.setItem('bt_room_'+NET.code,JSON.stringify({data:local.dump(),reg:NET.reg,t:Date.now()}))}catch(e){}},800)}
 function peerList(){return Object.keys(NET.pres).map(function(id){return {id:id,pres:NET.pres[id]}})}
 function applyPeers(list){S.peers=list.map(function(x){return {peer:x.id,isMe:x.id===NET.myId,sameTab:x.id===NET.myId,presence:x.pres||{}}});renderPeers()}
@@ -833,7 +903,7 @@ function moveHandler(m){if(m.isMe||!m.data||typeof m.data.id!=='string')return;v
 /* Operator checks every change a player asks for */
 function validOp(op){
   if(['set','update','delete'].indexOf(op.k)<0)return false;
-  if(!/^(tokens|sheets|log|game|encounters|assets)\/[A-Za-z0-9_-]{1,60}$/.test(op.path))return false;
+  if(!/^(tokens|sheets|log|game|encounters|assets|maps)\/[A-Za-z0-9_-]{1,60}$/.test(op.path))return false;
   if(op.k!=='delete'){if(!op.data||typeof op.data!=='object'||Array.isArray(op.data))return false;try{if(JSON.stringify(op.data).length>(op.path.indexOf('assets/')===0?230000:30000))return false}catch(e){return false}}
   return true
 }
@@ -854,7 +924,7 @@ function allowed(pid,m){
   }
   return false
 }
-function deny(conn,path){try{conn.send({t:'deny'});if(path.indexOf('encounters/')===0)return;var ex=local.peek(path);conn.send(ex?{t:'w',k:'set',path:path,data:ex}:{t:'w',k:'delete',path:path})}catch(e){}}
+function deny(conn,path){try{conn.send({t:'deny'});if(path.indexOf('encounters/')===0||path.indexOf('maps/')===0)return;var ex=local.peek(path);conn.send(ex?{t:'w',k:'set',path:path,data:ex}:{t:'w',k:'delete',path:path})}catch(e){}}
 var WORDS=['WOLF','FOX','HAWK','PINE','ROCK','MOON','STAR','WAVE','IRON','JADE','MINT','OAK','SNOW','RAIN','DUSK','DAWN','SAGE','LYNX','CRAB','DUNE','FERN','GLOW','HAZE','KITE','LARK','MOSS','NOVA','OPAL','PEAK','REEF','SILK','TIDE','ASH','BEAR','CEDAR','DRIFT','EMBER','FLINT','GROVE','HERON','IVY','JUNIPER','KELP','LOTUS','MAPLE','NORTH','ORCA','PEARL','QUARTZ','RAVEN','STONE','TIGER','UMBER','VALE','WILLOW','XENON','YARROW','ZEPHYR','AMBER','BIRCH','COBALT','DELTA','ECHO'];
 function genCode(){var a=new Uint32Array(2);crypto.getRandomValues(a);var d=String(a[1]%100000);while(d.length<5)d='0'+d;return WORDS[a[0]%WORDS.length]+'-'+d}
 function hello(conn,m){
@@ -909,7 +979,7 @@ function hostStart(code,name,game){
   NET.game=game||'';
   var saved=null;try{saved=JSON.parse(localStorage.getItem('bt_room_'+code)||'null')}catch(e){}
   if(saved){local.load(saved.data||{});NET.reg=saved.reg||{}}
-  local.hook(function(op){if(op.path.indexOf('encounters/')!==0)broadcast({t:'w',k:op.k,path:op.path,data:op.data});scheduleSave()});
+  local.hook(function(op){if(op.path.indexOf('encounters/')!==0&&op.path.indexOf('maps/')!==0)broadcast({t:'w',k:op.k,path:op.path,data:op.data});scheduleSave()});
   var peer=NET.peer=new Peer('wtbt-'+code.toLowerCase(),{debug:0});
   peer.on('open',function(){NET.pres.host={nick:name,col:colorFor('operator')};enter(true)});
   peer.on('error',function(e){
@@ -986,7 +1056,7 @@ function enter(host){
   ROOM.presence({nick:nick,col:S.me.color});
   if(host)applyPeers(peerList());
   roomInfo(host);renderAs();banner('');
-  if(host){bindPlayers();bindRegister()}
+  if(host){bindPlayers();bindRegister();bindOpPw()}
   if(!host){bindVault();var m0=mineSheets();var vl=readVault();if(!m0.length&&vl.length)restoreVault(vl,true)}
 }
 
@@ -1119,6 +1189,14 @@ function opCheck(pw){
   var st=opState();
   if(!st){if(pw.length<4)return Promise.resolve('short');var salt=codeGen()+codeGen();return sha(salt+':'+pw).then(function(h){try{localStorage.setItem('bt_op',JSON.stringify({s:salt,h:h}))}catch(e){return 'bad'}return 'new'})}
   return sha(st.s+':'+pw).then(function(h){return h===st.h?'ok':'bad'})
+}
+function bindOpPw(){
+  $('#opchg').addEventListener('click',function(){
+    var o=$('#opold').value,n=$('#opnew').value,msg=$('#opmsg');if(n.length<4){msg.textContent='The new password needs 4 or more characters.';return}
+    var st=opState();if(!st){msg.textContent='No password set on this device.';return}
+    sha(st.s+':'+o).then(function(h){if(h!==st.h){msg.textContent='The current password is not right.';return}
+      var salt=codeGen()+codeGen();return sha(salt+':'+n).then(function(h2){try{localStorage.setItem('bt_op',JSON.stringify({s:salt,h:h2}))}catch(e){msg.textContent='Could not save.';return}
+        $('#opold').value='';$('#opnew').value='';msg.textContent='Password changed. Use the new one next time you host.'})})})
 }
 function savedGames(){
   var o=[];try{for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('bt_room_')===0){var code=k.slice(8),d=JSON.parse(localStorage.getItem(k)||'{}'),n=Object.keys(d.data||{}),game='';try{game=localStorage.getItem('bt_game_'+code)||''}catch(e){}
