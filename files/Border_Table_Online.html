@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Border Table Online</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap">
+<style>
+:root{--bg:#eef2f4;--panel:#fff;--panel2:#f4f7f8;--fg:#14212a;--mut:#5d6f7b;--line:#d3dde2;--acc:#0a8fa3;--accfg:#fff;--A:#0fa5bb;--B:#e9822a;--N:#7c8a95;--bad:#d1334a;--good:#1d9a61;--m0:#dfe7e3;--m1:#c3cfd2;--m2:#a9b9bf;--m3:#8fa3ab;--grid:rgba(20,33,42,.16);--shadow:0 1px 2px rgba(0,0,0,.08),0 6px 18px rgba(0,0,0,.06);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b1216;--panel:#121c22;--panel2:#18262e;--fg:#e6eef2;--mut:#8fa4b0;--line:#25363f;--acc:#36d1e6;--accfg:#04252b;--A:#36d1e6;--B:#ff9d4a;--N:#93a3ad;--bad:#ff6b82;--good:#4fd18f;--m0:#16222a;--m1:#1d2d37;--m2:#26394a;--m3:#304657;--grid:rgba(255,255,255,.1);--shadow:0 1px 2px rgba(0,0,0,.4),0 8px 22px rgba(0,0,0,.35);color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0b1216;--panel:#121c22;--panel2:#18262e;--fg:#e6eef2;--mut:#8fa4b0;--line:#25363f;--acc:#36d1e6;--accfg:#04252b;--A:#36d1e6;--B:#ff9d4a;--N:#93a3ad;--bad:#ff6b82;--good:#4fd18f;--m0:#16222a;--m1:#1d2d37;--m2:#26394a;--m3:#304657;--grid:rgba(255,255,255,.1);--shadow:0 1px 2px rgba(0,0,0,.4),0 8px 22px rgba(0,0,0,.35);color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:Inter,system-ui,sans-serif;font-size:14px;line-height:1.45;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px}
+h1,h2,h3,.disp{font-family:"Space Grotesk",Inter,system-ui,sans-serif;text-wrap:balance}
+button,input,select,textarea{font:inherit;color:inherit}
+button{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:6px 10px;cursor:pointer;min-height:34px}
+button:hover{border-color:var(--acc)}
+button.pri{background:var(--acc);color:var(--accfg);border-color:var(--acc);font-weight:600}
+button.bad{color:var(--bad)}
+button:disabled{opacity:.45;cursor:default}
+input,select,textarea{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:6px 8px;min-width:0;max-width:100%}
+input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
+textarea{width:100%;resize:vertical}
+header{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;margin-bottom:10px}
+header h1{font-size:22px;margin:0;letter-spacing:.02em}
+header h1 span{color:var(--acc)}
+.sp{flex:1}
+.chips{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.chip{display:inline-flex;gap:6px;align-items:center;border:1px solid var(--line);background:var(--panel);border-radius:99px;padding:2px 10px 2px 4px;font-size:12px}
+.chip i{width:18px;height:18px;border-radius:50%;display:inline-block}
+.banner{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--B);border-radius:8px;padding:8px 12px;margin-bottom:10px;font-size:13px}
+.main{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:12px;align-items:start}
+@media (max-width:900px){.main{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow)}
+.mapcard{padding:8px}
+.tools{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:8px}
+.mapscroll{overflow:auto;border-radius:8px;border:1px solid var(--line);max-height:68vh;background:var(--m0);touch-action:pan-x pan-y}
+.mapwrap{position:relative}
+.map{position:absolute;left:0;top:0;transform-origin:0 0;background:var(--m0)}
+.map svg{position:absolute;inset:0;width:100%;height:100%}
+.gridl{position:absolute;inset:0;background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:40px 40px;pointer-events:none}
+.tk{position:absolute;touch-action:none;cursor:grab;user-select:none;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.tk.drag{cursor:grabbing;z-index:5}
+.face{width:86%;aspect-ratio:1;border-radius:50%;border:3px solid var(--tc);background:color-mix(in srgb,var(--tc) 22%,var(--panel));display:grid;place-items:center;font:700 14px "Space Grotesk",sans-serif;box-shadow:0 2px 6px rgba(0,0,0,.35)}
+.tk.sel .face{outline:3px solid var(--fg);outline-offset:2px}
+.tk.act .face{box-shadow:0 0 0 4px color-mix(in srgb,var(--tc) 50%,transparent),0 0 16px var(--tc)}
+.tk.out{opacity:.38;filter:grayscale(1)}
+.bar{width:84%;height:6px;border-radius:3px;background:rgba(0,0,0,.45);margin-top:2px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--good)}
+.bar.low i{background:var(--B)}.bar.crit i{background:var(--bad)}
+.tkn{position:absolute;top:100%;left:50%;transform:translateX(-50%);font-size:11px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:0 5px;pointer-events:none}
+.cur{position:absolute;width:10px;height:10px;border-radius:50%;pointer-events:none;transform:translate(-50%,-50%);z-index:9;border:2px solid #fff}
+.cur b{position:absolute;left:12px;top:-4px;font:600 11px Inter;background:var(--panel);color:var(--fg);border-radius:4px;padding:0 4px;white-space:nowrap}
+.insp{margin-top:8px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--panel2)}
+.row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.row+.row{margin-top:6px}
+.lbl{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}
+.side{display:flex;flex-direction:column;min-height:0}
+.tabs{display:flex;border-bottom:1px solid var(--line)}
+.tabs button{flex:1;border:0;border-radius:12px 12px 0 0;background:transparent;min-height:40px;font-weight:600;color:var(--mut)}
+.tabs button.on{color:var(--fg);box-shadow:inset 0 -3px 0 var(--acc)}
+.pane{padding:10px;display:none}
+.pane.on{display:block}
+#log{height:300px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;padding:2px}
+.msg{font-size:13px;overflow-wrap:anywhere}
+.msg b{color:var(--acc)}
+.msg small{color:var(--mut)}
+.rollc{border:1px solid var(--line);border-left:4px solid var(--acc);background:var(--panel2);border-radius:8px;padding:6px 10px}
+.rollc .tot{font:700 26px "Space Grotesk",sans-serif;line-height:1.1}
+.rollc.crit{border-left-color:var(--good)}.rollc.crit .tot{color:var(--good)}
+.rollc.fumble{border-left-color:var(--bad)}.rollc.fumble .tot{color:var(--bad)}
+.dice{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.dice button{padding:6px 0;font-weight:600}
+.num{width:64px}
+.sheetlist{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.sheetlist button.on{background:var(--acc);color:var(--accfg);border-color:var(--acc)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.stat{border:1px solid var(--line);border-radius:10px;padding:6px;text-align:center;background:var(--panel2)}
+.stat input{width:100%;text-align:center;font:700 18px "Space Grotesk",sans-serif;border:0;background:transparent;padding:2px}
+.stat button{width:100%;min-height:28px;font-size:12px}
+.loc{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
+.loc label{display:flex;gap:6px;align-items:center;border:1px solid var(--line);border-radius:8px;padding:4px 6px;font-size:12px;background:var(--panel2)}
+.loc label.dead{border-color:var(--bad);color:var(--bad)}
+.tbig{height:12px;border-radius:6px;background:var(--panel2);border:1px solid var(--line);overflow:hidden}
+.tbig i{display:block;height:100%;background:linear-gradient(90deg,var(--acc),var(--good))}
+.badge{display:inline-block;border-radius:6px;padding:1px 8px;font-size:12px;font-weight:600;border:1px solid var(--bad);color:var(--bad)}
+.hint{color:var(--mut);font-size:12px}
+.toast{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);border-radius:8px;padding:8px 14px;z-index:50;max-width:90vw}
+
+[hidden]{display:none!important}
+body.online #nick,body.online label:has(#nick){display:none}
+#landing{position:fixed;inset:0;z-index:40;background:var(--bg);overflow:auto;display:grid;place-items:center;padding:16px}
+.lcard{max-width:760px;width:100%}
+.lcard h1{font-size:30px;margin:0 0 6px}
+.lcard h1 span{color:var(--acc)}
+.lgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin:14px 0}
+.lgrid section{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;box-shadow:var(--shadow)}
+.lgrid h2{margin:0 0 8px;font-size:18px}
+.lgrid label{display:block;margin:8px 0 2px;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--mut)}
+.lgrid input{width:100%}
+.lgrid button{margin-top:10px}
+#lmsg{min-height:20px;color:var(--fg);font-weight:500}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+</head>
+<body>
+<header>
+  <h1 class="disp">BORDER <span>TABLE</span></h1>
+  <div class="chips" id="peers"></div>
+  <div class="row" id="roominfo"></div>
+  <div class="sp"></div>
+  <label class="row" style="gap:6px"><span class="lbl">Your name</span><input id="nick" maxlength="20" style="width:130px" placeholder="Player"></label>
+</header>
+<div id="banner"></div>
+
+<div class="main">
+  <section class="card mapcard">
+    <div class="tools">
+      <button id="zout" title="Zoom out">−</button><span id="zlbl" class="hint" style="min-width:42px;text-align:center">100%</span><button id="zin" title="Zoom in">+</button>
+      <span class="hint">Drag tokens. Everyone sees moves live.</span>
+      <div class="sp"></div>
+      <button id="nextturn" class="pri">Next turn</button>
+      <span id="roundlbl" class="hint"></span>
+    </div>
+    <div class="mapscroll" id="scroll"><div class="mapwrap" id="wrap"><div class="map" id="map"><div id="art"></div><div class="gridl"></div><div id="tokens"></div><div id="curs"></div></div></div></div>
+    <div id="insp"></div>
+  </section>
+
+  <aside class="card side">
+    <div class="tabs" id="tabs">
+      <button data-t="chat" class="on">Dice &amp; Chat</button>
+      <button data-t="sheets">Sheets</button>
+      <button data-t="table">Table</button>
+      <button data-t="op" id="optab" hidden>Operator</button>
+    </div>
+
+    <div class="pane on" id="p-chat">
+      <div id="log" aria-live="polite"></div>
+      <div class="row" style="margin-top:8px"><input id="chatin" style="flex:1" placeholder="Message, or /r 2d6+3"><button id="chatsend" class="pri">Send</button></div>
+      <div class="lbl" style="margin:10px 0 4px">Roll as</div>
+      <select id="asSel" style="width:100%"></select>
+      <div class="lbl" style="margin:10px 0 4px">Quick dice</div>
+      <div class="dice" id="dice"></div>
+      <div class="row"><input id="expr" style="flex:1" placeholder="d20+5, 2d6, d6+d4…"><button id="rollx" class="pri">Roll</button></div>
+      <div class="lbl" style="margin:10px 0 4px">Attack / check (d20)</div>
+      <div class="row">
+        <label class="hint">Bonus <input id="atkb" type="number" class="num" value="0"></label>
+        <select id="edge"><option value="">Normal</option><option value="edge">Edge (+d4)</option><option value="snag">Snag (−d4)</option></select>
+        <button id="atk" class="pri">Roll d20</button>
+      </div>
+      <div class="lbl" style="margin:10px 0 4px">Severity (d6 + Lethal)</div>
+      <div class="row"><label class="hint">Lethal <input id="leth" type="number" class="num" value="0"></label><button id="sev" class="pri">Roll severity</button></div>
+    </div>
+
+    <div class="pane" id="p-sheets">
+      <details id="imp" style="margin-bottom:10px">
+        <summary style="cursor:pointer;font-weight:600">Import from character code</summary>
+        <p class="hint" style="margin:6px 0">In the Character Creator press <b>Copy character code</b>, then paste the whole line here.</p>
+        <textarea id="codein" rows="2" placeholder="WT1|Kenji Arashi|Aftokrator|1|3|1|2|1|0|-1|Lampyris Shard Guns,Scorpion||Super Strength"></textarea>
+        <div class="row" style="margin-top:6px"><button id="impgo" class="pri">Import as new sheet</button><span id="impmsg" class="hint"></span></div>
+      </details>
+      <div class="sheetlist" id="sheetlist"></div>
+      <div id="sheetbox"></div>
+    </div>
+
+    <div class="pane" id="p-table">
+      <div class="lbl">Map</div>
+      <div class="row">
+        <select id="mapbg"><option value="grid">Open grid</option><option value="city">Border city</option><option value="forest">Forest</option><option value="interior">Interior</option></select>
+        <button id="remap">New layout</button>
+      </div>
+      <div class="row"><label class="hint">Columns <input id="cols" type="number" class="num" min="8" max="40"></label><label class="hint">Rows <input id="rows" type="number" class="num" min="6" max="30"></label></div>
+      <div class="lbl" style="margin-top:12px">Tokens</div>
+      <div class="row"><input id="tname" placeholder="Name" style="flex:1"><select id="tteam"><option value="A">Team A</option><option value="B">Team B</option><option value="N">Enemy</option></select></div>
+      <div class="row"><label class="hint">Max Trion <input id="tmax" type="number" class="num" value="40"></label><button id="addtok" class="pri">Add token</button></div>
+      <div class="row"><button id="starter">Add a 3v3 starter set</button><button id="clrtok" class="bad">Remove all tokens</button></div>
+      <div class="lbl" style="margin-top:12px">Turn order</div>
+      <p class="hint" style="margin:0">Give tokens an Initiative number (select a token). Highest goes first.</p>
+      <div class="row"><button id="resetturn">Reset to round 1</button></div>
+      <div class="lbl" style="margin-top:12px">Invite friends</div>
+      <p class="hint" style="margin:0">Send friends the invite link at the top, or give them the room code. They make up a name and a personal code and join. Keep this page open: if you close it, everyone is disconnected. Open the same room code later to continue.</p>
+    </div>
+    <div class="pane" id="p-op">
+      <p class="hint" style="margin:0 0 8px">Only you (and Editors) see this tab. Saved encounters are hidden from players until you load them.</p>
+      <div class="lbl">Save the current table</div>
+      <input id="encname" placeholder="Encounter name, e.g. Mission 1, scene 3" style="width:100%">
+      <textarea id="encnote" rows="2" placeholder="Notes for you: goals, tricks, what happens next"></textarea>
+      <label class="hint row"><input type="checkbox" id="encall"> Also save player-team tokens (default: enemies and neutral only)</label>
+      <div class="row"><button id="encsave" class="pri">Save encounter</button><span id="encmsg" class="hint"></span></div>
+      <div class="lbl" style="margin-top:12px">Saved encounters</div>
+      <label class="hint row"><input type="checkbox" id="encmap" checked> Load the map layout too</label>
+      <div id="enclist"></div>
+      <div class="lbl" style="margin-top:12px">Enemy library (fixed stats from the Monster Manual)</div>
+      <select id="libgrp" style="width:100%"></select>
+      <div id="liblist"></div>
+    </div>
+  </aside>
+</div>
+<div id="landing">
+ <div class="lcard">
+  <h1 class="disp">BORDER <span>TABLE ONLINE</span></h1>
+  <p class="hint" style="font-size:14px">Play together over the internet. No accounts. The Operator opens a table and shares a room code, and everyone else joins with that code and a personal code they make up.</p>
+  <div class="lgrid">
+   <section>
+    <h2>Join a table</h2>
+    <label for="jcode">Room code</label><input id="jcode" maxlength="8" autocomplete="off" autocapitalize="characters">
+    <label for="jname">Your name</label><input id="jname" maxlength="20" autocomplete="off">
+    <label for="jpin">Your personal code</label><input id="jpin" type="password" maxlength="40" autocomplete="off">
+    <p class="hint" style="margin:6px 0 0">Make one up and remember it. Use the same name and personal code next time to get your characters back. Nobody else can change your sheet.</p>
+    <button id="jgo" class="pri">Join</button>
+   </section>
+   <section>
+    <h2>Host a table (Operator)</h2>
+    <label for="hcode">Room code</label><input id="hcode" maxlength="8" autocomplete="off" autocapitalize="characters">
+    <label for="hname">Your name</label><input id="hname" maxlength="20" autocomplete="off" placeholder="Operator">
+    <p class="hint" style="margin:6px 0 0">Keep this page open while you play. Open the same room code again later to carry on where you stopped. Your saved encounters stay in this browser.</p>
+    <div class="row"><button id="hgo" class="pri">Open table</button><button id="hnew">New code</button></div>
+   </section>
+  </div>
+  <div id="lmsg" aria-live="polite"></div>
+ </div>
+</div>
+<div id="toast" class="toast" hidden></div>
+
+<script>
+(function(){
+"use strict";
+var $=function(s,r){return (r||document).querySelector(s)};
+function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e}
+var CELL=40;
+var CLASSES=['Attacker','Gunner','Shooter','Sniper','Trapper','Assassin','Tactician','Counterstriker','Aftokrator'];
+var STATS=['STR','DEX','STA','TRION','INT','CHA'];
+var LOC=['Head','Chest','L Arm','R Arm','L Leg','R Leg'];
+var S={tokens:{},sheets:{},log:[],map:{bg:'grid',seed:7,cols:24,rows:16},turn:{id:null,round:1},sel:null,selSheet:null,tab:'chat',peers:[],over:{},zoom:1,canWrite:true,synced:false,me:{id:null,name:'',color:'#0a8fa3'},isAdmin:false};
+var DB=null,ROOM=null,unsubs=[],nick='';
+try{nick=localStorage.getItem('bt_nick')||''}catch(e){}
+
+/* ---------- local fallback store (page works alone) ---------- */
+function localDb(){
+  var data={},subs=[],H=null,WR=null;
+  function notify(){subs.slice().forEach(function(s){s()})}
+  function snapDoc(path){var d=data[path];return {id:path.split('/').pop(),exists:!!d,data:function(){return d},metadata:{fromCache:false}}}
+  function coll(path){
+    var q={_o:null,_l:0};
+    function docs(){var pre=path+'/';var out=[];Object.keys(data).forEach(function(k){if(k.indexOf(pre)===0&&k.slice(pre.length).indexOf('/')<0)out.push(snapDoc(k))});
+      if(q._o)out.sort(function(a,b){var x=a.data()[q._o.f],y=b.data()[q._o.f];return (x>y?1:x<y?-1:0)*(q._o.d==='desc'?-1:1)});
+      if(q._l)out=out.slice(0,q._l);return out}
+    var c={path:path,orderBy:function(f,d){q._o={f:f,d:d};return c},limit:function(n){q._l=n;return c},
+      onSnapshot:function(cb){var f=function(){cb({docs:docs(),size:0,metadata:{fromCache:false}})};subs.push(f);setTimeout(f,0);return function(){subs=subs.filter(function(x){return x!==f})}},
+      doc:function(id){return doc(path+'/'+id)}};return c}
+  function doc(path){return {id:path.split('/').pop(),path:path,
+    set:function(o){var c=JSON.parse(JSON.stringify(o));if(WR)return WR({k:'set',path:path,data:c});data[path]=c;if(H)H({k:'set',path:path,data:c});notify();return Promise.resolve()},
+    update:function(o){var c=JSON.parse(JSON.stringify(o));if(!data[path])return Promise.reject({code:'invalid_argument'});if(WR)return WR({k:'update',path:path,data:c});Object.assign(data[path],c);if(H)H({k:'update',path:path,data:c});notify();return Promise.resolve()},
+    delete:function(){if(WR)return WR({k:'delete',path:path});delete data[path];if(H)H({k:'delete',path:path});notify();return Promise.resolve()},
+    get:function(){return Promise.resolve(snapDoc(path))},
+    onSnapshot:function(cb){var f=function(){cb(snapDoc(path))};subs.push(f);setTimeout(f,0);return function(){subs=subs.filter(function(x){return x!==f})}}}}
+  return {collection:coll,doc:doc,
+    peek:function(p){return data[p]},
+    dump:function(){return JSON.parse(JSON.stringify(data))},
+    load:function(d){data=d||{};notify()},
+    apply:function(op){if(op.k==='delete')delete data[op.path];else if(op.k==='set')data[op.path]=op.data;else if(data[op.path])Object.assign(data[op.path],op.data);else data[op.path]=op.data;notify()},
+    hook:function(f){H=f},writer:function(f){WR=f}}
+}
+
+/* ---------- write helpers ---------- */
+var Q={};
+function W(path,fn){Q[path]=(Q[path]||Promise.resolve()).then(fn).catch(function(e){toast('Could not save'+(e&&e.code?' ('+e.code+')':''))});return Q[path]}
+function toast(m){var t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(toast._t);toast._t=setTimeout(function(){t.hidden=true},3500)}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+var timers={};
+function debounce(key,ms,fn){clearTimeout(timers[key]);timers[key]=setTimeout(fn,ms)}
+function patchToken(id,p){W('tokens/'+id,function(){return DB.doc('tokens/'+id).update(p)})}
+function patchSheet(id,p){W('sheets/'+id,function(){return DB.doc('sheets/'+id).update(p)})}
+function setMap(p){S.map=Object.assign({},S.map,p);renderMap();W('game/map',function(){return DB.doc('game/map').set(S.map)})}
+function setTurn(p){S.turn=Object.assign({},S.turn,p);renderTokens();renderTurnLbl();W('game/turn',function(){return DB.doc('game/turn').set(S.turn)})}
+
+/* ---------- subscriptions ---------- */
+function subscribe(){
+  unsubs.forEach(function(f){try{f()}catch(e){}});unsubs=[];
+  var err=function(e){if(e&&e.code==='revoked')return;banner('Shared data is not reachable right now ('+((e&&e.code)||'error')+'). You can keep looking around.')};
+  var first=function(){S.synced=true};
+  unsubs.push(DB.collection('tokens').onSnapshot(function(s){S.tokens={};s.docs.forEach(function(d){S.tokens[d.id]=d.data()});first();renderTokens();renderInspector();renderTurnLbl()},err));
+  if(opVisible())unsubs.push(DB.collection('encounters').onSnapshot(function(s){S.enc={};s.docs.forEach(function(d){S.enc[d.id]=d.data()});renderEnc()},function(){}));
+  unsubs.push(DB.collection('sheets').onSnapshot(function(s){S.sheets={};s.docs.forEach(function(d){S.sheets[d.id]=d.data()});renderSheetList();renderSheet();renderAs();renderTokens();renderInspector()},err));
+  unsubs.push(DB.collection('log').orderBy('t','desc').limit(150).onSnapshot(function(s){S.log=s.docs.map(function(d){var o=d.data();o._id=d.id;return o}).reverse();renderLog();prune()},err));
+  unsubs.push(DB.doc('game/map').onSnapshot(function(d){if(d.exists){S.map=Object.assign({bg:'grid',seed:7,cols:24,rows:16},d.data())}renderMap();renderTableForm()},err));
+  unsubs.push(DB.doc('game/turn').onSnapshot(function(d){if(d.exists){S.turn=Object.assign({id:null,round:1},d.data())}renderTokens();renderTurnLbl()},err));
+}
+function prune(){if(!S.isAdmin||S.log.length<140)return;var old=S.log.slice(0,40);old.forEach(function(m){DB.doc('log/'+m._id).delete().catch(function(){})})}
+function banner(t){var b=$('#banner');b.textContent='';if(!t)return;var d=el('div','banner',t);b.appendChild(d)}
+
+/* ---------- dice ---------- */
+function rnd(n){var a=new Uint32Array(1),lim=Math.floor(4294967296/n)*n;do{crypto.getRandomValues(a)}while(a[0]>=lim);return a[0]%n+1}
+function rollExpr(str){
+  var s=String(str).replace(/\s+/g,'').toLowerCase().replace(/−/g,'-');
+  if(!s||!/^[0-9d+\-]+$/.test(s))return null;
+  var re=/([+-]?)(\d*)d(\d+)|([+-]?)(\d+)/g,m,pos=0,n=0,total=0,det=[],crit=0,first20=null;
+  while((m=re.exec(s))){
+    if(m.index!==pos)return null;pos=re.lastIndex;
+    if(n>0&&!(m[1]||m[4]))return null;
+    if(m[3]!==undefined){
+      var sign=m[1]==='-'?-1:1,cnt=m[2]===''?1:parseInt(m[2],10),sides=parseInt(m[3],10);
+      if(cnt<1||cnt>50||sides<2||sides>1000)return null;
+      var rs=[],sum=0;for(var i=0;i<cnt;i++){var r=rnd(sides);rs.push(r);sum+=r}
+      total+=sign*sum;
+      if(n===0&&cnt===1&&sides===20&&sign===1)first20=rs[0];
+      det.push((n>0?(sign<0?' − ':' + '):(sign<0?'−':''))+cnt+'d'+sides+'['+rs.join(',')+']');
+    }else{
+      var sg=m[4]==='-'?-1:1,v=parseInt(m[5],10);total+=sg*v;
+      det.push((n>0?(sg<0?' − ':' + '):(sg<0?'−':''))+v);
+    }
+    n++;
+  }
+  if(pos!==s.length||n===0)return null;
+  return {total:total,detail:det.join(''),crit:first20===20?1:first20===1?-1:0}
+}
+function postRoll(label,expr){
+  var r=rollExpr(expr);if(!r){toast('Could not read that roll');return}
+  addLog({kind:'roll',label:label,expr:expr.replace(/\s+/g,''),total:r.total,detail:r.detail,crit:r.crit})
+}
+function who(){var v=$('#asSel').value;if(v&&S.sheets[v])return S.sheets[v].name||'Unnamed';return myName()}
+function myName(){return nick||S.me.name||'Player'}
+function addLog(o){
+  o.t=Date.now();o.by=S.me.id||null;o.nick=myName();o.who=o.who||who();
+  var id=o.t.toString(36)+Math.random().toString(36).slice(2,6);
+  W('log/'+id,function(){return DB.doc('log/'+id).set(o)});
+}
+
+/* ---------- rendering: log ---------- */
+function renderLog(){
+  var box=$('#log'),near=box.scrollHeight-box.scrollTop-box.clientHeight<60;
+  box.textContent='';
+  S.log.forEach(function(m){
+    var d;
+    if(m.kind==='roll'){
+      d=el('div','rollc'+(m.crit>0?' crit':m.crit<0?' fumble':''));
+      var h=el('div','msg');var b=el('b',null,m.who||m.nick||'Someone');h.appendChild(b);h.appendChild(document.createTextNode(' — '+(m.label||'Roll')+' '));var sm=el('small',null,m.expr||'');h.appendChild(sm);
+      d.appendChild(h);d.appendChild(el('div','tot',String(m.total)+(m.crit>0?'  natural 20':m.crit<0?'  natural 1':'')));d.appendChild(el('div','hint',m.detail||''));
+    }else{
+      d=el('div','msg');d.appendChild(el('b',null,(m.nick||'Someone')+': '));d.appendChild(document.createTextNode(m.text||''));
+    }
+    box.appendChild(d);
+  });
+  if(near||!box._init){box.scrollTop=box.scrollHeight;box._init=1}
+}
+
+/* ---------- rendering: map ---------- */
+function prng(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function artSvg(m){
+  var W_=m.cols*CELL,H_=m.rows*CELL,r=prng(m.seed||1),s='';
+  function rect(x,y,w,h,f,o){s+='<rect x="'+x*CELL+'" y="'+y*CELL+'" width="'+w*CELL+'" height="'+h*CELL+'" fill="'+f+'"'+(o||'')+'/>'}
+  if(m.bg==='city'){
+    for(var y=1;y<m.rows-1;y+=5)for(var x=1;x<m.cols-1;x+=6){
+      var w=3+Math.floor(r()*3),h=3+Math.floor(r()*2);if(x+w>m.cols||y+h>m.rows)continue;
+      rect(x,y,w,h,'var(--m'+(1+Math.floor(r()*3))+')',' rx="6"');
+      if(r()<.6)rect(x+1,y+1,Math.max(1,w-2),1,'var(--m0)',' opacity=".55"');
+    }
+  }else if(m.bg==='forest'){
+    for(var i=0;i<Math.floor(m.cols*m.rows/9);i++){var cx=r()*W_,cy=r()*H_,rad=CELL*(.45+r()*.7);s+='<circle cx="'+cx+'" cy="'+cy+'" r="'+rad+'" fill="var(--m'+(1+Math.floor(r()*3))+')" opacity=".85"/>'}
+  }else if(m.bg==='interior'){
+    for(var y2=0;y2<m.rows;y2+=6)for(var x2=0;x2<m.cols;x2+=8){
+      var w2=Math.min(8,m.cols-x2),h2=Math.min(6,m.rows-y2);
+      s+='<rect x="'+x2*CELL+'" y="'+y2*CELL+'" width="'+w2*CELL+'" height="'+h2*CELL+'" fill="var(--m1)" stroke="var(--m3)" stroke-width="6"/>';
+      var dx=x2+1+Math.floor(r()*(w2-2)),dy=y2+1+Math.floor(r()*(h2-2));
+      s+='<rect x="'+(dx*CELL)+'" y="'+(y2*CELL-6)+'" width="'+CELL+'" height="12" fill="var(--m0)"/><rect x="'+(x2*CELL-6)+'" y="'+(dy*CELL)+'" width="12" height="'+CELL+'" fill="var(--m0)"/>';
+      if(r()<.7)rect(x2+1+Math.floor(r()*(w2-3)),y2+1+Math.floor(r()*(h2-3)),2,1,'var(--m3)',' rx="4" opacity=".7"');
+    }
+  }
+  return '<svg viewBox="0 0 '+W_+' '+H_+'" preserveAspectRatio="none" aria-hidden="true">'+s+'</svg>';
+}
+function renderMap(){
+  var m=S.map,map=$('#map'),w=m.cols*CELL,h=m.rows*CELL,z=S.zoom;
+  map.style.width=w+'px';map.style.height=h+'px';map.style.transform='scale('+z+')';
+  var wrap=$('#wrap');wrap.style.width=w*z+'px';wrap.style.height=h*z+'px';
+  var key=m.bg+'|'+m.seed+'|'+m.cols+'|'+m.rows;
+  if(map._k!==key){map._k=key;$('#art').innerHTML=artSvg(m)}
+  $('#zlbl').textContent=Math.round(z*100)+'%';
+}
+function initials(n){var p=String(n||'?').trim().split(/\s+/);return ((p[0]||'?')[0]+(p[1]?p[1][0]:'')).toUpperCase()}
+function tTrion(t){var sh=t.sheet&&S.sheets[t.sheet];return sh?{cur:+sh.cur||0,max:+sh.max||1,linked:true}:{cur:+t.cur||0,max:+t.max||1,linked:false}}
+function order(){return Object.keys(S.tokens).filter(function(k){return typeof S.tokens[k].init==='number'}).sort(function(a,b){return S.tokens[b].init-S.tokens[a].init||(a<b?-1:1)})}
+var tkEls={};
+function renderTokens(){
+  var host=$('#tokens'),ids=Object.keys(S.tokens);
+  Object.keys(tkEls).forEach(function(id){if(!S.tokens[id]){tkEls[id].remove();delete tkEls[id]}});
+  ids.forEach(function(id){
+    var t=S.tokens[id],e=tkEls[id];
+    if(!e){e=el('div','tk');e.dataset.id=id;e.appendChild(el('div','face'));var b=el('div','bar');b.appendChild(document.createElement('i'));e.appendChild(b);e.appendChild(el('div','tkn'));host.appendChild(e);tkEls[id]=e;bindToken(e)}
+    var sz=t.size||1,o=S.over[id],x=o?o.x:t.x,y=o?o.y:t.y,tr=tTrion(t),pct=Math.max(0,Math.min(100,100*tr.cur/tr.max));
+    e.style.width=sz*CELL+'px';e.style.height=sz*CELL+'px';e.style.left=x*CELL+'px';e.style.top=y*CELL+'px';
+    e.style.setProperty('--tc','var(--'+(t.team||'N')+')');
+    e.firstChild.textContent=initials(t.name);
+    var bar=e.children[1];bar.className='bar'+(pct<=25?' crit':pct<=50?' low':'');bar.firstChild.style.width=pct+'%';
+    e.children[2].textContent=t.name||'';
+    e.classList.toggle('sel',S.sel===id);e.classList.toggle('act',S.turn.id===id);e.classList.toggle('out',!!t.out||tr.cur<=0);
+  });
+}
+function renderTurnLbl(){
+  var o=order(),t=S.turn.id&&S.tokens[S.turn.id];
+  $('#roundlbl').textContent='Round '+(S.turn.round||1)+(t?' · '+(t.name||'?')+"'s turn":(o.length?'':' · set Initiative to use turns'));
+}
+
+/* ---------- token dragging ---------- */
+var drag=null,lastEmit=0;
+function cellPx(){return $('#map').getBoundingClientRect().width/S.map.cols}
+function bindToken(e){
+  e.addEventListener('pointerdown',function(ev){
+    if(ev.button>0)return;
+    var id=e.dataset.id,t=S.tokens[id];if(!t)return;
+    ev.preventDefault();e.setPointerCapture(ev.pointerId);
+    var r=$('#map').getBoundingClientRect(),c=cellPx();
+    drag={id:id,e:e,dx:(ev.clientX-r.left)/c-t.x,dy:(ev.clientY-r.top)/c-t.y,moved:false,sx:ev.clientX,sy:ev.clientY};
+    e.classList.add('drag');select(id);
+  });
+  e.addEventListener('pointermove',function(ev){
+    if(!drag||drag.e!==e)return;
+    if(!drag.moved&&Math.hypot(ev.clientX-drag.sx,ev.clientY-drag.sy)<4)return;
+    drag.moved=true;
+    var r=$('#map').getBoundingClientRect(),c=cellPx(),sz=S.tokens[drag.id].size||1;
+    var x=Math.max(0,Math.min(S.map.cols-sz,(ev.clientX-r.left)/c-drag.dx)),y=Math.max(0,Math.min(S.map.rows-sz,(ev.clientY-r.top)/c-drag.dy));
+    S.over[drag.id]={x:x,y:y};e.style.left=x*CELL+'px';e.style.top=y*CELL+'px';
+    var now=Date.now();if(ROOM&&now-lastEmit>60){lastEmit=now;ROOM.emit('move',{id:drag.id,x:+x.toFixed(2),y:+y.toFixed(2)}).catch(function(){})}
+  });
+  function end(){
+    if(!drag||drag.e!==e)return;var d=drag;drag=null;e.classList.remove('drag');
+    if(d.moved&&S.over[d.id]){
+      var sz=S.tokens[d.id].size||1,o=S.over[d.id];
+      var x=Math.max(0,Math.min(S.map.cols-sz,Math.round(o.x))),y=Math.max(0,Math.min(S.map.rows-sz,Math.round(o.y)));
+      S.over[d.id]={x:x,y:y};e.style.left=x*CELL+'px';e.style.top=y*CELL+'px';
+      if(ROOM)ROOM.emit('move',{id:d.id,x:x,y:y}).catch(function(){});
+      var id=d.id;patchToken(id,{x:x,y:y});setTimeout(function(){if(S.over[id]&&S.over[id].x===x&&S.over[id].y===y){delete S.over[id];renderTokens()}},1500);
+    }
+  }
+  e.addEventListener('pointerup',end);e.addEventListener('pointercancel',end);
+}
+function select(id){S.sel=id;renderTokens();renderInspector(true)}
+
+/* ---------- inspector ---------- */
+function renderInspector(force){
+  var host=$('#insp'),a=document.activeElement;
+  if(!force&&a&&host.contains(a)&&/INPUT|TEXTAREA|SELECT/.test(a.tagName))return;
+  host.textContent='';
+  var id=S.sel,t=S.tokens[id];if(!t){S.sel=null;return}
+  var box=el('div','insp'),tr=tTrion(t);
+  var r1=el('div','row');
+  var nm=el('input');nm.value=t.name||'';nm.style.flex='1';nm.setAttribute('aria-label','Token name');
+  nm.addEventListener('input',function(){debounce('tn'+id,500,function(){patchToken(id,{name:nm.value.slice(0,24)})})});
+  var tm=el('select');[['A','Team A'],['B','Team B'],['N','Enemy']].forEach(function(p){var o=el('option',null,p[1]);o.value=p[0];tm.appendChild(o)});tm.value=t.team||'N';
+  tm.addEventListener('change',function(){patchToken(id,{team:tm.value})});
+  var sz=el('select');[[1,'1×1'],[2,'2×2'],[3,'3×3']].forEach(function(p){var o=el('option',null,p[1]);o.value=p[0];sz.appendChild(o)});sz.value=t.size||1;
+  sz.addEventListener('change',function(){patchToken(id,{size:+sz.value})});
+  r1.append(nm,tm,sz);box.appendChild(r1);
+  if(t.info){var inf=el('div','hint',t.info);inf.style.margin='6px 0 0';box.appendChild(inf)}
+  var r2=el('div','row');
+  r2.appendChild(el('span','lbl','Trion'));
+  [[-5,'−5'],[-1,'−1'],[1,'+1'],[5,'+5']].forEach(function(p){var b=el('button',null,p[1]);b.addEventListener('click',function(){setTrion(id,tr.cur+p[0])});r2.appendChild(b)});
+  r2.appendChild(el('b',null,tr.cur+' / '+tr.max));
+  if(tr.linked)r2.appendChild(el('span','hint','(from sheet)'));
+  else{var mx=el('input');mx.type='number';mx.className='num';mx.value=tr.max;mx.title='Max Trion';mx.addEventListener('input',function(){var v=Math.max(1,+mx.value||1);debounce('tm'+id,500,function(){patchToken(id,{max:v,cur:Math.min(tr.cur,v)})})});r2.appendChild(mx)}
+  box.appendChild(r2);
+  var r3=el('div','row');
+  var ini=el('input');ini.type='number';ini.className='num';ini.placeholder='Init';ini.value=typeof t.init==='number'?t.init:'';
+  ini.addEventListener('input',function(){var v=ini.value===''?null:+ini.value;debounce('ti'+id,500,function(){patchToken(id,{init:v})})});
+  var li=el('label','hint','Initiative ');li.appendChild(ini);r3.appendChild(li);
+  var ri=el('button',null,'Roll d20 init');ri.addEventListener('click',function(){var v=rnd(20);ini.value=v;patchToken(id,{init:v});addLog({kind:'roll',label:'Initiative',expr:'d20',total:v,detail:'d20['+v+']',crit:0,who:t.name})});r3.appendChild(ri);
+  var ou=el('button',null,t.out?'Back in':'Bail out');ou.addEventListener('click',function(){patchToken(id,{out:!t.out})});r3.appendChild(ou);
+  var rm=el('button','bad','Remove');var armed=false;rm.addEventListener('click',function(){if(!armed){armed=true;rm.textContent='Tap again to remove';setTimeout(function(){armed=false;rm.textContent='Remove'},2500);return}W('tokens/'+id,function(){return DB.doc('tokens/'+id).delete()});S.sel=null;renderInspector(true)});
+  r3.appendChild(rm);box.appendChild(r3);
+  host.appendChild(box);
+}
+function setTrion(id,v){
+  var t=S.tokens[id];if(!t)return;var tr=tTrion(t);v=Math.max(0,Math.min(tr.max,v));
+  if(tr.linked)patchSheet(t.sheet,{cur:v});else patchToken(id,{cur:v});
+}
+
+/* ---------- sheets ---------- */
+function newSheetObj(name){var st={};STATS.forEach(function(k){st[k]=0});return {name:name,cls:'Attacker',lvl:1,stats:st,cur:40,max:40,dead:{},notes:'',owner:S.me.id||null}}
+function renderSheetList(){
+  var host=$('#sheetlist');host.textContent='';
+  Object.keys(S.sheets).sort().forEach(function(id){var b=el('button',S.selSheet===id?'on':'',S.sheets[id].name||'Unnamed');b.addEventListener('click',function(){S.selSheet=id;renderSheetList();renderSheet(true)});host.appendChild(b)});
+  var add=el('button','pri','+ New sheet');add.addEventListener('click',function(){var id=uid();S.selSheet=id;var o=newSheetObj(myName()+"'s character");W('sheets/'+id,function(){return DB.doc('sheets/'+id).set(o)})});host.appendChild(add);
+}
+function renderAs(){
+  var sel=$('#asSel'),cur=sel.value;sel.textContent='';
+  var o=el('option',null,'Myself ('+myName()+')');o.value='';sel.appendChild(o);
+  Object.keys(S.sheets).forEach(function(id){var p=el('option',null,S.sheets[id].name||'Unnamed');p.value=id;sel.appendChild(p)});
+  sel.value=S.sheets[cur]?cur:'';
+}
+function renderSheet(force){
+  var host=$('#sheetbox'),a=document.activeElement;
+  if(!force&&a&&host.contains(a)&&/INPUT|TEXTAREA|SELECT/.test(a.tagName))return;
+  host.textContent='';
+  var id=S.selSheet,sh=S.sheets[id];
+  if(!sh){host.appendChild(el('p','hint','Make a sheet, then put it on the map as a token. Trion and wounds are one pool: the token bar follows the sheet.'));return}
+  var P=function(p){patchSheet(id,p)};
+  var r=el('div','row');
+  var nm=el('input');nm.value=sh.name||'';nm.style.flex='1';nm.setAttribute('aria-label','Character name');nm.addEventListener('input',function(){debounce('sn'+id,500,function(){P({name:nm.value.slice(0,30)})})});
+  r.appendChild(nm);host.appendChild(r);
+  r=el('div','row');
+  var cl=el('select');(CLASSES.indexOf(sh.cls)<0&&sh.cls?CLASSES.concat([sh.cls]):CLASSES).forEach(function(c){var o=el('option',null,c);o.value=c;cl.appendChild(o)});cl.value=sh.cls||'Attacker';cl.addEventListener('change',function(){P({cls:cl.value})});
+  var lv=el('select');for(var i=1;i<=10;i++){var o=el('option',null,'Level '+i);o.value=i;lv.appendChild(o)}lv.value=sh.lvl||1;lv.addEventListener('change',function(){P({lvl:+lv.value})});
+  r.append(cl,lv);host.appendChild(r);
+  host.appendChild(el('div','lbl','Stats (tap to roll d20 + stat)')).style.margin='10px 0 4px';
+  var g=el('div','stats');
+  STATS.forEach(function(k){
+    var c=el('div','stat');c.appendChild(el('div','lbl',k));
+    var inp=el('input');inp.type='number';inp.value=(sh.stats&&sh.stats[k])||0;inp.addEventListener('input',function(){var v=+inp.value||0;debounce('ss'+id+k,500,function(){var st=Object.assign({},sh.stats||{});st[k]=v;P({stats:st})})});
+    c.appendChild(inp);
+    var b=el('button',null,'Roll');b.addEventListener('click',function(){var v=+inp.value||0;postRoll(k+' check','d20'+(v>=0?'+':'')+v)});c.appendChild(b);g.appendChild(c);
+  });
+  host.appendChild(g);
+  var cur=+sh.cur||0,max=+sh.max||1;
+  host.appendChild(el('div','lbl','Trion and wounds (one pool)')).style.margin='10px 0 4px';
+  var tb=el('div','tbig');var fi=document.createElement('i');fi.style.width=Math.max(0,Math.min(100,100*cur/max))+'%';tb.appendChild(fi);host.appendChild(tb);
+  r=el('div','row');r.style.marginTop='6px';
+  [[-5,'−5'],[-1,'−1'],[1,'+1'],[5,'+5']].forEach(function(p){var b=el('button',null,p[1]);b.addEventListener('click',function(){P({cur:Math.max(0,Math.min(max,cur+p[0]))})});r.appendChild(b)});
+  r.appendChild(el('b',null,cur+' / '));
+  var mx=el('input');mx.type='number';mx.className='num';mx.value=max;mx.title='Max Trion (copy from your Character Creator)';mx.addEventListener('input',function(){var v=Math.max(1,+mx.value||1);debounce('sm'+id,500,function(){P({max:v,cur:Math.min(cur,v)})})});r.appendChild(mx);
+  host.appendChild(r);
+  host.appendChild(el('div','lbl','Body parts destroyed')).style.margin='10px 0 4px';
+  var lg=el('div','loc'),dead=sh.dead||{},nl=0;
+  LOC.forEach(function(k){
+    var l=el('label',dead[k]?'dead':'');var c=el('input');c.type='checkbox';c.checked=!!dead[k];if(dead[k]&&/Arm|Leg/.test(k))nl++;
+    c.addEventListener('change',function(){var d=Object.assign({},dead);d[k]=c.checked;var p={dead:d};if(k==='Chest'&&c.checked){p.cur=0}P(p)});
+    l.appendChild(c);l.appendChild(document.createTextNode(k));lg.appendChild(l);
+  });
+  host.appendChild(lg);
+  var st=el('div','row');st.style.marginTop='6px';
+  if(dead.Chest||dead.Head&&false)st.appendChild(el('span','badge','Chest destroyed: bail out'));
+  else if(cur<=0)st.appendChild(el('span','badge','Out of Trion: bail out'));
+  else if(nl>=2)st.appendChild(el('span','badge','Two limbs lost: nearly down'));
+  host.appendChild(st);
+  host.appendChild(el('div','lbl','Weapons, triggers, notes')).style.margin='10px 0 4px';
+  var ta=el('textarea');ta.rows=5;ta.value=sh.notes||'';ta.addEventListener('input',function(){debounce('sx'+id,700,function(){P({notes:ta.value.slice(0,4000)})})});host.appendChild(ta);
+  r=el('div','row');r.style.marginTop='8px';
+  var put=el('button','pri','Put on map');put.addEventListener('click',function(){
+    var tid=uid(),team=S.me.id&&S.me.id===sh.owner?'A':'A';
+    var o={name:sh.name||'Unnamed',team:team,x:1,y:1,size:1,sheet:id,out:false};
+    W('tokens/'+tid,function(){return DB.doc('tokens/'+tid).set(o)});S.sel=tid;toast('Token added to the map');
+  });
+  var del=el('button','bad','Delete sheet');var armed=false;del.addEventListener('click',function(){if(!armed){armed=true;del.textContent='Tap again to delete';setTimeout(function(){armed=false;del.textContent='Delete sheet'},2500);return}W('sheets/'+id,function(){return DB.doc('sheets/'+id).delete()});S.selSheet=null;renderSheet(true)});
+  r.append(put,del);host.appendChild(r);
+}
+
+/* ---------- character code import (WT1|name|class|level|STR|DEX|STA|TRION|INT|CHA|weapons|subs|ability[|B]) ---------- */
+var CLASS_TRION={Attacker:5,Gunner:4,Shooter:4,Sniper:3,Trapper:5,Assassin:4,Tactician:4,Counterstriker:5,Aftokrator:4};
+function parseCode(txt){
+  var p=String(txt||'').trim().split('|');
+  if(p[0]!=='WT1'||p.length<12)return null;
+  var n=function(i){var v=parseInt(p[i],10);return isNaN(v)?0:Math.max(-3,Math.min(8,v))};
+  var list=function(i){return (p[i]||'').split(',').map(function(x){return x.trim()}).filter(Boolean)};
+  var cls=(p[2]||'Gunner').trim(),lvl=Math.max(1,Math.min(10,parseInt(p[3],10)||1));
+  var st={STR:n(4),DEX:n(5),STA:n(6),TRION:n(7),INT:n(8),CHA:n(9)},w=list(10),o=list(11);
+  var max=Math.max(10,40+5*st.TRION+2*st.STA+(CLASS_TRION[cls]||4)*(lvl-1)-(2*w.length+o.length));
+  var notes=['Weapons: '+(w.join(', ')||'none'),'Sub triggers: '+(o.join(', ')||'none')];
+  if(p[12])notes.push('Special ability: '+p[12].trim());
+  if(/^B/i.test(p[13]||''))notes.push('Level 5 specialisation: second option');
+  return {name:(p[1]||'Agent').trim().slice(0,30),cls:cls,lvl:lvl,stats:st,cur:max,max:max,dead:{},notes:notes.join('\n').slice(0,4000),owner:S.me.id||null};
+}
+function importCode(){
+  var o=parseCode($('#codein').value),msg=$('#impmsg');
+  if(!o){msg.textContent='That is not a character code. Copy the whole line from the creator.';return}
+  var id=uid();S.selSheet=id;
+  W('sheets/'+id,function(){return DB.doc('sheets/'+id).set(o)});
+  $('#codein').value='';msg.textContent='Imported '+o.name+'. Max Trion '+o.max+'.';
+}
+
+/* ---------- Operator: saved encounters and enemy library ---------- */
+/* [code,name,group,Trion (3-agent total for bosses),attack,Lethal,Block,Evade,recommended Level] */
+var LIB=[["SK","Skitter","Minions",9,1,0,0,10,0],["EC","Echo","Minions",10,1,0,0,10,0],["BD","Bado","Minions",18,1,0,0,10,0],["BA","Bamster","Minions",18,1,0,0,10,0],["BE","Beast","Minions",18,1,0,0,10,0],["CN","Charon","Minions",18,1,0,0,10,0],["M","Minion","Minions",18,1,0,0,10,0],["RD","Rad","Minions",18,1,0,0,10,0],["DS","Scout Dog","Minions",18,1,0,0,11,0],["SC","Spilco","Minions",18,3,0,0,10,0],["AR","Arugda","Soldiers",48,3,1,2,10,0],["GL","Glider","Soldiers",48,3,0,2,11,0],["DG","Guard Dog","Soldiers",48,3,1,3,10,0],["HB","Hollow Blade","Soldiers",48,3,1,2,10,0],["DH","Hunter Dog","Soldiers",48,3,1,2,10,0],["ID","Idra","Soldiers",48,3,1,3,10,0],["LA","Lancer","Soldiers",48,3,1,0,10,0],["MM","Marmod","Soldiers",48,3,1,2,10,0],["SS","Shade Stalker","Soldiers",48,3,1,2,10,0],["VD","Vander","Soldiers",48,3,1,2,10,0],["PN","Pneura","Soldiers",52,4,1,2,11,0],["S","Soldier","Soldiers",52,4,1,2,11,0],["BU","Bulwark","Elites",94,6,2,4,11,0],["E","Elite","Elites",94,6,2,4,11,0],["IL","Ilgar","Elites",94,6,2,4,11,0],["GV","Gieve","Elites",100,7,2,4,12,0],["LI","Lilith","Elites",100,7,2,4,12,0],["GC","Gatecrawler","Bosses",45,5,1,2,10,1],["MW","Mirrorwarden","Bosses",51,6,1,2,11,2],["RB","Rabbit","Bosses",60,7,1,2,12,3],["PR","Chelidon boss","Bosses",114,7,1,2,12,7],["PH","Lampyris boss","Bosses",126,7,1,2,12,7],["PE","Vorvoros boss","Bosses",180,7,1,2,12,9],["PG","Pergrande","Bosses",192,9,1,2,14,10],["K","Black Trigger wielder","Black Triggers",126,9,2,3,13,5],["AL","Alektor (Hyrein)","Black Triggers",132,9,2,3,13,10],["OR","Organon (Viza)","Black Triggers",132,9,2,3,13,5],["CH","Cinderheart","Black Triggers",156,9,2,3,13,5],["SP","Speiraskia (Mira)","Black Triggers",162,9,2,3,13,7]];
+S.enc={};S.local=true;
+function opVisible(){return S.local||S.isAdmin}
+function updateOpTab(){var b=$('#optab');b.hidden=!opVisible();if(b.hidden&&S.tab==='op')$('#tabs button[data-t=chat]').click()}
+function freeSpot(){var used={};Object.keys(S.tokens).forEach(function(k){var t=S.tokens[k];used[Math.round(t.x)+','+Math.round(t.y)]=1});
+  for(var x=S.map.cols-2;x>=0;x--)for(var y=0;y<S.map.rows;y++)if(!used[x+','+y])return [x,y];return [0,0]}
+function addEnemy(r){
+  var sp=freeSpot(),id=uid(),big=r[3]>=100?2:1;
+  var o={name:r[1],team:'N',x:Math.min(sp[0],S.map.cols-big),y:Math.min(sp[1],S.map.rows-big),size:big,cur:r[3],max:r[3],out:false,
+    info:'Attack +'+r[4]+', Lethal '+r[5]+', Block '+r[6]+', Evade '+r[7]+(r[8]?', recommended Level '+r[8]:'')};
+  W('tokens/'+id,function(){return DB.doc('tokens/'+id).set(o)});S.sel=id;toast(r[1]+' added')
+}
+function renderLib(){
+  var gs=['Minions','Soldiers','Elites','Bosses','Black Triggers'],sel=$('#libgrp');
+  if(!sel.options.length){gs.forEach(function(g){var o=el('option',null,g);o.value=g;sel.appendChild(o)});sel.addEventListener('change',renderLib)}
+  var host=$('#liblist');host.textContent='';
+  LIB.filter(function(r){return r[2]===sel.value}).forEach(function(r){
+    var row=el('div','row');row.style.justifyContent='space-between';
+    var t=el('span',null,r[1]);var h=el('span','hint',' '+r[3]+' Trion · +'+r[4]+(r[8]?' · Lv '+r[8]:''));t.appendChild(h);
+    var b=el('button',null,'Add');b.addEventListener('click',function(){addEnemy(r)});row.append(t,b);host.appendChild(row)})
+}
+function saveEncounter(){
+  var name=$('#encname').value.trim(),msg=$('#encmsg');
+  if(!name){msg.textContent='Give it a name first.';return}
+  var all=$('#encall').checked,toks=[];
+  Object.keys(S.tokens).forEach(function(k){var t=S.tokens[k];if(!all&&t.team==='A')return;
+    var tr=tTrion(t);toks.push({name:t.name||'Token',team:t.team||'N',x:t.x,y:t.y,size:t.size||1,max:tr.max,info:t.info||''})});
+  if(!toks.length){msg.textContent='No tokens to save. Add some enemies first.';return}
+  var id=uid(),o={name:name.slice(0,50),notes:$('#encnote').value.slice(0,2000),map:{bg:S.map.bg,seed:S.map.seed,cols:S.map.cols,rows:S.map.rows},tokens:toks.slice(0,60),t:Date.now()};
+  W('encounters/'+id,function(){return DB.doc('encounters/'+id).set(o)});
+  $('#encname').value='';$('#encnote').value='';msg.textContent='Saved '+toks.length+' tokens.';
+}
+function loadEncounter(id,replace){
+  var e=S.enc[id];if(!e)return;
+  if(replace)Object.keys(S.tokens).forEach(function(k){if(S.tokens[k].team!=='A')W('tokens/'+k,function(){return DB.doc('tokens/'+k).delete()})});
+  if($('#encmap').checked&&e.map)setMap(e.map);
+  var m=e.map&&$('#encmap').checked?e.map:S.map;
+  (e.tokens||[]).forEach(function(t){var tid=uid(),sz=t.size||1;
+    var o={name:t.name,team:t.team||'N',x:Math.max(0,Math.min(m.cols-sz,Math.round(t.x||0))),y:Math.max(0,Math.min(m.rows-sz,Math.round(t.y||0))),size:sz,cur:t.max,max:t.max,out:false,info:t.info||''};
+    W('tokens/'+tid,function(){return DB.doc('tokens/'+tid).set(o)})});
+  toast('Loaded '+e.name);
+}
+function updateEncounter(id){
+  var e=S.enc[id];if(!e)return;var all=$('#encall').checked,toks=[];
+  Object.keys(S.tokens).forEach(function(k){var t=S.tokens[k];if(!all&&t.team==='A')return;var tr=tTrion(t);toks.push({name:t.name||'Token',team:t.team||'N',x:t.x,y:t.y,size:t.size||1,max:tr.max,info:t.info||''})});
+  if(!toks.length){toast('No tokens on the table to save');return}
+  W('encounters/'+id,function(){return DB.doc('encounters/'+id).update({tokens:toks.slice(0,60),map:{bg:S.map.bg,seed:S.map.seed,cols:S.map.cols,rows:S.map.rows},t:Date.now()})});toast('Updated '+e.name);
+}
+function renderEnc(){
+  var host=$('#enclist');host.textContent='';
+  var ids=Object.keys(S.enc).sort(function(a,b){return (S.enc[b].t||0)-(S.enc[a].t||0)});
+  if(!ids.length){host.appendChild(el('p','hint','Nothing saved yet.'));return}
+  ids.forEach(function(id){
+    var e=S.enc[id],c=el('div','insp');c.style.marginTop='6px';
+    var h=el('div',null,e.name);h.style.fontWeight='600';c.appendChild(h);
+    c.appendChild(el('div','hint',(e.tokens||[]).length+' tokens · '+((e.map&&e.map.bg)||'grid')+' map'));
+    if(e.notes){var n=el('div','hint',e.notes);n.style.whiteSpace='pre-wrap';n.style.marginTop='4px';c.appendChild(n)}
+    var r=el('div','row');r.style.marginTop='6px';
+    var a=el('button','pri','Add to table');a.addEventListener('click',function(){loadEncounter(id,false)});
+    var b=el('button',null,'Replace enemies');b.addEventListener('click',function(){loadEncounter(id,true)});
+    var u=el('button',null,'Update');u.title='Overwrite with the tokens on the table now';u.addEventListener('click',function(){updateEncounter(id)});
+    var d=el('button','bad','Delete');var armed=false;d.addEventListener('click',function(){if(!armed){armed=true;d.textContent='Tap again';setTimeout(function(){armed=false;d.textContent='Delete'},2500);return}W('encounters/'+id,function(){return DB.doc('encounters/'+id).delete()})});
+    r.append(a,b,u,d);c.appendChild(r);host.appendChild(c)})
+}
+
+/* ---------- table tab ---------- */
+function renderTableForm(){
+  var a=document.activeElement;
+  if(!(a&&(a.id==='cols'||a.id==='rows'))){$('#cols').value=S.map.cols;$('#rows').value=S.map.rows}
+  $('#mapbg').value=S.map.bg;
+}
+function addToken(name,team,max,x,y){var id=uid();var o={name:name,team:team,x:x,y:y,size:1,cur:max,max:max,out:false};W('tokens/'+id,function(){return DB.doc('tokens/'+id).set(o)});return id}
+
+/* ---------- peers / cursors ---------- */
+function renderPeers(){
+  var host=$('#peers');host.textContent='';
+  S.peers.forEach(function(p){
+    var c=el('span','chip');var i=document.createElement('i');i.style.background=(p.presence&&p.presence.col)||'var(--acc)';c.appendChild(i);
+    c.appendChild(document.createTextNode(String((p.presence&&p.presence.nick)||'Player').slice(0,20)+(p.isMe&&p.sameTab?' (you)':'')));host.appendChild(c);
+  });
+  var cs=$('#curs');cs.textContent='';
+  var r=S.map;
+  S.peers.forEach(function(p){
+    var pr=p.presence||{};if(p.isMe||!Array.isArray(pr.c))return;
+    var d=el('div','cur');d.style.left=pr.c[0]*r.cols*CELL+'px';d.style.top=pr.c[1]*r.rows*CELL+'px';d.style.background=pr.col||'var(--acc)';
+    d.appendChild(el('b',null,String(pr.nick||'Player').slice(0,16)));cs.appendChild(d);
+  });
+}
+
+/* ---------- wiring ---------- */
+function bind(){
+  $('#nick').value=nick;
+  $('#nick').addEventListener('input',function(){nick=$('#nick').value.slice(0,20);try{localStorage.setItem('bt_nick',nick)}catch(e){}renderAs();if(ROOM)ROOM.presence({nick:myName()}).catch(function(){})});
+  $('#tabs').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;S.tab=b.dataset.t;
+    document.querySelectorAll('#tabs button').forEach(function(x){x.classList.toggle('on',x===b)});
+    document.querySelectorAll('.pane').forEach(function(p){p.classList.toggle('on',p.id==='p-'+S.tab)});
+    if(S.tab==='sheets'){renderSheetList();renderSheet(true)}if(S.tab==='op'){renderEnc();renderLib()}});
+  var dice=$('#dice');[4,6,8,10,12,20,100].forEach(function(n){var b=el('button',null,'d'+n);b.addEventListener('click',function(){postRoll('d'+n,'d'+n)});dice.appendChild(b)});
+  $('#impgo').addEventListener('click',importCode);$('#encsave').addEventListener('click',saveEncounter);
+  $('#rollx').addEventListener('click',function(){var v=$('#expr').value;if(v)postRoll('Roll',v)});
+  $('#expr').addEventListener('keydown',function(e){if(e.key==='Enter')$('#rollx').click()});
+  $('#atk').addEventListener('click',function(){var b=parseInt($('#atkb').value,10)||0,e=$('#edge').value;var ex='d20'+(b>=0?'+':'')+b+(e==='edge'?'+d4':e==='snag'?'-d4':'');postRoll('Attack / check'+(e?' ('+e+')':''),ex)});
+  $('#sev').addEventListener('click',function(){var l=parseInt($('#leth').value,10)||0;postRoll('Severity','d6'+(l>=0?'+':'')+l)});
+  function send(){var v=$('#chatin').value.trim();if(!v)return;$('#chatin').value='';
+    var m=/^\/r(?:oll)?\s+(.+)$/i.exec(v);if(m){postRoll('Roll',m[1]);return}
+    addLog({kind:'chat',text:v.slice(0,500)})}
+  $('#chatsend').addEventListener('click',send);$('#chatin').addEventListener('keydown',function(e){if(e.key==='Enter')send()});
+  $('#zin').addEventListener('click',function(){S.zoom=Math.min(2,+(S.zoom+.15).toFixed(2));renderMap()});
+  $('#zout').addEventListener('click',function(){S.zoom=Math.max(.4,+(S.zoom-.15).toFixed(2));renderMap()});
+  $('#mapbg').addEventListener('change',function(){setMap({bg:$('#mapbg').value})});
+  $('#remap').addEventListener('click',function(){setMap({seed:Math.floor(Math.random()*1e6)})});
+  ['cols','rows'].forEach(function(k){$('#'+k).addEventListener('input',function(){var v=Math.round(+$('#'+k).value),lo=k==='cols'?8:6,hi=k==='cols'?40:30;if(!(v>=lo&&v<=hi))return;debounce('mp'+k,500,function(){var p={};p[k]=v;setMap(p)})})});
+  $('#addtok').addEventListener('click',function(){var n=$('#tname').value.trim()||'Token';var id=addToken(n.slice(0,24),$('#tteam').value,Math.max(1,+$('#tmax').value||40),1,1);$('#tname').value='';S.sel=id});
+  $('#starter').addEventListener('click',function(){
+    for(var i=0;i<3;i++)addToken('Agent '+(i+1),'A',40,2,3+i*2);
+    for(var j=0;j<3;j++)addToken('Hostile '+(j+1),'N',40,S.map.cols-3,3+j*2);
+  });
+  var cl=$('#clrtok'),armed=false;cl.addEventListener('click',function(){if(!armed){armed=true;cl.textContent='Tap again: remove all';setTimeout(function(){armed=false;cl.textContent='Remove all tokens'},2500);return}
+    Object.keys(S.tokens).forEach(function(id){W('tokens/'+id,function(){return DB.doc('tokens/'+id).delete()})});S.sel=null});
+  $('#resetturn').addEventListener('click',function(){setTurn({id:null,round:1})});
+  $('#nextturn').addEventListener('click',function(){
+    var o=order();if(!o.length){toast('Give tokens an Initiative number first');return}
+    var i=o.indexOf(S.turn.id),n=i+1,rd=S.turn.round||1;if(i<0){n=0}else if(n>=o.length){n=0;rd++}
+    setTurn({id:o[n],round:rd});
+  });
+  var sc=$('#scroll');
+  sc.addEventListener('pointermove',function(e){if(!ROOM)return;var r=$('#map').getBoundingClientRect();var fx=(e.clientX-r.left)/r.width,fy=(e.clientY-r.top)/r.height;if(fx<0||fy<0||fx>1||fy>1)return;ROOM.presence({c:[+fx.toFixed(3),+fy.toFixed(3)]}).catch(function(){})});
+  sc.addEventListener('pointerleave',function(){if(ROOM)ROOM.presence({c:null}).catch(function(){})});
+  sc.addEventListener('pointerdown',function(e){if(e.target===sc||e.target.closest('#art')||e.target.id==='map'||e.target.classList.contains('gridl')){S.sel=null;renderTokens();renderInspector(true)}});
+}
+
+/* ---------- Online without accounts: the Operator's browser holds the table, everyone else connects to it (WebRTC via PeerJS) ---------- */
+var NET={host:false,code:'',conns:{},hostConn:null,pres:{},myId:null,pid:null,name:'',peer:null,reg:{},entered:false,handlers:{},presT:null,saveT:null,creds:null,stop:false,rt:null};
+S.local=false;
+var local=DB=localDb();
+bind();updateOpTab();renderMap();renderTurnLbl();renderAs();renderSheetList();renderTableForm();renderLib();
+
+function say(t){$('#lmsg').textContent=t||''}
+function cleanCode(v){return String(v||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,8)}
+function codeGen(){var A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789',a=new Uint8Array(5),r='';crypto.getRandomValues(a);for(var i=0;i<5;i++)r+=A[a[i]%A.length];return r}
+function slug(n){return String(n||'').toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,20)||'player'}
+function colorFor(x){var h=0;x=String(x);for(var i=0;i<x.length;i++)h=(h*31+x.charCodeAt(i))%360;return 'hsl('+h+',70%,45%)'}
+function sha(str){
+  if(window.crypto&&crypto.subtle&&crypto.subtle.digest&&window.TextEncoder){return crypto.subtle.digest('SHA-256',new TextEncoder().encode(str)).then(function(b){return Array.prototype.map.call(new Uint8Array(b),function(x){return ('0'+x.toString(16)).slice(-2)}).join('')})}
+  var h=5381;for(var i=0;i<str.length;i++)h=((h<<5)+h+str.charCodeAt(i))|0;return Promise.resolve('d'+(h>>>0).toString(16))
+}
+function broadcast(msg,except){Object.keys(NET.conns).forEach(function(id){var c=NET.conns[id];if(c&&c.open&&id!==except){try{c.send(msg)}catch(e){}}})}
+function snapshot(){var d=local.dump(),o={};Object.keys(d).forEach(function(k){if(k.indexOf('encounters/')!==0)o[k]=d[k]});return o}
+function scheduleSave(){clearTimeout(NET.saveT);NET.saveT=setTimeout(function(){try{localStorage.setItem('bt_room_'+NET.code,JSON.stringify({data:local.dump(),reg:NET.reg}))}catch(e){}},800)}
+function peerList(){return Object.keys(NET.pres).map(function(id){return {id:id,pres:NET.pres[id]}})}
+function applyPeers(list){S.peers=list.map(function(x){return {peer:x.id,isMe:x.id===NET.myId,sameTab:x.id===NET.myId,presence:x.pres||{}}});renderPeers()}
+function pushPeers(){if(NET.presT)return;NET.presT=setTimeout(function(){NET.presT=null;var l=peerList();broadcast({t:'peers',list:l});applyPeers(l)},50)}
+function fire(topic,data,from){(NET.handlers[topic]||[]).forEach(function(f){try{f({topic:topic,data:data,isMe:from===NET.myId})}catch(e){}})}
+function cleanPres(p){var o={};if(!p||typeof p!=='object')return o;if('nick' in p)o.nick=String(p.nick).slice(0,20);if('col' in p)o.col=String(p.col).slice(0,40);if('c' in p)o.c=(Array.isArray(p.c)&&p.c.length===2&&isFinite(p.c[0])&&isFinite(p.c[1]))?[+p.c[0],+p.c[1]]:null;return o}
+function mergePres(id,patch){var cur=Object.assign({},NET.pres[id]||{}),c=cleanPres(patch);Object.keys(c).forEach(function(k){if(c[k]===null)delete cur[k];else cur[k]=c[k]});NET.pres[id]=cur}
+var ROOMX={
+  emit:function(topic,data){if(NET.host)broadcast({t:'ev',topic:topic,data:data,from:NET.myId});else if(NET.hostConn&&NET.hostConn.open)NET.hostConn.send({t:'emit',topic:topic,data:data});return Promise.resolve()},
+  on:function(topic,f){(NET.handlers[topic]=NET.handlers[topic]||[]).push(f)},
+  presence:function(patch){if(NET.host){mergePres(NET.myId,patch);pushPeers()}else if(NET.hostConn&&NET.hostConn.open)NET.hostConn.send({t:'pres',patch:patch});return Promise.resolve()}
+};
+function moveHandler(m){if(m.isMe||!m.data||typeof m.data.id!=='string')return;var d=m.data;if(typeof d.x!=='number'||typeof d.y!=='number'||!S.tokens[d.id])return;if(drag&&drag.id===d.id)return;S.over[d.id]={x:d.x,y:d.y};var e=tkEls[d.id];if(e){e.style.left=d.x*CELL+'px';e.style.top=d.y*CELL+'px'}S._ot=S._ot||{};clearTimeout(S._ot[d.id]);S._ot[d.id]=setTimeout(function(){delete S.over[d.id];renderTokens()},1800)}
+
+/* Operator checks every change a player asks for */
+function validOp(op){
+  if(['set','update','delete'].indexOf(op.k)<0)return false;
+  if(!/^(tokens|sheets|log|game|encounters)\/[A-Za-z0-9_-]{1,60}$/.test(op.path))return false;
+  if(op.k!=='delete'){if(!op.data||typeof op.data!=='object'||Array.isArray(op.data))return false;try{if(JSON.stringify(op.data).length>30000)return false}catch(e){return false}}
+  return true
+}
+function allowed(pid,m){
+  var root=m.path.split('/')[0],ex=local.peek(m.path),d=m.data||{};
+  if(root==='log')return m.k==='set'&&!ex&&typeof d.t==='number';
+  if(root==='sheets'){if(ex)return ex.owner===pid;return m.k==='set'&&d.owner===pid}
+  if(root==='tokens'){
+    var sh=function(id){return id?local.peek('sheets/'+id):null};
+    if(ex){
+      if(ex.sheet){var s=sh(ex.sheet);if(!(s&&s.owner===pid))return false;if(m.k==='update'&&('sheet' in d||d.team==='N'))return false;return true}
+      if(ex.team==='N'){if(m.k!=='update')return false;var ks=Object.keys(d);return ks.length>0&&ks.every(function(k){return k==='cur'||k==='out'})}
+      if(m.k==='update'&&('sheet' in d||d.team==='N'))return false;return true
+    }
+    if(m.k!=='set'||d.team==='N')return false;
+    if(d.sheet){var s2=sh(d.sheet);return !!(s2&&s2.owner===pid)}
+    return true
+  }
+  return false
+}
+function deny(conn,path){try{conn.send({t:'deny'});if(path.indexOf('encounters/')===0)return;var ex=local.peek(path);conn.send(ex?{t:'w',k:'set',path:path,data:ex}:{t:'w',k:'delete',path:path})}catch(e){}}
+function hello(conn,m){
+  var name=String(m.name||'').trim().slice(0,20),h=String(m.h||'').slice(0,80),sl=slug(name);
+  function rej(w){try{conn.send({t:'reject',why:w})}catch(e){}setTimeout(function(){try{conn.close()}catch(e){}},400)}
+  if(!name||!h)return rej('Enter a name and a personal code.');
+  if(sl==='operator'||sl==='host')return rej('Pick another name.');
+  var r=NET.reg[sl];
+  if(r&&r.h!==h)return rej('That name is already used at this table with a different personal code.');
+  if(!r){NET.reg[sl]={h:h,name:name};scheduleSave()}
+  conn._ok=true;conn._pid=sl;NET.conns[conn.peer]=conn;NET.pres[conn.peer]={nick:name,col:colorFor(sl)};
+  conn.send({t:'welcome',pid:sl,id:conn.peer,data:snapshot(),list:peerList()});pushPeers()
+}
+function onConn(conn){
+  conn.on('data',function(m){
+    if(!m||typeof m!=='object')return;
+    if(m.t==='hello'){hello(conn,m);return}
+    if(!conn._ok)return;
+    if(m.t==='w'){
+      var op={k:m.k,path:String(m.path||''),data:m.data};
+      if(!validOp(op)||!allowed(conn._pid,op)){deny(conn,op.path);return}
+      var d=local.doc(op.path);
+      if(op.k==='set'){if(op.path.indexOf('sheets/')===0)op.data.owner=conn._pid;d.set(op.data)}
+      else if(op.k==='update')d.update(op.data).catch(function(){});
+      else d.delete();
+    }else if(m.t==='emit'){
+      if(m.topic!=='move')return;
+      broadcast({t:'ev',topic:'move',data:m.data,from:conn.peer},conn.peer);fire('move',m.data,conn.peer)
+    }else if(m.t==='pres'){mergePres(conn.peer,m.patch);pushPeers()}
+  });
+  conn.on('close',function(){delete NET.conns[conn.peer];delete NET.pres[conn.peer];pushPeers()});
+  conn.on('error',function(){})
+}
+function hostStart(code,name){
+  if(typeof Peer==='undefined'){say('Could not load the connection library. Check your internet and reload the page.');return}
+  NET.host=true;NET.code=code;NET.pid='operator';NET.name=name;NET.myId='host';
+  var saved=null;try{saved=JSON.parse(localStorage.getItem('bt_room_'+code)||'null')}catch(e){}
+  if(saved){local.load(saved.data||{});NET.reg=saved.reg||{}}
+  local.hook(function(op){if(op.path.indexOf('encounters/')!==0)broadcast({t:'w',k:op.k,path:op.path,data:op.data});scheduleSave()});
+  var peer=NET.peer=new Peer('wtbt-'+code.toLowerCase(),{debug:0});
+  peer.on('open',function(){NET.pres.host={nick:name,col:colorFor('operator')};enter(true)});
+  peer.on('error',function(e){
+    if(e.type==='unavailable-id')say('That room code is already open somewhere. Pick another code, or wait a minute if you just closed it.');
+    else if(!NET.entered)say('Could not open the table ('+e.type+').');
+    else banner('Connection problem ('+e.type+'). Players may need to rejoin.')
+  });
+  peer.on('disconnected',function(){try{peer.reconnect()}catch(e){}});
+  peer.on('connection',onConn)
+}
+function retryLater(){clearTimeout(NET.rt);if(NET.stop)return;NET.rt=setTimeout(function(){if(NET.peer&&!NET.peer.destroyed&&NET.myId)connect()},2500)}
+function cdata(m){
+  if(!m||typeof m!=='object')return;
+  if(m.t==='welcome'){NET.pid=m.pid;NET.myId=m.id;local.load(m.data||{});applyPeers(m.list||[]);banner('');if(!NET.entered)enter(false)}
+  else if(m.t==='reject'){NET.stop=true;say(String(m.why||'Could not join.'));try{NET.peer.destroy()}catch(e){}}
+  else if(m.t==='w')local.apply({k:m.k,path:m.path,data:m.data});
+  else if(m.t==='peers')applyPeers(m.list||[]);
+  else if(m.t==='ev')fire(m.topic,m.data,m.from);
+  else if(m.t==='deny')toast('Only the Operator or the sheet owner can change that.')
+}
+function connect(){
+  var conn=NET.peer.connect('wtbt-'+NET.code.toLowerCase(),{serialization:'json',reliable:true});
+  NET.hostConn=conn;
+  var to=setTimeout(function(){if(!conn.open){try{conn.close()}catch(e){}if(!NET.entered)say('Could not reach the table. Check the room code, or try again. Some school and work networks block this.');else retryLater()}},15000);
+  conn.on('open',function(){clearTimeout(to);conn.send({t:'hello',name:NET.creds.name,h:NET.creds.h})});
+  conn.on('data',cdata);
+  conn.on('close',function(){if(NET.hostConn===conn&&!NET.stop){banner('Lost the connection to the Operator. Reconnecting…');retryLater()}});
+  conn.on('error',function(){})
+}
+function clientStart(code,name,pin){
+  if(typeof Peer==='undefined'){say('Could not load the connection library. Check your internet and reload the page.');return}
+  NET.code=code;NET.name=name;
+  local.writer(function(op){if(NET.hostConn&&NET.hostConn.open){NET.hostConn.send({t:'w',k:op.k,path:op.path,data:op.data});return Promise.resolve()}return Promise.reject({code:'unavailable'})});
+  sha(code+':'+slug(name)+':'+pin).then(function(h){
+    NET.creds={name:name,h:h};
+    var peer=NET.peer=new Peer({debug:0});
+    peer.on('open',function(id){NET.myId=id;connect()});
+    peer.on('error',function(e){
+      if(NET.stop)return;
+      if(e.type==='peer-unavailable'){if(NET.entered)retryLater();else say('No table with that code is open. Check the code and ask the Operator to open the table.')}
+      else if(!NET.entered)say('Could not connect ('+e.type+').')
+    });
+    peer.on('disconnected',function(){try{peer.reconnect()}catch(e){}})
+  })
+}
+function roomInfo(host){
+  var h=$('#roominfo');h.textContent='';
+  var c=el('span','chip');c.appendChild(document.createTextNode('Room '));c.appendChild(el('b',null,NET.code));h.appendChild(c);
+  var url=location.href.split('#')[0]+'#'+NET.code;
+  var b=el('button',null,'Copy invite link');
+  b.addEventListener('click',function(){
+    function fallback(){var i=el('input');i.readOnly=true;i.value=url;i.style.width='260px';h.appendChild(i);i.select()}
+    try{navigator.clipboard.writeText(url).then(function(){toast('Invite link copied')},fallback)}catch(e){fallback()}
+  });
+  h.appendChild(b)
+}
+function enter(host){
+  NET.entered=true;S.local=false;S.isAdmin=host;
+  S.me={id:NET.pid,name:NET.name,color:colorFor(NET.pid)};
+  nick=NET.name;$('#nick').value=nick;
+  document.body.classList.add('online');
+  $('#landing').hidden=true;
+  $('#tabs button[data-t=table]').hidden=!host;$('#nextturn').hidden=!host;
+  updateOpTab();subscribe();
+  ROOM=ROOMX;ROOM.on('move',moveHandler);
+  ROOM.presence({nick:nick,col:S.me.color});
+  if(host)applyPeers(peerList());
+  roomInfo(host);renderAs();banner('')
+}
+
+/* landing screen */
+var last={};try{last=JSON.parse(localStorage.getItem('bt_last')||'{}')}catch(e){}
+$('#jname').value=last.name||'';$('#hname').value=last.hname||'';
+$('#jcode').value=cleanCode((location.hash||'').replace('#',''))||last.jcode||'';
+$('#hcode').value=last.hcode||codeGen();
+function saveLast(){try{localStorage.setItem('bt_last',JSON.stringify({name:$('#jname').value.trim(),hname:$('#hname').value.trim(),jcode:cleanCode($('#jcode').value),hcode:cleanCode($('#hcode').value)}))}catch(e){}}
+$('#hnew').addEventListener('click',function(){$('#hcode').value=codeGen()});
+$('#hgo').addEventListener('click',function(){
+  var c=cleanCode($('#hcode').value);if(c.length<4){say('Room code needs at least 4 letters or numbers.');return}
+  say('Opening the table…');saveLast();hostStart(c,$('#hname').value.trim()||'Operator')
+});
+$('#jgo').addEventListener('click',function(){
+  var c=cleanCode($('#jcode').value),n=$('#jname').value.trim(),p=$('#jpin').value;
+  if(c.length<4||!n||p.length<3){say('Fill in the room code, your name and a personal code (at least 3 characters).');return}
+  say('Connecting…');saveLast();NET.stop=false;clientStart(c,n,p)
+});
+['jpin','jname','jcode'].forEach(function(id){$('#'+id).addEventListener('keydown',function(e){if(e.key==='Enter')$('#jgo').click()})});
+})();
+</script>
+</body>
+</html>
