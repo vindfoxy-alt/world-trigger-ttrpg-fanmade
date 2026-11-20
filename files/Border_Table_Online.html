@@ -110,7 +110,7 @@ button.pri{background:linear-gradient(90deg,#0a3f73,#1186b8);color:#fff;border-c
 .badge{display:inline-block;border-radius:6px;padding:1px 8px;font-size:12px;font-weight:600;border:1px solid var(--bad);color:var(--bad)}
 .hint{color:var(--mut);font-size:12px}
 .toast{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);border-radius:8px;padding:8px 14px;z-index:50;max-width:90vw}
-
+a.mm{position:fixed;left:12px;bottom:12px;z-index:9999;background:linear-gradient(135deg,#0b3a63,#12809f);color:#fff;text-decoration:none;font:700 13px system-ui,sans-serif;padding:9px 14px;border-radius:999px;border:1px solid rgba(160,230,245,.6);box-shadow:0 4px 14px rgba(0,30,60,.4)}a.mm:hover{filter:brightness(1.15)}@media print{a.mm{display:none}}
 [hidden]{display:none!important}
 body.online #nick,body.online label:has(#nick){display:none}
 #landing{position:fixed;inset:0;z-index:40;background:var(--bg) radial-gradient(900px 420px at 50% 0,rgba(34,184,207,.2),transparent 70%);overflow:auto;display:grid;place-items:center;padding:16px}
@@ -1272,5 +1272,5 @@ function prefillMe(){try{var me=JSON.parse(localStorage.getItem('bt_me')||'null'
 ['jpin','jname','jcode'].forEach(function(id){$('#'+id).addEventListener('keydown',function(e){if(e.key==='Enter')$('#jgo').click()})});
 })();
 </script>
-</body>
+<a class="mm" href="https://vindfoxy-alt.github.io/world-trigger-ttrpg-fanmade/" title="Back to the main menu">&#8592; Main menu</a></body>
 </html>
