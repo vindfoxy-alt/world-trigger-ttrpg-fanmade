@@ -203,6 +203,10 @@ body.online #nick,body.online label:has(#nick){display:none}
       <p class="hint" style="margin:0 0 6px">Only you can see this. Codes are stored in this browser. If a friend forgets theirs, change it here and tell them. Their characters stay on the table.</p>
       <div id="players"></div>
       <div class="row" style="margin-top:6px"><input id="pname" placeholder="New player name" maxlength="20" style="flex:1;min-width:110px"><input id="ppin" placeholder="Code" maxlength="40" style="width:90px"><button id="pmake" title="Make a random code">Random</button><button id="padd" class="pri">Add</button></div>
+      <div class="lbl" style="margin-top:12px">Register (every game, name and code)</div>
+      <p class="hint" style="margin:0 0 6px">Filled in automatically whenever someone joins or you add or change a code. It covers every game you have hosted in this browser. It contains personal codes, so keep downloads private.</p>
+      <div id="register" style="overflow-x:auto"></div>
+      <div class="row" style="margin-top:6px"><button id="rcsv">Download for Excel (.csv)</button><button id="rdoc">Download document (.doc)</button><button id="rcopy">Copy as text</button><button id="rclear" class="bad">Clear register</button></div>
       <div class="lbl" style="margin-top:12px">Enemy library (fixed stats from the Monster Manual)</div>
       <select id="libgrp" style="width:100%"></select>
       <div id="liblist"></div>
@@ -225,6 +229,7 @@ body.online #nick,body.online label:has(#nick){display:none}
    <section>
     <h2>Host a table (Operator)</h2>
     <label for="hcode">Room code</label><input id="hcode" maxlength="8" autocomplete="off" autocapitalize="characters">
+    <label for="hgame">Game name</label><input id="hgame" maxlength="40" autocomplete="off" placeholder="e.g. Friday group, Mission 1">
     <label for="hname">Your name</label><input id="hname" maxlength="20" autocomplete="off" placeholder="Operator">
     <p class="hint" style="margin:6px 0 0">Keep this page open while you play. Open the same room code again later to carry on where you stopped. Your saved encounters stay in this browser.</p>
     <div class="row"><button id="hgo" class="pri">Open table</button><button id="hnew">New code</button></div>
@@ -777,6 +782,7 @@ function hello(conn,m){
   var pin=String(m.pin||'').slice(0,40);
   if(!r){NET.reg[sl]={h:h,name:name,pin:pin};scheduleSave()}
   else if(!r.pin&&pin){r.pin=pin;scheduleSave()}
+  regUpsert(sl,name,NET.reg[sl].pin||pin,true);
   if(NET.entered)setTimeout(renderPlayers,0);
   conn._ok=true;conn._pid=sl;NET.conns[conn.peer]=conn;NET.pres[conn.peer]={nick:name,col:colorFor(sl)};
   conn.send({t:'welcome',pid:sl,id:conn.peer,data:snapshot(),list:peerList()});pushPeers()
@@ -801,9 +807,11 @@ function onConn(conn){
   conn.on('close',function(){delete NET.conns[conn.peer];delete NET.pres[conn.peer];pushPeers();setTimeout(renderPlayers,0)});
   conn.on('error',function(){})
 }
-function hostStart(code,name){
+function hostStart(code,name,game){
   if(typeof Peer==='undefined'){say('Could not load the connection library. Check your internet and reload the page.');return}
   NET.host=true;NET.code=code;NET.pid='operator';NET.name=name;NET.myId='host';
+  try{if(game)localStorage.setItem('bt_game_'+code,game);game=game||localStorage.getItem('bt_game_'+code)||''}catch(e){}
+  NET.game=game||'';
   var saved=null;try{saved=JSON.parse(localStorage.getItem('bt_room_'+code)||'null')}catch(e){}
   if(saved){local.load(saved.data||{});NET.reg=saved.reg||{}}
   local.hook(function(op){if(op.path.indexOf('encounters/')!==0)broadcast({t:'w',k:op.k,path:op.path,data:op.data});scheduleSave()});
@@ -855,7 +863,7 @@ function clientStart(code,name,pin){
 }
 function roomInfo(host){
   var h=$('#roominfo');h.textContent='';
-  var c=el('span','chip');c.appendChild(document.createTextNode('Room '));c.appendChild(el('b',null,NET.code));h.appendChild(c);
+  var c=el('span','chip');c.appendChild(document.createTextNode('Room '));c.appendChild(el('b',null,NET.code));if(NET.game)c.appendChild(document.createTextNode(' · '+NET.game));h.appendChild(c);
   var url=location.href.split('#')[0]+'#'+NET.code;
   var b=el('button',null,'Copy invite link');
   b.addEventListener('click',function(){
@@ -876,7 +884,7 @@ function enter(host){
   ROOM.presence({nick:nick,col:S.me.color});
   if(host)applyPeers(peerList());
   roomInfo(host);renderAs();banner('');
-  if(host)bindPlayers();
+  if(host){bindPlayers();bindRegister()}
   if(!host){bindVault();var m0=mineSheets();var vl=readVault();if(!m0.length&&vl.length)restoreVault(vl,true)}
 }
 
@@ -917,7 +925,7 @@ function bindVault(){
 function onlineSlugs(){var o={};Object.keys(NET.conns).forEach(function(k){var c=NET.conns[k];if(c&&c.open&&c._pid)o[c._pid]=1});return o}
 function setPlayer(name,pin){
   var sl=slug(name);if(!name||!pin||pin.length<3){toast('Enter a name and a code of at least 3 characters');return Promise.resolve(false)}
-  return sha(NET.code+':'+sl+':'+pin).then(function(h){var old=NET.reg[sl];NET.reg[sl]={h:h,name:old&&old.name?old.name:name,pin:pin};scheduleSave();renderPlayers();return true})
+  return sha(NET.code+':'+sl+':'+pin).then(function(h){var old=NET.reg[sl];NET.reg[sl]={h:h,name:old&&old.name?old.name:name,pin:pin};scheduleSave();regUpsert(sl,NET.reg[sl].name,pin,false);renderPlayers();return true})
 }
 function loginText(r){return 'Border Table Online\nRoom code: '+NET.code+'\nLink: '+location.href.split('#')[0]+'#'+NET.code+'\nName: '+r.name+'\nPersonal code: '+(r.pin||'(ask the Operator)')}
 function renderPlayers(){
@@ -956,16 +964,53 @@ function bindPlayers(){
   renderPlayers()
 }
 
+
+/* ---------- Operator register: every game, name and code, filled in automatically ---------- */
+function regAll(){try{var v=JSON.parse(localStorage.getItem('bt_register')||'[]');return Array.isArray(v)?v:[]}catch(e){return []}}
+function regSaveAll(v){try{localStorage.setItem('bt_register',JSON.stringify(v.slice(-2000)))}catch(e){}}
+function stamp(){var d=new Date(),z=function(n){return ('0'+n).slice(-2)};return d.getFullYear()+'-'+z(d.getMonth()+1)+'-'+z(d.getDate())+' '+z(d.getHours())+':'+z(d.getMinutes())}
+function regUpsert(sl,name,pin,joined){
+  var v=regAll(),r=null;
+  for(var i=0;i<v.length;i++)if(v[i].room===NET.code&&v[i].slug===sl){r=v[i];break}
+  if(!r){r={room:NET.code,game:NET.game||'',slug:sl,name:name,pin:pin||'',first:stamp(),last:'',joins:0};v.push(r)}
+  r.name=name||r.name;if(pin)r.pin=pin;if(NET.game)r.game=NET.game;
+  if(joined){r.last=stamp();r.joins=(r.joins||0)+1}
+  regSaveAll(v);renderRegister()
+}
+function regRows(){return regAll().slice().sort(function(a,b){var ca=a.room===NET.code?0:1,cb=b.room===NET.code?0:1;return ca-cb||(a.room<b.room?-1:a.room>b.room?1:0)||(a.name||'').localeCompare(b.name||'')})}
+function renderRegister(){
+  var host=$('#register');if(!host)return;host.textContent='';
+  var rows=regRows();if(!rows.length){host.appendChild(el('p','hint','Nothing registered yet.'));return}
+  var t=el('table');t.style.cssText='border-collapse:collapse;width:100%;font-size:12px';
+  var hd=el('tr');['Game','Room','Name','Code','Last joined','Joins'].forEach(function(h){var th=el('th',null,h);th.style.cssText='text-align:left;padding:3px 6px;border-bottom:1px solid var(--line);color:var(--mut);white-space:nowrap';hd.appendChild(th)});t.appendChild(hd);
+  rows.forEach(function(r){var tr=el('tr');[r.game||'-',r.room,r.name,r.pin||'-',r.last||r.first,String(r.joins||0)].forEach(function(x,i){var td=el('td',null,x);td.style.cssText='padding:3px 6px;border-bottom:1px solid var(--line);white-space:nowrap'+(i===3?';font-family:monospace':'')+(r.room===NET.code?'':';opacity:.7');tr.appendChild(td)});t.appendChild(tr)});
+  host.appendChild(t)
+}
+function csvCell(x){x=String(x==null?'':x);if(/^[=+\-@\t\r]/.test(x))x="'"+x;return '"'+x.replace(/"/g,'""')+'"'}
+function saveFile(name,type,text){var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:type}));a.download=name;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},500)}
+function escH(x){return String(x==null?'':x).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function regText(){return regRows().map(function(r){return (r.game||'(no game name)')+' | room '+r.room+' | '+r.name+' | code '+(r.pin||'unknown')+' | last joined '+(r.last||r.first)}).join('\n')}
+function bindRegister(){
+  $('#rcsv').addEventListener('click',function(){var l=['Game,Room,Name,Code,First seen,Last joined,Joins'];regRows().forEach(function(r){l.push([r.game,r.room,r.name,r.pin,r.first,r.last,r.joins].map(csvCell).join(','))});saveFile('border-table-register.csv','text/csv;charset=utf-8','﻿'+l.join('\r\n'))});
+  $('#rdoc').addEventListener('click',function(){
+    var h='<html><head><meta charset="utf-8"><title>Border Table register</title></head><body><h1>Border Table: player register</h1><p>Created '+escH(stamp())+'. Contains personal codes. Keep private.</p><table border="1" cellpadding="4" style="border-collapse:collapse"><tr><th>Game</th><th>Room</th><th>Name</th><th>Code</th><th>First seen</th><th>Last joined</th><th>Joins</th></tr>';
+    regRows().forEach(function(r){h+='<tr>'+[r.game,r.room,r.name,r.pin,r.first,r.last,r.joins].map(function(x){return '<td>'+escH(x)+'</td>'}).join('')+'</tr>'});
+    saveFile('border-table-register.doc','application/msword',h+'</table></body></html>')});
+  $('#rcopy').addEventListener('click',function(){var t=regText();if(!t){toast('Nothing to copy');return}function fb(){toast('Could not copy automatically')}try{navigator.clipboard.writeText(t).then(function(){toast('Register copied')},fb)}catch(e){fb()}});
+  var cl=$('#rclear'),armed=false;cl.addEventListener('click',function(){if(!armed){armed=true;cl.textContent='Tap again: clear';setTimeout(function(){armed=false;cl.textContent='Clear register'},2500);return}regSaveAll([]);renderRegister()});
+  renderRegister()
+}
+
 /* landing screen */
 var last={};try{last=JSON.parse(localStorage.getItem('bt_last')||'{}')}catch(e){}
-$('#jname').value=last.name||'';$('#hname').value=last.hname||'';
+$('#jname').value=last.name||'';$('#hname').value=last.hname||'';$('#hgame').value=last.hgame||'';
 $('#jcode').value=cleanCode((location.hash||'').replace('#',''))||last.jcode||'';
 $('#hcode').value=last.hcode||codeGen();
-function saveLast(){try{localStorage.setItem('bt_last',JSON.stringify({name:$('#jname').value.trim(),hname:$('#hname').value.trim(),jcode:cleanCode($('#jcode').value),hcode:cleanCode($('#hcode').value)}))}catch(e){}}
+function saveLast(){try{localStorage.setItem('bt_last',JSON.stringify({name:$('#jname').value.trim(),hname:$('#hname').value.trim(),hgame:$('#hgame').value.trim(),jcode:cleanCode($('#jcode').value),hcode:cleanCode($('#hcode').value)}))}catch(e){}}
 $('#hnew').addEventListener('click',function(){$('#hcode').value=codeGen()});
 $('#hgo').addEventListener('click',function(){
   var c=cleanCode($('#hcode').value);if(c.length<4){say('Room code needs at least 4 letters or numbers.');return}
-  say('Opening the table…');saveLast();hostStart(c,$('#hname').value.trim()||'Operator')
+  say('Opening the table…');saveLast();hostStart(c,$('#hname').value.trim()||'Operator',$('#hgame').value.trim())
 });
 $('#jgo').addEventListener('click',function(){
   var c=cleanCode($('#jcode').value),n=$('#jname').value.trim(),p=$('#jpin').value;
