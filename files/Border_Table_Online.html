@@ -65,6 +65,23 @@ header h1 span{color:var(--acc)}
 .tabs{display:flex;border-bottom:1px solid var(--line)}
 .tabs button{flex:1;border:0;border-radius:12px 12px 0 0;background:transparent;min-height:40px;font-weight:600;color:var(--mut)}
 .tabs button.on{color:var(--fg);box-shadow:inset 0 -3px 0 var(--acc)}
+
+body{background-image:radial-gradient(1100px 420px at 50% -100px,rgba(34,184,207,.16),transparent 70%)}
+header{position:relative;overflow:hidden;border-radius:14px;padding:14px 18px;background:linear-gradient(90deg,#06182c,#0b3a63 60%,#12809f);color:#fff;border:1px solid rgba(95,212,228,.35);box-shadow:0 6px 20px rgba(6,40,70,.28);min-height:92px;align-content:center}
+header .hsvg{position:absolute;inset:0;width:100%;height:100%;z-index:0;-webkit-mask-image:linear-gradient(90deg,transparent,#000 30%);mask-image:linear-gradient(90deg,transparent,#000 30%)}
+header>*:not(.hsvg){position:relative;z-index:1}
+header h1{color:#fff;text-shadow:0 2px 10px rgba(0,0,0,.5);font-size:26px;letter-spacing:.08em}
+header h1 span{color:#5fd4e4}
+header .lbl{color:#cfe6f1}
+header .chip{background:rgba(6,24,44,.75);border-color:rgba(95,212,228,.4);color:#e6f4fa}
+header input{background:rgba(6,24,44,.7);color:#fff;border-color:rgba(95,212,228,.45)}
+.card{border-top:3px solid var(--acc)}
+.pane>.lbl{display:flex;align-items:center;gap:7px;padding:4px 9px;border-radius:7px;color:var(--fg);font-weight:600;background:linear-gradient(90deg,rgba(17,134,184,.28),rgba(17,134,184,0) 85%)}
+.pane>.lbl::before{content:"";width:13px;height:15px;flex:none;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 22'%3E%3Cpath d='M10 1 L19 6 V16 L10 21 L1 16 V6Z' fill='%235fd4e4' stroke='%231186b8' stroke-width='1.5'/%3E%3C/svg%3E") center/contain no-repeat}
+.tabs{background:linear-gradient(180deg,rgba(17,134,184,.12),transparent);border-radius:12px 12px 0 0}
+.tabs button.on{background:linear-gradient(180deg,transparent,rgba(17,134,184,.18))}
+button.pri{background:linear-gradient(90deg,#0a3f73,#1186b8);color:#fff;border-color:transparent}
+.mapscroll{border:2px solid rgba(17,134,184,.45)}
 .pane{padding:10px;display:none}
 .pane.on{display:block}
 #log{height:300px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;padding:2px}
@@ -95,8 +112,9 @@ header h1 span{color:var(--acc)}
 
 [hidden]{display:none!important}
 body.online #nick,body.online label:has(#nick){display:none}
-#landing{position:fixed;inset:0;z-index:40;background:var(--bg);overflow:auto;display:grid;place-items:center;padding:16px}
+#landing{position:fixed;inset:0;z-index:40;background:var(--bg) radial-gradient(900px 420px at 50% 0,rgba(34,184,207,.2),transparent 70%);overflow:auto;display:grid;place-items:center;padding:16px}
 .lcard{max-width:760px;width:100%}
+.lhero{position:relative;overflow:hidden;border-radius:14px;padding:26px 24px;margin-bottom:12px;background:#06182c;border:1px solid rgba(95,212,228,.35);min-height:110px;box-shadow:0 6px 20px rgba(6,40,70,.3)}.lhero .hsvg{position:absolute;inset:0;width:100%;height:100%}.lhero h1{position:relative;color:#fff;margin:0;text-shadow:0 2px 10px rgba(0,0,0,.5)}.lhero h1 span{color:#5fd4e4}
 .lcard h1{font-size:30px;margin:0 0 6px}
 .lcard h1 span{color:var(--acc)}
 .lgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin:14px 0}
@@ -110,7 +128,7 @@ body.online #nick,body.online label:has(#nick){display:none}
 <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
 </head>
 <body>
-<header>
+<header><svg class="hsvg" viewBox="0 0 980 200" preserveAspectRatio="xMaxYMid meet" aria-hidden="true"><defs><pattern id="hx" width="56" height="97" patternUnits="userSpaceOnUse" patternTransform="scale(.8)"><path d="M28 0 L56 16 L56 48 L28 64 L0 48 L0 16 Z M28 64 L28 97 M0 48 L0 81 L28 97 L56 81 L56 48" fill="none" stroke="#7fd3ea" stroke-opacity=".16" stroke-width="1.2"/></pattern><radialGradient id="gl"><stop offset="0" stop-color="#22c3dc" stop-opacity=".55"/><stop offset="1" stop-color="#22c3dc" stop-opacity="0"/></radialGradient><linearGradient id="bgg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#06182c"/><stop offset=".55" stop-color="#0b3a63"/><stop offset="1" stop-color="#12809f"/></linearGradient></defs><rect width="980" height="200" fill="url(#bgg)"/><rect width="980" height="200" fill="url(#hx)"/><ellipse cx="800" cy="100" rx="64.6" ry="75" fill="url(#gl)"/><ellipse cx="800" cy="100" rx="45.9" ry="62.5" fill="none" stroke="#5fd4e4" stroke-opacity=".5" stroke-width="2"/><ellipse cx="800" cy="100" rx="39.1" ry="56" fill="none" stroke="#5fd4e4" stroke-opacity=".7" stroke-width="2" stroke-dasharray="9 7"/><ellipse cx="800" cy="100" rx="34" ry="50" fill="#040d17" stroke="#c9f6ff" stroke-width="4"/><g><polygon points="660,44 673.92,52 660,60 646.08,52" fill="#bff4ff"/><polygon points="646.08,52 660,60 660,76 646.08,68" fill="#6aa9b8"/><polygon points="673.92,52 660,60 660,76 673.92,68" fill="#8ec3d0"/></g><g><polygon points="930,38 940.44,44 930,50 919.56,44" fill="#f6a03a"/><polygon points="919.56,44 930,50 930,62 919.56,56" fill="#b2661a"/><polygon points="940.44,44 930,50 930,62 940.44,56" fill="#d4842a"/></g><g><polygon points="700,140 708.7,145 700,150 691.3,145" fill="#27c4dc"/><polygon points="691.3,145 700,150 700,160 691.3,155" fill="#17808f"/><polygon points="708.7,145 700,150 700,160 708.7,155" fill="#1da0b3"/></g><g><polygon points="905,136 917.18,143 905,150 892.82,143" fill="#7fb8ff"/><polygon points="892.82,143 905,150 905,164 892.82,157" fill="#3b6fb8"/><polygon points="917.18,143 905,150 905,164 917.18,157" fill="#5b93e0"/></g><g><polygon points="575,111 582.83,115.5 575,120 567.17,115.5" fill="#f6a03a"/><polygon points="567.17,115.5 575,120 575,129 567.17,124.5" fill="#b2661a"/><polygon points="582.83,115.5 575,120 575,129 582.83,124.5" fill="#d4842a"/></g><g fill="#040d17" transform="translate(800,0)"><circle cx="0" cy="104" r="6"/><path d="M-8 112 L8 112 L10 136 L-10 136Z"/></g><rect x="806" y="112" width="4" height="24" fill="#c9f6ff" transform="rotate(35 806 112)"/></svg>
   <h1 class="disp">BORDER <span>TABLE</span></h1>
   <div class="chips" id="peers"></div>
   <div class="row" id="roominfo"></div>
@@ -231,7 +249,7 @@ body.online #nick,body.online label:has(#nick){display:none}
 </div>
 <div id="landing">
  <div class="lcard">
-  <h1 class="disp">BORDER <span>TABLE ONLINE</span></h1>
+  <div class="lhero"><svg class="hsvg" viewBox="0 0 980 200" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><pattern id="hx" width="56" height="97" patternUnits="userSpaceOnUse" patternTransform="scale(.8)"><path d="M28 0 L56 16 L56 48 L28 64 L0 48 L0 16 Z M28 64 L28 97 M0 48 L0 81 L28 97 L56 81 L56 48" fill="none" stroke="#7fd3ea" stroke-opacity=".16" stroke-width="1.2"/></pattern><radialGradient id="gl"><stop offset="0" stop-color="#22c3dc" stop-opacity=".55"/><stop offset="1" stop-color="#22c3dc" stop-opacity="0"/></radialGradient><linearGradient id="bgg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#06182c"/><stop offset=".55" stop-color="#0b3a63"/><stop offset="1" stop-color="#12809f"/></linearGradient></defs><rect width="980" height="200" fill="url(#bgg)"/><rect width="980" height="200" fill="url(#hx)"/><ellipse cx="800" cy="100" rx="64.6" ry="75" fill="url(#gl)"/><ellipse cx="800" cy="100" rx="45.9" ry="62.5" fill="none" stroke="#5fd4e4" stroke-opacity=".5" stroke-width="2"/><ellipse cx="800" cy="100" rx="39.1" ry="56" fill="none" stroke="#5fd4e4" stroke-opacity=".7" stroke-width="2" stroke-dasharray="9 7"/><ellipse cx="800" cy="100" rx="34" ry="50" fill="#040d17" stroke="#c9f6ff" stroke-width="4"/><g><polygon points="660,44 673.92,52 660,60 646.08,52" fill="#bff4ff"/><polygon points="646.08,52 660,60 660,76 646.08,68" fill="#6aa9b8"/><polygon points="673.92,52 660,60 660,76 673.92,68" fill="#8ec3d0"/></g><g><polygon points="930,38 940.44,44 930,50 919.56,44" fill="#f6a03a"/><polygon points="919.56,44 930,50 930,62 919.56,56" fill="#b2661a"/><polygon points="940.44,44 930,50 930,62 940.44,56" fill="#d4842a"/></g><g><polygon points="700,140 708.7,145 700,150 691.3,145" fill="#27c4dc"/><polygon points="691.3,145 700,150 700,160 691.3,155" fill="#17808f"/><polygon points="708.7,145 700,150 700,160 708.7,155" fill="#1da0b3"/></g><g><polygon points="905,136 917.18,143 905,150 892.82,143" fill="#7fb8ff"/><polygon points="892.82,143 905,150 905,164 892.82,157" fill="#3b6fb8"/><polygon points="917.18,143 905,150 905,164 917.18,157" fill="#5b93e0"/></g><g><polygon points="575,111 582.83,115.5 575,120 567.17,115.5" fill="#f6a03a"/><polygon points="567.17,115.5 575,120 575,129 567.17,124.5" fill="#b2661a"/><polygon points="582.83,115.5 575,120 575,129 582.83,124.5" fill="#d4842a"/></g><g fill="#040d17" transform="translate(800,0)"><circle cx="0" cy="104" r="6"/><path d="M-8 112 L8 112 L10 136 L-10 136Z"/></g><rect x="806" y="112" width="4" height="24" fill="#c9f6ff" transform="rotate(35 806 112)"/></svg><h1 class="disp">BORDER <span>TABLE ONLINE</span></h1></div>
   <p class="hint" style="font-size:14px">Play together over the internet. No accounts. The Operator opens a table and shares a room code, and everyone else joins with that code and a personal code the table gives them.</p>
   <div class="lgrid">
    <section>
