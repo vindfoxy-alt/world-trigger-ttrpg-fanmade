@@ -199,6 +199,10 @@ body.online #nick,body.online label:has(#nick){display:none}
       <div class="lbl" style="margin-top:12px">Saved encounters</div>
       <label class="hint row"><input type="checkbox" id="encmap" checked> Load the map layout too</label>
       <div id="enclist"></div>
+      <div class="lbl" style="margin-top:12px">Players (names and personal codes)</div>
+      <p class="hint" style="margin:0 0 6px">Only you can see this. Codes are stored in this browser. If a friend forgets theirs, change it here and tell them. Their characters stay on the table.</p>
+      <div id="players"></div>
+      <div class="row" style="margin-top:6px"><input id="pname" placeholder="New player name" maxlength="20" style="flex:1;min-width:110px"><input id="ppin" placeholder="Code" maxlength="40" style="width:90px"><button id="pmake" title="Make a random code">Random</button><button id="padd" class="pri">Add</button></div>
       <div class="lbl" style="margin-top:12px">Enemy library (fixed stats from the Monster Manual)</div>
       <select id="libgrp" style="width:100%"></select>
       <div id="liblist"></div>
@@ -770,7 +774,10 @@ function hello(conn,m){
   if(sl==='operator'||sl==='host')return rej('Pick another name.');
   var r=NET.reg[sl];
   if(r&&r.h!==h)return rej('That name is already used at this table with a different personal code.');
-  if(!r){NET.reg[sl]={h:h,name:name};scheduleSave()}
+  var pin=String(m.pin||'').slice(0,40);
+  if(!r){NET.reg[sl]={h:h,name:name,pin:pin};scheduleSave()}
+  else if(!r.pin&&pin){r.pin=pin;scheduleSave()}
+  if(NET.entered)setTimeout(renderPlayers,0);
   conn._ok=true;conn._pid=sl;NET.conns[conn.peer]=conn;NET.pres[conn.peer]={nick:name,col:colorFor(sl)};
   conn.send({t:'welcome',pid:sl,id:conn.peer,data:snapshot(),list:peerList()});pushPeers()
 }
@@ -791,7 +798,7 @@ function onConn(conn){
       broadcast({t:'ev',topic:'move',data:m.data,from:conn.peer},conn.peer);fire('move',m.data,conn.peer)
     }else if(m.t==='pres'){mergePres(conn.peer,m.patch);pushPeers()}
   });
-  conn.on('close',function(){delete NET.conns[conn.peer];delete NET.pres[conn.peer];pushPeers()});
+  conn.on('close',function(){delete NET.conns[conn.peer];delete NET.pres[conn.peer];pushPeers();setTimeout(renderPlayers,0)});
   conn.on('error',function(){})
 }
 function hostStart(code,name){
@@ -824,7 +831,7 @@ function connect(){
   var conn=NET.peer.connect('wtbt-'+NET.code.toLowerCase(),{serialization:'json',reliable:true});
   NET.hostConn=conn;
   var to=setTimeout(function(){if(!conn.open){try{conn.close()}catch(e){}if(!NET.entered)say('Could not reach the table. Check the room code, or try again. Some school and work networks block this.');else retryLater()}},15000);
-  conn.on('open',function(){clearTimeout(to);conn.send({t:'hello',name:NET.creds.name,h:NET.creds.h})});
+  conn.on('open',function(){clearTimeout(to);conn.send({t:'hello',name:NET.creds.name,h:NET.creds.h,pin:NET.creds.pin})});
   conn.on('data',cdata);
   conn.on('close',function(){if(NET.hostConn===conn&&!NET.stop){banner('Lost the connection to the Operator. Reconnecting…');retryLater()}});
   conn.on('error',function(){})
@@ -835,7 +842,7 @@ function clientStart(code,name,pin){
   local.writer(function(op){if(NET.hostConn&&NET.hostConn.open){NET.hostConn.send({t:'w',k:op.k,path:op.path,data:op.data});return Promise.resolve()}return Promise.reject({code:'unavailable'})});
   sha('v:'+slug(name)+':'+pin).then(function(v){VK=v});
   sha(code+':'+slug(name)+':'+pin).then(function(h){
-    NET.creds={name:name,h:h};
+    NET.creds={name:name,h:h,pin:pin};
     var peer=NET.peer=new Peer({debug:0});
     peer.on('open',function(id){NET.myId=id;connect()});
     peer.on('error',function(e){
@@ -869,6 +876,7 @@ function enter(host){
   ROOM.presence({nick:nick,col:S.me.color});
   if(host)applyPeers(peerList());
   roomInfo(host);renderAs();banner('');
+  if(host)bindPlayers();
   if(!host){bindVault();var m0=mineSheets();var vl=readVault();if(!m0.length&&vl.length)restoreVault(vl,true)}
 }
 
@@ -902,6 +910,50 @@ function bindVault(){
     var t=$('#vin').value.trim();if(t.indexOf('WTV1:')!==0){toast('That is not a backup code');return}
     try{var l=JSON.parse(decodeURIComponent(escape(atob(t.slice(5)))));if(!Array.isArray(l))throw 0;restoreVault(l,false);$('#vin').value=''}catch(e){toast('That backup code is damaged')}});
   vaultMsg()
+}
+
+
+/* ---------- Operator: see, add, change and remove players ---------- */
+function onlineSlugs(){var o={};Object.keys(NET.conns).forEach(function(k){var c=NET.conns[k];if(c&&c.open&&c._pid)o[c._pid]=1});return o}
+function setPlayer(name,pin){
+  var sl=slug(name);if(!name||!pin||pin.length<3){toast('Enter a name and a code of at least 3 characters');return Promise.resolve(false)}
+  return sha(NET.code+':'+sl+':'+pin).then(function(h){var old=NET.reg[sl];NET.reg[sl]={h:h,name:old&&old.name?old.name:name,pin:pin};scheduleSave();renderPlayers();return true})
+}
+function loginText(r){return 'Border Table Online\nRoom code: '+NET.code+'\nLink: '+location.href.split('#')[0]+'#'+NET.code+'\nName: '+r.name+'\nPersonal code: '+(r.pin||'(ask the Operator)')}
+function renderPlayers(){
+  var host=$('#players');if(!host||!NET.host)return;
+  var a=document.activeElement;if(a&&host.contains(a)&&a.tagName==='INPUT')return;
+  host.textContent='';
+  var on=onlineSlugs(),ks=Object.keys(NET.reg).sort();
+  if(!ks.length){host.appendChild(el('p','hint','Nobody has joined yet. Add a player below, or let them join with their own code.'));return}
+  ks.forEach(function(k){
+    var r=NET.reg[k],c=el('div','insp');c.style.marginTop='6px';
+    var top=el('div','row');top.style.justifyContent='space-between';
+    var nm=el('b',null,r.name||k);top.appendChild(nm);
+    if(on[k]){var o=el('span','hint','● online');o.style.color='var(--good)';top.appendChild(o)}
+    c.appendChild(top);
+    var cd=el('div',null,'Code: ');var v=el('b',null,r.pin||'unknown');v.style.fontFamily='monospace';cd.appendChild(v);
+    if(!r.pin)cd.appendChild(el('span','hint',' (they joined before codes were saved: set a new one)'));c.appendChild(cd);
+    var row=el('div','row');row.style.marginTop='6px';
+    var ch=el('button',null,'Change code');
+    ch.addEventListener('click',function(){
+      row.textContent='';var i=el('input');i.placeholder='New code';i.maxLength=40;i.style.width='110px';
+      var rn=el('button',null,'Random');rn.addEventListener('click',function(){i.value=codeGen()});
+      var sv=el('button','pri','Save');sv.addEventListener('click',function(){setPlayer(r.name||k,i.value.trim())});
+      var cn=el('button',null,'Cancel');cn.addEventListener('click',renderPlayers);row.append(i,rn,sv,cn);i.focus()});
+    var cp=el('button',null,'Copy login info');
+    cp.addEventListener('click',function(){var t=loginText(r);function fb(){toast('Could not copy. Code: '+(r.pin||'unknown'))}try{navigator.clipboard.writeText(t).then(function(){toast('Login info copied')},fb)}catch(e){fb()}});
+    var rm=el('button','bad','Remove');var armed=false;
+    rm.addEventListener('click',function(){if(!armed){armed=true;rm.textContent='Tap again';setTimeout(function(){armed=false;rm.textContent='Remove'},2500);return}delete NET.reg[k];scheduleSave();renderPlayers()});
+    row.append(ch,cp,rm);c.appendChild(row);host.appendChild(c)
+  })
+}
+function bindPlayers(){
+  $('#pmake').addEventListener('click',function(){$('#ppin').value=codeGen()});
+  $('#padd').addEventListener('click',function(){var n=$('#pname').value.trim(),p=$('#ppin').value.trim();
+    if(NET.reg[slug(n)]){toast('That name already exists. Use Change code on it.');return}
+    setPlayer(n,p).then(function(ok){if(ok){$('#pname').value='';$('#ppin').value=''}})});
+  renderPlayers()
 }
 
 /* landing screen */
