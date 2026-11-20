@@ -42,7 +42,7 @@ header h1 span{color:var(--acc)}
 .gridl{position:absolute;inset:0;background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:40px 40px;pointer-events:none}
 .tk{position:absolute;touch-action:none;cursor:grab;user-select:none;display:flex;flex-direction:column;align-items:center;justify-content:center}
 .tk.drag{cursor:grabbing;z-index:5}
-.face{width:86%;aspect-ratio:1;border-radius:50%;border:3px solid var(--tc);background:color-mix(in srgb,var(--tc) 22%,var(--panel));display:grid;place-items:center;font:700 14px "Space Grotesk",sans-serif;box-shadow:0 2px 6px rgba(0,0,0,.35)}
+.face{background-size:cover;background-position:center;width:86%;aspect-ratio:1;border-radius:50%;border:3px solid var(--tc);background:color-mix(in srgb,var(--tc) 22%,var(--panel));display:grid;place-items:center;font:700 14px "Space Grotesk",sans-serif;box-shadow:0 2px 6px rgba(0,0,0,.35)}
 .tk.sel .face{outline:3px solid var(--fg);outline-offset:2px}
 .tk.act .face{box-shadow:0 0 0 4px color-mix(in srgb,var(--tc) 50%,transparent),0 0 16px var(--tc)}
 .tk.out{opacity:.38;filter:grayscale(1)}
@@ -175,10 +175,12 @@ body.online #nick,body.online label:has(#nick){display:none}
     <div class="pane" id="p-table">
       <div class="lbl">Map</div>
       <div class="row">
-        <select id="mapbg"><option value="grid">Open grid</option><option value="city">Border city</option><option value="forest">Forest</option><option value="interior">Interior</option></select>
+        <select id="mapbg"><option value="grid">Open grid</option><option value="city">Border city</option><option value="forest">Forest</option><option value="interior">Interior</option><option value="image">My picture</option></select>
         <button id="remap">New layout</button>
       </div>
-      <div class="row"><label class="hint">Columns <input id="cols" type="number" class="num" min="8" max="40"></label><label class="hint">Rows <input id="rows" type="number" class="num" min="6" max="30"></label></div>
+      <div class="row"><button id="mapimp">Import map picture…</button></div>
+      <p class="hint" style="margin:4px 0 0">Any image works. Set Columns to how many grid squares your picture is wide. You can also drag a picture onto the map.</p>
+      <div class="row"><label class="hint">Columns <input id="cols" type="number" class="num" min="8" max="40"></label><label class="hint">Rows <input id="rows" type="number" class="num" min="6" max="40"></label></div>
       <div class="lbl" style="margin-top:12px">Tokens</div>
       <div class="row"><input id="tname" placeholder="Name" style="flex:1"><select id="tteam"><option value="A">Team A</option><option value="B">Team B</option><option value="N">Enemy</option></select></div>
       <div class="row"><label class="hint">Max Trion <input id="tmax" type="number" class="num" value="40"></label><button id="addtok" class="pri">Add token</button></div>
@@ -262,7 +264,7 @@ var CELL=40;
 var CLASSES=['Attacker','Gunner','Shooter','Sniper','Trapper','Assassin','Tactician','Counterstriker','Aftokrator'];
 var STATS=['STR','DEX','STA','TRION','INT','CHA'];
 var LOC=['Head','Chest','L Arm','R Arm','L Leg','R Leg'];
-var S={tokens:{},sheets:{},log:[],map:{bg:'grid',seed:7,cols:24,rows:16},turn:{id:null,round:1},sel:null,selSheet:null,tab:'chat',peers:[],over:{},zoom:1,canWrite:true,synced:false,me:{id:null,name:'',color:'#0a8fa3'},isAdmin:false};
+var S={assets:{},tokens:{},sheets:{},log:[],map:{bg:'grid',seed:7,cols:24,rows:16},turn:{id:null,round:1},sel:null,selSheet:null,tab:'chat',peers:[],over:{},zoom:1,canWrite:true,synced:false,me:{id:null,name:'',color:'#0a8fa3'},isAdmin:false};
 var DB=null,ROOM=null,unsubs=[],nick='';
 try{nick=localStorage.getItem('bt_nick')||''}catch(e){}
 
@@ -314,6 +316,7 @@ function subscribe(){
   if(opVisible())unsubs.push(DB.collection('encounters').onSnapshot(function(s){S.enc={};s.docs.forEach(function(d){S.enc[d.id]=d.data()});renderEnc()},function(){}));
   unsubs.push(DB.collection('sheets').onSnapshot(function(s){S.sheets={};s.docs.forEach(function(d){S.sheets[d.id]=d.data()});renderSheetList();if(window.vaultSync)vaultSync();renderSheet();renderAs();renderTokens();renderInspector()},err));
   unsubs.push(DB.collection('log').orderBy('t','desc').limit(150).onSnapshot(function(s){S.log=s.docs.map(function(d){var o=d.data();o._id=d.id;return o}).reverse();renderLog();prune()},err));
+  unsubs.push(DB.collection('assets').onSnapshot(function(s){S.assets={};s.docs.forEach(function(d){S.assets[d.id]=d.data()});renderMap()},err));
   unsubs.push(DB.doc('game/map').onSnapshot(function(d){if(d.exists){S.map=Object.assign({bg:'grid',seed:7,cols:24,rows:16},d.data())}renderMap();renderTableForm()},err));
   unsubs.push(DB.doc('game/turn').onSnapshot(function(d){if(d.exists){S.turn=Object.assign({id:null,round:1},d.data())}renderTokens();renderTurnLbl()},err));
 }
@@ -403,10 +406,14 @@ function renderMap(){
   var m=S.map,map=$('#map'),w=m.cols*CELL,h=m.rows*CELL,z=S.zoom;
   map.style.width=w+'px';map.style.height=h+'px';map.style.transform='scale('+z+')';
   var wrap=$('#wrap');wrap.style.width=w*z+'px';wrap.style.height=h*z+'px';
-  var key=m.bg+'|'+m.seed+'|'+m.cols+'|'+m.rows;
-  if(map._k!==key){map._k=key;$('#art').innerHTML=artSvg(m)}
+  var asset=m.bg==='image'?S.assets[m.imgId]:null;
+  var key=m.bg+'|'+m.seed+'|'+m.cols+'|'+m.rows+'|'+(m.bg==='image'?(m.imgId||'')+(asset?'+':'-'):'');
+  if(map._k!==key){map._k=key;var art=$('#art');
+    if(m.bg==='image'){art.textContent='';if(asset&&okJpeg(asset.data)){var im=new Image();im.alt='';im.src=asset.data;im.style.cssText='position:absolute;inset:0;width:100%;height:100%;object-fit:fill;pointer-events:none;user-select:none';art.appendChild(im)}}
+    else art.innerHTML=artSvg(m)}
   $('#zlbl').textContent=Math.round(z*100)+'%';
 }
+function okJpeg(d){return typeof d==='string'&&d.length<260000&&/^data:image\/jpeg;base64,[A-Za-z0-9+\/=]+$/.test(d)}
 function initials(n){var p=String(n||'?').trim().split(/\s+/);return ((p[0]||'?')[0]+(p[1]?p[1][0]:'')).toUpperCase()}
 function tTrion(t){var sh=t.sheet&&S.sheets[t.sheet];return sh?{cur:+sh.cur||0,max:+sh.max||1,linked:true}:{cur:+t.cur||0,max:+t.max||1,linked:false}}
 function order(){return Object.keys(S.tokens).filter(function(k){return typeof S.tokens[k].init==='number'}).sort(function(a,b){return S.tokens[b].init-S.tokens[a].init||(a<b?-1:1)})}
@@ -420,7 +427,8 @@ function renderTokens(){
     var sz=t.size||1,o=S.over[id],x=o?o.x:t.x,y=o?o.y:t.y,tr=tTrion(t),pct=Math.max(0,Math.min(100,100*tr.cur/tr.max));
     e.style.width=sz*CELL+'px';e.style.height=sz*CELL+'px';e.style.left=x*CELL+'px';e.style.top=y*CELL+'px';
     e.style.setProperty('--tc','var(--'+(t.team||'N')+')');
-    e.firstChild.textContent=initials(t.name);
+    if(okJpeg(t.img)){e.firstChild.textContent='';e.firstChild.style.backgroundImage='url('+t.img+')'}
+    else{e.firstChild.style.backgroundImage='';e.firstChild.textContent=initials(t.name)}
     var bar=e.children[1];bar.className='bar'+(pct<=25?' crit':pct<=50?' low':'');bar.firstChild.style.width=pct+'%';
     e.children[2].textContent=t.name||'';
     e.classList.toggle('sel',S.sel===id);e.classList.toggle('act',S.turn.id===id);e.classList.toggle('out',!!t.out||tr.cur<=0);
@@ -481,6 +489,9 @@ function renderInspector(force){
   var sz=el('select');[[1,'1×1'],[2,'2×2'],[3,'3×3']].forEach(function(p){var o=el('option',null,p[1]);o.value=p[0];sz.appendChild(o)});sz.value=t.size||1;
   sz.addEventListener('change',function(){patchToken(id,{size:+sz.value})});
   r1.append(nm,tm,sz);box.appendChild(r1);
+  var rp=el('div','row');var pb=el('button',null,t.img?'Change picture':'Add picture');pb.addEventListener('click',function(){pickImage(function(f){tokenPicture(id,f)})});rp.appendChild(pb);
+  if(t.img){var pr=el('button',null,'Remove picture');pr.addEventListener('click',function(){patchToken(id,{img:''})});rp.appendChild(pr)}
+  box.appendChild(rp);
   if(t.info){var inf=el('div','hint',t.info);inf.style.margin='6px 0 0';box.appendChild(inf)}
   var r2=el('div','row');
   r2.appendChild(el('span','lbl','Trion'));
@@ -626,7 +637,7 @@ function saveEncounter(){
   Object.keys(S.tokens).forEach(function(k){var t=S.tokens[k];if(!all&&t.team==='A')return;
     var tr=tTrion(t);toks.push({name:t.name||'Token',team:t.team||'N',x:t.x,y:t.y,size:t.size||1,max:tr.max,info:t.info||''})});
   if(!toks.length){msg.textContent='No tokens to save. Add some enemies first.';return}
-  var id=uid(),o={name:name.slice(0,50),notes:$('#encnote').value.slice(0,2000),map:{bg:S.map.bg,seed:S.map.seed,cols:S.map.cols,rows:S.map.rows},tokens:toks.slice(0,60),t:Date.now()};
+  var id=uid(),o={name:name.slice(0,50),notes:$('#encnote').value.slice(0,2000),map:{bg:(S.map.bg==='image'?'grid':S.map.bg),seed:S.map.seed,cols:S.map.cols,rows:S.map.rows},tokens:toks.slice(0,60),t:Date.now()};
   W('encounters/'+id,function(){return DB.doc('encounters/'+id).set(o)});
   $('#encname').value='';$('#encnote').value='';msg.textContent='Saved '+toks.length+' tokens.';
 }
@@ -644,7 +655,7 @@ function updateEncounter(id){
   var e=S.enc[id];if(!e)return;var all=$('#encall').checked,toks=[];
   Object.keys(S.tokens).forEach(function(k){var t=S.tokens[k];if(!all&&t.team==='A')return;var tr=tTrion(t);toks.push({name:t.name||'Token',team:t.team||'N',x:t.x,y:t.y,size:t.size||1,max:tr.max,info:t.info||''})});
   if(!toks.length){toast('No tokens on the table to save');return}
-  W('encounters/'+id,function(){return DB.doc('encounters/'+id).update({tokens:toks.slice(0,60),map:{bg:S.map.bg,seed:S.map.seed,cols:S.map.cols,rows:S.map.rows},t:Date.now()})});toast('Updated '+e.name);
+  W('encounters/'+id,function(){return DB.doc('encounters/'+id).update({tokens:toks.slice(0,60),map:{bg:(S.map.bg==='image'?'grid':S.map.bg),seed:S.map.seed,cols:S.map.cols,rows:S.map.rows},t:Date.now()})});toast('Updated '+e.name);
 }
 function renderEnc(){
   var host=$('#enclist');host.textContent='';
@@ -662,6 +673,64 @@ function renderEnc(){
     var d=el('button','bad','Delete');var armed=false;d.addEventListener('click',function(){if(!armed){armed=true;d.textContent='Tap again';setTimeout(function(){armed=false;d.textContent='Delete'},2500);return}W('encounters/'+id,function(){return DB.doc('encounters/'+id).delete()})});
     r.append(a,b,u,d);c.appendChild(r);host.appendChild(c)})
 }
+
+
+/* ---------- pictures: import map images and token pictures (button or drag and drop) ---------- */
+function loadImg(file){return new Promise(function(res,rej){
+  if(!file||!/^image\//.test(file.type)){rej('That is not a picture file.');return}
+  var u=URL.createObjectURL(file),i=new Image();
+  i.onload=function(){URL.revokeObjectURL(u);res(i)};i.onerror=function(){URL.revokeObjectURL(u);rej('Could not read that picture.')};i.src=u})}
+function toJpeg(img,w,h,q,crop){
+  var c=document.createElement('canvas');c.width=w;c.height=h;var x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,w,h);
+  if(crop){var side=Math.min(img.naturalWidth,img.naturalHeight);x.drawImage(img,(img.naturalWidth-side)/2,(img.naturalHeight-side)/2,side,side,0,0,w,h)}else x.drawImage(img,0,0,w,h);
+  return c.toDataURL('image/jpeg',q)}
+function mapJpeg(img){
+  var W0=img.naturalWidth,H0=img.naturalHeight,sc=Math.min(1,1600/Math.max(W0,H0));
+  for(var n=0;n<8;n++){var w=Math.max(200,Math.round(W0*sc)),h=Math.max(200,Math.round(H0*sc));
+    var qs=[.8,.7,.6,.5];for(var i=0;i<qs.length;i++){var d=toJpeg(img,w,h,qs[i],false);if(d.length<=190000)return d}
+    sc*=.8}
+  return null}
+function pickImage(cb){var f=document.createElement('input');f.type='file';f.accept='image/*';f.onchange=function(){if(f.files&&f.files[0])cb(f.files[0])};f.click()}
+function importMap(file){
+  if(!(S.local||S.isAdmin)){toast('Only the Operator can change the map');return}
+  loadImg(file).then(function(img){
+    var d=mapJpeg(img);if(!d){toast('That picture is too detailed. Try a smaller one.');return}
+    var aspect=img.naturalHeight/img.naturalWidth,cols=Math.max(8,Math.min(40,S.map.cols||24)),rows=Math.max(6,Math.min(40,Math.round(cols*aspect)));
+    var id=uid(),old=S.map.imgId;S.assets[id]={data:d};
+    W('assets/'+id,function(){return DB.doc('assets/'+id).set({data:d})});
+    if(old&&old!==id)W('assets/'+old,function(){return DB.doc('assets/'+old).delete()});
+    setMap({bg:'image',imgId:id,aspect:+aspect.toFixed(4),cols:cols,rows:rows});toast('Map picture imported')
+  }).catch(function(e){toast(String(e))})}
+function tokenPicture(id,file){
+  loadImg(file).then(function(img){var d=toJpeg(img,128,128,.8,true);if(d.length>24000)d=toJpeg(img,96,96,.7,true);patchToken(id,{img:d});toast('Picture set')}).catch(function(e){toast(String(e))})}
+function newPictureToken(file,team){
+  loadImg(file).then(function(img){var d=toJpeg(img,128,128,.8,true);if(d.length>24000)d=toJpeg(img,96,96,.7,true);
+    var sp=freeSpot?freeSpot():[1,1],id=uid(),nm=String(file.name||'Token').replace(/\.[^.]+$/,'').slice(0,24)||'Token';
+    var o={name:nm,team:team,x:Math.min(sp[0],S.map.cols-1),y:Math.min(sp[1],S.map.rows-1),size:1,cur:40,max:40,out:false,img:d};
+    W('tokens/'+id,function(){return DB.doc('tokens/'+id).set(o)});S.sel=id;toast('Token added')}).catch(function(e){toast(String(e))})}
+function dropChooser(file,x,y){
+  var old=$('#dropbox');if(old)old.remove();
+  var b=el('div','card');b.id='dropbox';b.style.cssText='position:fixed;z-index:60;padding:12px;max-width:300px;left:'+Math.max(8,Math.min(innerWidth-310,x-60))+'px;top:'+Math.max(8,Math.min(innerHeight-260,y-20))+'px';
+  b.appendChild(el('div','lbl','What is this picture?'));
+  function add(label,fn,pri){var bt=el('button',pri?'pri':'',label);bt.style.cssText='display:block;width:100%;margin-top:6px';bt.addEventListener('click',function(){b.remove();fn()});b.appendChild(bt)}
+  if(S.local||S.isAdmin)add('Map background',function(){importMap(file)},true);
+  if(S.sel&&S.tokens[S.sel])add('Picture for the selected token',function(){tokenPicture(S.sel,file)});
+  if(S.local||S.isAdmin){add('New token: Team A',function(){newPictureToken(file,'A')});add('New token: Team B',function(){newPictureToken(file,'B')});add('New token: Enemy',function(){newPictureToken(file,'N')})}
+  else add('New token of my own',function(){newPictureToken(file,'A')});
+  var cn=el('button',null,'Cancel');cn.style.cssText='display:block;width:100%;margin-top:6px';cn.addEventListener('click',function(){b.remove()});b.appendChild(cn);
+  document.body.appendChild(b)}
+function bindDrop(){
+  var hasFiles=function(e){return e.dataTransfer&&Array.prototype.indexOf.call(e.dataTransfer.types||[],'Files')>=0};
+  document.addEventListener('dragover',function(e){if(hasFiles(e)){e.preventDefault();$('#scroll').style.outline='3px dashed var(--acc)'}});
+  document.addEventListener('dragleave',function(e){if(!e.relatedTarget)$('#scroll').style.outline=''});
+  document.addEventListener('drop',function(e){
+    if(!hasFiles(e))return;e.preventDefault();$('#scroll').style.outline='';
+    var f=e.dataTransfer.files&&e.dataTransfer.files[0];if(!f)return;
+    if(!/^image\//.test(f.type)){toast('Drop a picture file (png, jpg, gif, webp)');return}
+    var tk=e.target.closest&&e.target.closest('.tk');
+    if(tk&&tk.dataset.id&&S.tokens[tk.dataset.id]){S.sel=tk.dataset.id;renderTokens();renderInspector(true);tokenPicture(tk.dataset.id,f);return}
+    dropChooser(f,e.clientX,e.clientY)});
+  $('#mapimp').addEventListener('click',function(){pickImage(importMap)})}
 
 /* ---------- table tab ---------- */
 function renderTableForm(){
@@ -707,9 +776,9 @@ function bind(){
   $('#chatsend').addEventListener('click',send);$('#chatin').addEventListener('keydown',function(e){if(e.key==='Enter')send()});
   $('#zin').addEventListener('click',function(){S.zoom=Math.min(2,+(S.zoom+.15).toFixed(2));renderMap()});
   $('#zout').addEventListener('click',function(){S.zoom=Math.max(.4,+(S.zoom-.15).toFixed(2));renderMap()});
-  $('#mapbg').addEventListener('change',function(){setMap({bg:$('#mapbg').value})});
+  $('#mapbg').addEventListener('change',function(){var v=$('#mapbg').value;if(v==='image'&&!S.map.imgId){toast('Import a map picture first');$('#mapbg').value=S.map.bg;return}setMap({bg:v})});
   $('#remap').addEventListener('click',function(){setMap({seed:Math.floor(Math.random()*1e6)})});
-  ['cols','rows'].forEach(function(k){$('#'+k).addEventListener('input',function(){var v=Math.round(+$('#'+k).value),lo=k==='cols'?8:6,hi=k==='cols'?40:30;if(!(v>=lo&&v<=hi))return;debounce('mp'+k,500,function(){var p={};p[k]=v;setMap(p)})})});
+  ['cols','rows'].forEach(function(k){$('#'+k).addEventListener('input',function(){var v=Math.round(+$('#'+k).value),lo=k==='cols'?8:6,hi=40;if(!(v>=lo&&v<=hi))return;debounce('mp'+k,500,function(){var p={};p[k]=v;if(k==='cols'&&S.map.bg==='image'&&S.map.aspect){p.rows=Math.max(6,Math.min(40,Math.round(v*S.map.aspect)));$('#rows').value=p.rows}setMap(p)})})});
   $('#addtok').addEventListener('click',function(){var n=$('#tname').value.trim()||'Token';var id=addToken(n.slice(0,24),$('#tteam').value,Math.max(1,+$('#tmax').value||40),1,1);$('#tname').value='';S.sel=id});
   $('#starter').addEventListener('click',function(){
     for(var i=0;i<3;i++)addToken('Agent '+(i+1),'A',40,2,3+i*2);
@@ -733,7 +802,7 @@ function bind(){
 var NET={host:false,code:'',conns:{},hostConn:null,pres:{},myId:null,pid:null,name:'',peer:null,reg:{},entered:false,handlers:{},presT:null,saveT:null,creds:null,stop:false,rt:null};
 S.local=false;
 var local=DB=localDb();
-bind();updateOpTab();renderMap();renderTurnLbl();renderAs();renderSheetList();renderTableForm();renderLib();
+bind();bindDrop();updateOpTab();renderMap();renderTurnLbl();renderAs();renderSheetList();renderTableForm();renderLib();
 
 function say(t){$('#lmsg').textContent=t||''}
 function cleanCode(v){return String(v||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,8)}
@@ -745,7 +814,8 @@ function sha(str){
   var h=5381;for(var i=0;i<str.length;i++)h=((h<<5)+h+str.charCodeAt(i))|0;return Promise.resolve('d'+(h>>>0).toString(16))
 }
 function broadcast(msg,except){Object.keys(NET.conns).forEach(function(id){var c=NET.conns[id];if(c&&c.open&&id!==except){try{c.send(msg)}catch(e){}}})}
-function snapshot(){var d=local.dump(),o={};Object.keys(d).forEach(function(k){if(k.indexOf('encounters/')!==0)o[k]=d[k]});return o}
+function snapshot(){var d=local.dump(),o={};Object.keys(d).forEach(function(k){if(k.indexOf('encounters/')!==0&&k.indexOf('assets/')!==0)o[k]=d[k]});return o}
+function sendAssets(conn){var d=local.dump();Object.keys(d).forEach(function(k){if(k.indexOf('assets/')===0){try{conn.send({t:'w',k:'set',path:k,data:d[k]})}catch(e){}}})}
 function scheduleSave(){clearTimeout(NET.saveT);NET.saveT=setTimeout(function(){try{localStorage.setItem('bt_room_'+NET.code,JSON.stringify({data:local.dump(),reg:NET.reg,t:Date.now()}))}catch(e){}},800)}
 function peerList(){return Object.keys(NET.pres).map(function(id){return {id:id,pres:NET.pres[id]}})}
 function applyPeers(list){S.peers=list.map(function(x){return {peer:x.id,isMe:x.id===NET.myId,sameTab:x.id===NET.myId,presence:x.pres||{}}});renderPeers()}
@@ -763,8 +833,8 @@ function moveHandler(m){if(m.isMe||!m.data||typeof m.data.id!=='string')return;v
 /* Operator checks every change a player asks for */
 function validOp(op){
   if(['set','update','delete'].indexOf(op.k)<0)return false;
-  if(!/^(tokens|sheets|log|game|encounters)\/[A-Za-z0-9_-]{1,60}$/.test(op.path))return false;
-  if(op.k!=='delete'){if(!op.data||typeof op.data!=='object'||Array.isArray(op.data))return false;try{if(JSON.stringify(op.data).length>30000)return false}catch(e){return false}}
+  if(!/^(tokens|sheets|log|game|encounters|assets)\/[A-Za-z0-9_-]{1,60}$/.test(op.path))return false;
+  if(op.k!=='delete'){if(!op.data||typeof op.data!=='object'||Array.isArray(op.data))return false;try{if(JSON.stringify(op.data).length>(op.path.indexOf('assets/')===0?230000:30000))return false}catch(e){return false}}
   return true
 }
 function allowed(pid,m){
@@ -795,7 +865,7 @@ function hello(conn,m){
     if(NET.entered)setTimeout(renderPlayers,0);
     conn._ok=true;conn._pid=sl;NET.conns[conn.peer]=conn;NET.pres[conn.peer]={nick:name,col:colorFor(sl)};
     var w={t:'welcome',pid:sl,id:conn.peer,data:snapshot(),list:peerList()};if(code)w.code=code;
-    conn.send(w);pushPeers()
+    conn.send(w);sendAssets(conn);pushPeers()
   }
   if(!name)return rej('Enter your name.');
   if(sl==='operator'||sl==='host')return rej('Pick another name.');
