@@ -35,8 +35,8 @@ header h1 span{color:var(--acc)}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow)}
 .mapcard{padding:8px}
 .tools{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:8px}
-.mapscroll{overflow:auto;border-radius:8px;border:1px solid var(--line);max-height:68vh;background:var(--m0);touch-action:pan-x pan-y}
-.mapwrap{position:relative}
+.mapscroll{overflow:auto;border-radius:8px;border:1px solid var(--line);max-height:85vh;background:var(--m0);touch-action:pan-x pan-y}
+.mapwrap{position:relative;margin:0 auto}
 .map{position:absolute;left:0;top:0;transform-origin:0 0;background:var(--m0)}
 .map svg{position:absolute;inset:0;width:100%;height:100%}
 .gridl{position:absolute;inset:0;background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:40px 40px;pointer-events:none}
@@ -122,7 +122,7 @@ body.online #nick,body.online label:has(#nick){display:none}
 <div class="main">
   <section class="card mapcard">
     <div class="tools">
-      <button id="zout" title="Zoom out">−</button><span id="zlbl" class="hint" style="min-width:42px;text-align:center">100%</span><button id="zin" title="Zoom in">+</button>
+      <button id="zout" title="Zoom out">−</button><span id="zlbl" class="hint" style="min-width:42px;text-align:center">100%</span><button id="zin" title="Zoom in">+</button><button id="zfit" title="Fit the whole map to the screen">Fit</button>
       <span class="hint">Drag tokens. Everyone sees moves live.</span>
       <div class="sp"></div>
       <button id="nextturn" class="pri">Next turn</button>
@@ -278,7 +278,7 @@ var CELL=40;
 var CLASSES=['Attacker','Gunner','Shooter','Sniper','Trapper','Assassin','Tactician','Counterstriker','Aftokrator'];
 var STATS=['STR','DEX','STA','TRION','INT','CHA'];
 var LOC=['Head','Chest','L Arm','R Arm','L Leg','R Leg'];
-var S={assets:{},tokens:{},sheets:{},log:[],map:{bg:'grid',seed:7,cols:24,rows:16},turn:{id:null,round:1},sel:null,selSheet:null,tab:'chat',peers:[],over:{},zoom:1,canWrite:true,synced:false,me:{id:null,name:'',color:'#0a8fa3'},isAdmin:false};
+var S={fit:true,assets:{},tokens:{},sheets:{},log:[],map:{bg:'grid',seed:7,cols:24,rows:16},turn:{id:null,round:1},sel:null,selSheet:null,tab:'chat',peers:[],over:{},zoom:1,canWrite:true,synced:false,me:{id:null,name:'',color:'#0a8fa3'},isAdmin:false};
 var DB=null,ROOM=null,unsubs=[],nick='';
 try{nick=localStorage.getItem('bt_nick')||''}catch(e){}
 
@@ -419,6 +419,7 @@ function artSvg(m){
 }
 function renderMap(){
   var m=S.map,map=$('#map'),w=m.cols*CELL,h=m.rows*CELL,z=S.zoom;
+  if(S.fit){var sc0=$('#scroll'),aw=sc0.clientWidth-2,ah=Math.max(260,Math.min(innerHeight*.85,innerHeight-sc0.getBoundingClientRect().top-16));if(aw>50){z=Math.max(.2,Math.min(4,Math.min(aw/w,ah/h)));S.zoom=z}}
   map.style.width=w+'px';map.style.height=h+'px';map.style.transform='scale('+z+')';
   var wrap=$('#wrap');wrap.style.width=w*z+'px';wrap.style.height=h*z+'px';
   var asset=m.bg==='image'?S.assets[m.imgId]:null;
@@ -844,8 +845,10 @@ function bind(){
     var m=/^\/r(?:oll)?\s+(.+)$/i.exec(v);if(m){postRoll('Roll',m[1]);return}
     addLog({kind:'chat',text:v.slice(0,500)})}
   $('#chatsend').addEventListener('click',send);$('#chatin').addEventListener('keydown',function(e){if(e.key==='Enter')send()});
-  $('#zin').addEventListener('click',function(){S.zoom=Math.min(2,+(S.zoom+.15).toFixed(2));renderMap()});
-  $('#zout').addEventListener('click',function(){S.zoom=Math.max(.4,+(S.zoom-.15).toFixed(2));renderMap()});
+  $('#zfit').addEventListener('click',function(){S.fit=true;renderMap()});
+  window.addEventListener('resize',function(){if(S.fit)renderMap()});
+  $('#zin').addEventListener('click',function(){S.fit=false;S.zoom=Math.min(2,+(S.zoom+.15).toFixed(2));renderMap()});
+  $('#zout').addEventListener('click',function(){S.fit=false;S.zoom=Math.max(.4,+(S.zoom-.15).toFixed(2));renderMap()});
   $('#mapbg').addEventListener('change',function(){var v=$('#mapbg').value;if(v==='image'&&!S.map.imgId){toast('Import a map picture first');$('#mapbg').value=S.map.bg;return}setMap({bg:v})});
   $('#remap').addEventListener('click',function(){setMap({seed:Math.floor(Math.random()*1e6)})});
   ['cols','rows'].forEach(function(k){$('#'+k).addEventListener('input',function(){var v=Math.round(+$('#'+k).value),lo=k==='cols'?8:6,hi=40;if(!(v>=lo&&v<=hi))return;debounce('mp'+k,500,function(){var p={};p[k]=v;if(k==='cols'&&S.map.bg==='image'&&S.map.aspect){p.rows=Math.max(6,Math.min(40,Math.round(v*S.map.aspect)));$('#rows').value=p.rows}setMap(p)})})});
