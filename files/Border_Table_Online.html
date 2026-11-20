@@ -232,7 +232,11 @@ body.online #nick,body.online label:has(#nick){display:none}
     <label for="hgame">Game name</label><input id="hgame" maxlength="40" autocomplete="off" placeholder="e.g. Friday group, Mission 1">
     <label for="hname">Your name</label><input id="hname" maxlength="20" autocomplete="off" placeholder="Operator">
     <p class="hint" style="margin:6px 0 0">Keep this page open while you play. Open the same room code again later to carry on where you stopped. Your saved encounters stay in this browser.</p>
-    <div class="row"><button id="hgo" class="pri">Open table</button><button id="hnew">New code</button></div>
+    <label for="hpw">Operator password</label><input id="hpw" type="password" maxlength="40" autocomplete="off">
+    <p class="hint" id="hpwhint" style="margin:6px 0 0"></p>
+    <div class="row"><button id="hgo" class="pri">Open table</button><button id="hnew">New code</button><button id="hshow">My saved games</button></div>
+    <div id="hlist"></div>
+    <div class="row"><button id="hforgot" class="bad" style="font-size:12px;min-height:28px">Forgot the password? Erase everything saved</button></div>
    </section>
   </div>
   <div id="lmsg" aria-live="polite"></div>
@@ -733,7 +737,7 @@ function sha(str){
 }
 function broadcast(msg,except){Object.keys(NET.conns).forEach(function(id){var c=NET.conns[id];if(c&&c.open&&id!==except){try{c.send(msg)}catch(e){}}})}
 function snapshot(){var d=local.dump(),o={};Object.keys(d).forEach(function(k){if(k.indexOf('encounters/')!==0)o[k]=d[k]});return o}
-function scheduleSave(){clearTimeout(NET.saveT);NET.saveT=setTimeout(function(){try{localStorage.setItem('bt_room_'+NET.code,JSON.stringify({data:local.dump(),reg:NET.reg}))}catch(e){}},800)}
+function scheduleSave(){clearTimeout(NET.saveT);NET.saveT=setTimeout(function(){try{localStorage.setItem('bt_room_'+NET.code,JSON.stringify({data:local.dump(),reg:NET.reg,t:Date.now()}))}catch(e){}},800)}
 function peerList(){return Object.keys(NET.pres).map(function(id){return {id:id,pres:NET.pres[id]}})}
 function applyPeers(list){S.peers=list.map(function(x){return {peer:x.id,isMe:x.id===NET.myId,sameTab:x.id===NET.myId,presence:x.pres||{}}});renderPeers()}
 function pushPeers(){if(NET.presT)return;NET.presT=setTimeout(function(){NET.presT=null;var l=peerList();broadcast({t:'peers',list:l});applyPeers(l)},50)}
@@ -1008,10 +1012,51 @@ $('#jcode').value=cleanCode((location.hash||'').replace('#',''))||last.jcode||''
 $('#hcode').value=last.hcode||codeGen();
 function saveLast(){try{localStorage.setItem('bt_last',JSON.stringify({name:$('#jname').value.trim(),hname:$('#hname').value.trim(),hgame:$('#hgame').value.trim(),jcode:cleanCode($('#jcode').value),hcode:cleanCode($('#hcode').value)}))}catch(e){}}
 $('#hnew').addEventListener('click',function(){$('#hcode').value=codeGen()});
+/* Operator password: one per browser. It protects hosting, the saved games and the register. */
+function opState(){try{return JSON.parse(localStorage.getItem('bt_op')||'null')}catch(e){return null}}
+function opHint(){$('#hpwhint').textContent=opState()?'Enter your Operator password to open or resume a game.':'First time here: type a password you will remember. It protects your saved games and the player list on this device.'}
+function opCheck(pw){
+  var st=opState();
+  if(!st){if(pw.length<4)return Promise.resolve('short');var salt=codeGen()+codeGen();return sha(salt+':'+pw).then(function(h){try{localStorage.setItem('bt_op',JSON.stringify({s:salt,h:h}))}catch(e){return 'bad'}return 'new'})}
+  return sha(st.s+':'+pw).then(function(h){return h===st.h?'ok':'bad'})
+}
+function savedGames(){
+  var o=[];try{for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('bt_room_')===0){var code=k.slice(8),d=JSON.parse(localStorage.getItem(k)||'{}'),n=Object.keys(d.data||{}),game='';try{game=localStorage.getItem('bt_game_'+code)||''}catch(e){}
+    o.push({code:code,game:game,players:Object.keys(d.reg||{}).length,tokens:n.filter(function(x){return x.indexOf('tokens/')===0}).length,sheets:n.filter(function(x){return x.indexOf('sheets/')===0}).length,t:d.t||0})}}}catch(e){}
+  return o.sort(function(a,b){return b.t-a.t})
+}
+function showSaved(){
+  var host=$('#hlist');host.textContent='';var l=savedGames();
+  if(!l.length){host.appendChild(el('p','hint','No saved games yet. A game is saved automatically while you host it.'));return}
+  l.forEach(function(g){
+    var c=el('div','row');c.style.cssText='justify-content:space-between;margin-top:6px;border:1px solid var(--line);border-radius:8px;padding:6px 8px';
+    var t=el('div',null,'');var b=el('b',null,g.game||'(no name)');t.appendChild(b);
+    var info=el('div','hint',g.code+' · '+g.players+' player'+(g.players===1?'':'s')+' · '+g.sheets+' sheet'+(g.sheets===1?'':'s')+' · '+g.tokens+' token'+(g.tokens===1?'':'s'));t.appendChild(info);
+    var op=el('button','pri','Open');op.addEventListener('click',function(){$('#hcode').value=g.code;$('#hgame').value=g.game;$('#hgo').click()});
+    var del=el('button','bad','Delete');var armed=false;del.addEventListener('click',function(){if(!armed){armed=true;del.textContent='Tap again';setTimeout(function(){armed=false;del.textContent='Delete'},2500);return}try{localStorage.removeItem('bt_room_'+g.code);localStorage.removeItem('bt_game_'+g.code)}catch(e){}showSaved()});
+    var r=el('div','row');r.append(op,del);c.append(t,r);host.appendChild(c)})
+}
+opHint();
+function gate(then){
+  var pw=$('#hpw').value;
+  if(!pw){say('Type your Operator password first.');return}
+  opCheck(pw).then(function(r){
+    if(r==='short'){say('Pick a password of at least 4 characters.');return}
+    if(r==='bad'){say('Wrong Operator password.');return}
+    if(r==='new')say('Operator password created. Remember it: it cannot be recovered.');
+    opHint();then()
+  })
+}
 $('#hgo').addEventListener('click',function(){
   var c=cleanCode($('#hcode').value);if(c.length<4){say('Room code needs at least 4 letters or numbers.');return}
-  say('Opening the table…');saveLast();hostStart(c,$('#hname').value.trim()||'Operator',$('#hgame').value.trim())
+  gate(function(){say('Opening the table…');saveLast();hostStart(c,$('#hname').value.trim()||'Operator',$('#hgame').value.trim())})
 });
+$('#hshow').addEventListener('click',function(){gate(function(){say('');showSaved()})});
+$('#hpw').addEventListener('keydown',function(e){if(e.key==='Enter')$('#hgo').click()});
+(function(){var f=$('#hforgot'),armed=false;f.addEventListener('click',function(){
+  if(!armed){armed=true;f.textContent='Tap again: this deletes all saved games, players and the register';setTimeout(function(){armed=false;f.textContent='Forgot the password? Erase everything saved'},4000);return}
+  try{var ks=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&(k.indexOf('bt_room_')===0||k.indexOf('bt_game_')===0||k==='bt_register'||k==='bt_op'))ks.push(k)}ks.forEach(function(k){localStorage.removeItem(k)})}catch(e){}
+  $('#hlist').textContent='';$('#hpw').value='';opHint();say('Everything saved on this device was erased. You can set a new Operator password.');f.textContent='Forgot the password? Erase everything saved';armed=false})})();
 $('#jgo').addEventListener('click',function(){
   var c=cleanCode($('#jcode').value),n=$('#jname').value.trim(),p=$('#jpin').value;
   if(c.length<4||!n||p.length<3){say('Fill in the room code, your name and a personal code (at least 3 characters).');return}
