@@ -160,6 +160,14 @@ body.online #nick,body.online label:has(#nick){display:none}
         <textarea id="codein" rows="2" placeholder="WT1|Kenji Arashi|Aftokrator|1|3|1|2|1|0|-1|Lampyris Shard Guns,Scorpion||Super Strength"></textarea>
         <div class="row" style="margin-top:6px"><button id="impgo" class="pri">Import as new sheet</button><span id="impmsg" class="hint"></span></div>
       </details>
+      <details id="vault" style="margin-bottom:10px">
+        <summary style="cursor:pointer;font-weight:600">My saved characters</summary>
+        <p class="hint" style="margin:6px 0">Your characters are saved on this device under your name and personal code, so you can take them to any table. To use them on another device, copy the backup code and paste it there.</p>
+        <div id="vaultmsg" class="hint"></div>
+        <div class="row" style="margin-top:6px"><button id="vrestore">Restore saved characters</button><button id="vcopy">Copy backup code</button></div>
+        <textarea id="vin" rows="2" placeholder="Paste a backup code (starts with WTV1:)" style="margin-top:6px"></textarea>
+        <div class="row" style="margin-top:6px"><button id="vimport" class="pri">Import backup</button></div>
+      </details>
       <div class="sheetlist" id="sheetlist"></div>
       <div id="sheetbox"></div>
     </div>
@@ -282,7 +290,7 @@ function subscribe(){
   var first=function(){S.synced=true};
   unsubs.push(DB.collection('tokens').onSnapshot(function(s){S.tokens={};s.docs.forEach(function(d){S.tokens[d.id]=d.data()});first();renderTokens();renderInspector();renderTurnLbl()},err));
   if(opVisible())unsubs.push(DB.collection('encounters').onSnapshot(function(s){S.enc={};s.docs.forEach(function(d){S.enc[d.id]=d.data()});renderEnc()},function(){}));
-  unsubs.push(DB.collection('sheets').onSnapshot(function(s){S.sheets={};s.docs.forEach(function(d){S.sheets[d.id]=d.data()});renderSheetList();renderSheet();renderAs();renderTokens();renderInspector()},err));
+  unsubs.push(DB.collection('sheets').onSnapshot(function(s){S.sheets={};s.docs.forEach(function(d){S.sheets[d.id]=d.data()});renderSheetList();if(window.vaultSync)vaultSync();renderSheet();renderAs();renderTokens();renderInspector()},err));
   unsubs.push(DB.collection('log').orderBy('t','desc').limit(150).onSnapshot(function(s){S.log=s.docs.map(function(d){var o=d.data();o._id=d.id;return o}).reverse();renderLog();prune()},err));
   unsubs.push(DB.doc('game/map').onSnapshot(function(d){if(d.exists){S.map=Object.assign({bg:'grid',seed:7,cols:24,rows:16},d.data())}renderMap();renderTableForm()},err));
   unsubs.push(DB.doc('game/turn').onSnapshot(function(d){if(d.exists){S.turn=Object.assign({id:null,round:1},d.data())}renderTokens();renderTurnLbl()},err));
@@ -825,6 +833,7 @@ function clientStart(code,name,pin){
   if(typeof Peer==='undefined'){say('Could not load the connection library. Check your internet and reload the page.');return}
   NET.code=code;NET.name=name;
   local.writer(function(op){if(NET.hostConn&&NET.hostConn.open){NET.hostConn.send({t:'w',k:op.k,path:op.path,data:op.data});return Promise.resolve()}return Promise.reject({code:'unavailable'})});
+  sha('v:'+slug(name)+':'+pin).then(function(v){VK=v});
   sha(code+':'+slug(name)+':'+pin).then(function(h){
     NET.creds={name:name,h:h};
     var peer=NET.peer=new Peer({debug:0});
@@ -854,12 +863,45 @@ function enter(host){
   nick=NET.name;$('#nick').value=nick;
   document.body.classList.add('online');
   $('#landing').hidden=true;
-  $('#tabs button[data-t=table]').hidden=!host;$('#nextturn').hidden=!host;
+  $('#tabs button[data-t=table]').hidden=!host;$('#nextturn').hidden=!host;$('#vault').hidden=host;
   updateOpTab();subscribe();
   ROOM=ROOMX;ROOM.on('move',moveHandler);
   ROOM.presence({nick:nick,col:S.me.color});
   if(host)applyPeers(peerList());
-  roomInfo(host);renderAs();banner('')
+  roomInfo(host);renderAs();banner('');
+  if(!host){bindVault();var m0=mineSheets();var vl=readVault();if(!m0.length&&vl.length)restoreVault(vl,true)}
+}
+
+
+/* ---------- personal vault: characters saved on the player's own device under name + personal code ---------- */
+var VK=null,vaultT=null;
+function mineSheets(){var d=local.dump(),o=[];Object.keys(d).forEach(function(k){if(k.indexOf('sheets/')===0&&d[k].owner===NET.pid)o.push({id:k.slice(7),s:d[k]})});return o}
+function stripSheet(x){return {name:String(x.name||'Unnamed').slice(0,30),cls:String(x.cls||'Gunner').slice(0,30),lvl:Math.max(1,Math.min(10,+x.lvl||1)),
+  stats:(function(){var o={};['STR','DEX','STA','TRION','INT','CHA'].forEach(function(k){o[k]=Math.max(-3,Math.min(8,+((x.stats||{})[k])||0))});return o})(),
+  cur:Math.max(0,+x.cur||0),max:Math.max(1,+x.max||1),dead:(function(){var o={};['Head','Chest','L Arm','R Arm','L Leg','R Leg'].forEach(function(k){if(x.dead&&x.dead[k])o[k]=true});return o})(),notes:String(x.notes||'').slice(0,4000)}}
+function readVault(){try{var v=JSON.parse(localStorage.getItem('bt_vault_'+VK)||'[]');return Array.isArray(v)?v:[]}catch(e){return []}}
+window.vaultSync=function(){
+  if(NET.host||!VK||!NET.entered)return;
+  clearTimeout(vaultT);vaultT=setTimeout(function(){var m=mineSheets();if(!m.length)return;
+    try{localStorage.setItem('bt_vault_'+VK,JSON.stringify(m.map(function(x){return stripSheet(x.s)}).slice(0,30)))}catch(e){}vaultMsg()},800)
+};
+function vaultMsg(){var n=readVault().length;var e=$('#vaultmsg');if(e)e.textContent=n?n+' saved character'+(n>1?'s':'')+' on this device.':'Nothing saved on this device yet. Characters you make are saved automatically.'}
+function restoreVault(list,quiet){
+  var have=mineSheets().map(function(x){return (x.s.name||'')+'|'+(x.s.cls||'')}),n=0;
+  list.slice(0,30).forEach(function(raw){var c=stripSheet(raw),key=c.name+'|'+c.cls;if(have.indexOf(key)>=0)return;have.push(key);
+    c.owner=NET.pid;var id=uid();W('sheets/'+id,function(){return DB.doc('sheets/'+id).set(c)});n++});
+  if(!quiet)toast(n?('Restored '+n+' character'+(n>1?'s':'')):'Nothing new to restore');else if(n)toast('Restored '+n+' saved character'+(n>1?'s':'')+' from this device');
+}
+function backupCode(){var l=readVault();if(!l.length)return '';return 'WTV1:'+btoa(unescape(encodeURIComponent(JSON.stringify(l))))}
+function bindVault(){
+  $('#vrestore').addEventListener('click',function(){restoreVault(readVault(),false)});
+  $('#vcopy').addEventListener('click',function(){var c=backupCode();if(!c){toast('Nothing to back up yet');return}
+    function fb(){$('#vin').value=c;$('#vin').select();toast('Select and copy the code in the box')}
+    try{navigator.clipboard.writeText(c).then(function(){toast('Backup code copied')},fb)}catch(e){fb()}});
+  $('#vimport').addEventListener('click',function(){
+    var t=$('#vin').value.trim();if(t.indexOf('WTV1:')!==0){toast('That is not a backup code');return}
+    try{var l=JSON.parse(decodeURIComponent(escape(atob(t.slice(5)))));if(!Array.isArray(l))throw 0;restoreVault(l,false);$('#vin').value=''}catch(e){toast('That backup code is damaged')}});
+  vaultMsg()
 }
 
 /* landing screen */
