@@ -1,0 +1,102 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Owner Analytics (private)</title>
+<meta name="robots" content="noindex,nofollow">
+<style>
+*{box-sizing:border-box}body{margin:0;font:14px/1.5 system-ui,Segoe UI,Arial,sans-serif;background:#06182c;color:#eaf4fb;padding:16px}
+.w{max-width:960px;margin:0 auto}h1{font-size:20px;margin:0 0 4px}p.sub{color:#9fc3d6;margin:0 0 18px;font-size:13px}
+.card{background:#0b2740;border:1px solid #1c4d70;border-radius:12px;padding:16px;margin-bottom:14px}
+label{display:block;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:#8fb6cb;margin:8px 0 3px}
+input{width:100%;padding:8px 10px;border-radius:8px;border:1px solid #1c4d70;background:#06182c;color:#eaf4fb;font:inherit}
+button{margin-top:10px;background:linear-gradient(135deg,#0b3a63,#12809f);color:#fff;border:1px solid rgba(160,230,245,.5);padding:8px 16px;border-radius:999px;font:700 13px system-ui;cursor:pointer}
+.row{display:flex;gap:16px;flex-wrap:wrap}.stat{flex:1;min-width:120px;background:#0b2740;border:1px solid #1c4d70;border-radius:10px;padding:12px;text-align:center}
+.stat b{display:block;font-size:24px;color:#5fd4e4}.bars div.bar{display:flex;align-items:center;gap:8px;margin:4px 0;font-size:13px}
+.bars .lbl{width:140px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bars .fill{height:14px;background:linear-gradient(90deg,#0b3a63,#12809f);border-radius:4px}
+.bars .n{width:40px;text-align:right;color:#9fc3d6}
+table{width:100%;border-collapse:collapse;font-size:12.5px}th,td{padding:5px 8px;text-align:left;border-bottom:1px solid #1c4d70}th{color:#8fb6cb}
+.flag{color:#ffb02e;font-weight:700}#err{color:#ff8080;font-size:13px;margin-top:8px}
+a{color:#5fd4e4}
+</style></head><body><div class="w">
+<h1>OWNER ANALYTICS <span style="font-weight:400;font-size:13px;color:#8fb6cb">(private, not linked from the site)</span></h1>
+<p class="sub">Visitor stats for the World Trigger RPG fan site. Visible only when you sign in with the owner account.</p>
+<div class="card" id="login">
+  <label>Email</label><input id="em" type="email" autocomplete="username">
+  <label>Password</label><input id="pw" type="password" autocomplete="current-password">
+  <button id="go">Sign in</button>
+  <div id="err"></div>
+</div>
+<div id="dash" hidden>
+  <div class="row">
+    <div class="stat"><b id="sVisits">-</b>Total visits</div>
+    <div class="stat"><b id="sUniq">-</b>Unique visitor IDs</div>
+    <div class="stat"><b id="sIps">-</b>Unique IP addresses</div>
+    <div class="stat"><b id="sAlts">-</b>IPs with 2+ visitor IDs</div>
+  </div>
+  <div class="card"><h3>Visits by country</h3><div class="bars" id="byCountry"></div></div>
+  <div class="card"><h3>Visits by city</h3><div class="bars" id="byCity"></div></div>
+  <div class="card"><h3>Visits by page</h3><div class="bars" id="byPage"></div></div>
+  <div class="card"><h3>Visits per day (last 14 days)</h3><div class="bars" id="byDay"></div></div>
+  <div class="card"><h3>Possible repeat visitors (same IP, different visitor ID)</h3>
+    <p style="color:#9fc3d6;font-size:12.5px;margin:0 0 8px">A new visitor ID can mean a new person, or the same person on a new browser, a cleared cookie, or an incognito window. This only flags a match for you to judge &mdash; it is not proof of anything.</p>
+    <table id="altTable"><thead><tr><th>IP address</th><th>Visitor IDs seen</th><th>Visits</th><th>Cities seen</th></tr></thead><tbody></tbody></table>
+  </div>
+  <div class="card"><h3>Raw visits (most recent 200)</h3><div style="overflow-x:auto"><table id="rawTable"><thead><tr><th>Time</th><th>Page</th><th>Country</th><th>City</th><th>IP</th><th>Visitor ID</th></tr></thead><tbody></tbody></table></div></div>
+</div>
+</div>
+<script>
+var CFG={apiKey:'REPLACE_API_KEY',projectId:'REPLACE_PROJECT_ID'};
+function bars(host,counts,top){
+  host.innerHTML='';var arr=Object.keys(counts).map(function(k){return [k,counts[k]]}).sort(function(a,b){return b[1]-a[1]}).slice(0,top||12);
+  var max=arr.length?arr[0][1]:1;
+  arr.forEach(function(p){var d=document.createElement('div');d.className='bar';
+    d.innerHTML='<div class="lbl" title="'+esc(p[0])+'">'+esc(p[0]||'(unknown)')+'</div><div class="fill" style="width:'+Math.max(4,p[1]/max*220)+'px"></div><div class="n">'+p[1]+'</div>';
+    host.appendChild(d)});
+  if(!arr.length)host.textContent='No data yet.'
+}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function val(f){return f?(f.stringValue!=null?f.stringValue:''):''}
+function signIn(email,pw){
+  return fetch('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key='+CFG.apiKey,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email,password:pw,returnSecureToken:true})})
+    .then(function(r){return r.json()}).then(function(j){if(j.error)throw new Error(j.error.message);return j.idToken})
+}
+function fetchVisits(token){
+  var docs=[],pageToken='';
+  function page(){
+    var url='https://firestore.googleapis.com/v1/projects/'+CFG.projectId+'/databases/(default)/documents/visits?pageSize=300'+(pageToken?'&pageToken='+pageToken:'');
+    return fetch(url,{headers:{'Authorization':'Bearer '+token}}).then(function(r){return r.json()}).then(function(j){
+      (j.documents||[]).forEach(function(d){docs.push(d.fields||{})});
+      if(j.nextPageToken&&docs.length<3000){pageToken=j.nextPageToken;return page()}
+      return docs
+    })
+  }
+  return page()
+}
+function render(docs){
+  var rows=docs.map(function(f){return {vid:val(f.vid),path:val(f.path),country:val(f.country),region:val(f.region),city:val(f.city),ip:val(f.ip),ts:val(f.ts)}});
+  document.getElementById('sVisits').textContent=rows.length;
+  var uv={},uip={},byC={},byCity={},byP={},byD={},ipToVid={};
+  rows.forEach(function(r){uv[r.vid]=1;if(r.ip){uip[r.ip]=1;ipToVid[r.ip]=ipToVid[r.ip]||{};ipToVid[r.ip][r.vid]=1;ipToVid[r.ip]['_cities']=ipToVid[r.ip]['_cities']||{};if(r.city)ipToVid[r.ip]['_cities'][r.city]=1;ipToVid[r.ip]['_n']=(ipToVid[r.ip]['_n']||0)+1}
+    if(r.country)byC[r.country]=(byC[r.country]||0)+1;if(r.city)byCity[(r.city)+(r.region?', '+r.region:'')]=(byCity[(r.city)+(r.region?', '+r.region:'')]||0)+1;
+    byP[r.path]=(byP[r.path]||0)+1;var day=(r.ts||'').slice(0,10);if(day)byD[day]=(byD[day]||0)+1});
+  document.getElementById('sUniq').textContent=Object.keys(uv).length;
+  document.getElementById('sIps').textContent=Object.keys(uip).length;
+  var alts=Object.keys(ipToVid).filter(function(ip){return Object.keys(ipToVid[ip]).filter(function(k){return k[0]!=='_'}).length>1});
+  document.getElementById('sAlts').textContent=alts.length;
+  bars(document.getElementById('byCountry'),byC);bars(document.getElementById('byCity'),byCity);bars(document.getElementById('byPage'),byP);bars(document.getElementById('byDay'),byD,14);
+  var tb=document.querySelector('#altTable tbody');tb.innerHTML='';
+  alts.sort(function(a,b){return ipToVid[b]._n-ipToVid[a]._n}).forEach(function(ip){
+    var vids=Object.keys(ipToVid[ip]).filter(function(k){return k[0]!=='_'});
+    var cities=Object.keys(ipToVid[ip]._cities||{});
+    var tr=document.createElement('tr');tr.innerHTML='<td>'+esc(ip)+'</td><td class="flag">'+vids.length+'</td><td>'+ipToVid[ip]._n+'</td><td>'+esc(cities.join(', ')||'-')+'</td>';tb.appendChild(tr)});
+  var rb=document.querySelector('#rawTable tbody');rb.innerHTML='';
+  rows.sort(function(a,b){return (b.ts||'').localeCompare(a.ts||'')}).slice(0,200).forEach(function(r){
+    var tr=document.createElement('tr');tr.innerHTML='<td>'+esc((r.ts||'').replace('T',' ').slice(0,19))+'</td><td>'+esc(r.path)+'</td><td>'+esc(r.country)+'</td><td>'+esc(r.city)+'</td><td>'+esc(r.ip)+'</td><td style="font-family:monospace;font-size:11px">'+esc(r.vid).slice(0,8)+'</td>';rb.appendChild(tr)})
+}
+document.getElementById('go').onclick=function(){
+  var em=document.getElementById('em').value.trim(),pw=document.getElementById('pw').value;
+  document.getElementById('err').textContent='';
+  if(CFG.apiKey==='REPLACE_API_KEY'){document.getElementById('err').textContent='Not set up yet.';return}
+  signIn(em,pw).then(function(token){return fetchVisits(token)}).then(function(docs){
+    document.getElementById('login').hidden=true;document.getElementById('dash').hidden=false;render(docs)
+  }).catch(function(e){document.getElementById('err').textContent='Could not sign in: '+e.message})
+}
+</script></body></html>
