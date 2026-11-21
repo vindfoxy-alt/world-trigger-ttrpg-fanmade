@@ -236,9 +236,9 @@ body.online #nick,body.online label:has(#nick){display:none}
       <div class="row"><input id="opold" type="password" placeholder="Current password" autocomplete="off" style="flex:1;min-width:110px"><input id="opnew" type="password" placeholder="New password (4+ characters)" autocomplete="off" style="flex:1;min-width:110px"></div>
       <div class="row" style="margin-top:6px"><button id="opchg" class="pri">Change password</button><span id="opmsg" class="hint"></span></div>
       <div class="lbl" style="margin-top:12px">Players (names and personal codes)</div>
-      <p class="hint" style="margin:0 0 6px">Only you can see this. Codes are made by the table (random, never chosen by people), so nobody has a password to reuse. If a friend forgets theirs, make a new one here and tell them. Their characters stay on the table.</p>
+      <p class="hint" style="margin:0 0 6px">Only you can see this. Each player makes their own password the first time they join, and you can not read it. If a friend forgets theirs, tap Reset password and they pick a new one. Their characters stay on the table.</p>
       <div id="players"></div>
-      <div class="row" style="margin-top:6px"><input id="pname" placeholder="New player name" maxlength="20" style="flex:1;min-width:110px"><button id="padd" class="pri">Add and make a code</button></div>
+      
       <div class="lbl" style="margin-top:12px">Register (every game, name and code)</div>
       <p class="hint" style="margin:0 0 6px">Filled in automatically whenever someone joins or you add or change a code. It covers every game you have hosted in this browser. It contains personal codes, so keep downloads private.</p>
       <div id="register" style="overflow-x:auto"></div>
@@ -258,7 +258,7 @@ body.online #nick,body.online label:has(#nick){display:none}
     <h2>Join a table</h2>
     <label for="jcode">Room code</label><input id="jcode" maxlength="8" autocomplete="off" autocapitalize="characters">
     <label for="jname">Your name</label><input id="jname" maxlength="20" autocomplete="off">
-    <label for="jpin">Your personal code</label><input id="jpin" maxlength="40" autocomplete="off" autocapitalize="characters" placeholder="Leave empty the first time"><label for="jown">Or make your own password (first time only)</label><input id="jown" type="password" maxlength="40" autocomplete="new-password" placeholder="At least 4 characters. Use it as your code next time."><p class="hint" style="margin:4px 0 0">Your own password stays secret: the Operator can not read it, only reset it.</p>
+    <label for="jpin">Your password</label><input id="jpin" type="password" maxlength="40" autocomplete="off" placeholder="At least 4 characters"><p class="hint" style="margin:4px 0 0">First time at this table: type a new password, it becomes yours. Next time: type the same one. Nobody else can read it; the Operator can only reset it.</p>
     <p class="hint" style="margin:6px 0 0">First time: leave the code empty and the table gives you one. Write it down. Next time, enter your name and that code to get your characters back. Nobody else can change your sheet.</p>
     <button id="jgo" class="pri">Join</button>
    </section>
@@ -971,20 +971,12 @@ function hello(conn,m){
   if(sl==='operator'||sl==='host')return rej('Pick another name.');
   var r=NET.reg[sl];
   var np=String(m.np||'').slice(0,80);
-  if(!h&&np){
-    if(r)return rej('That name is already taken at this table. Enter your password, or pick another name.');
-    NET.reg[sl]={h:np,name:name,pin:'',own:1};scheduleSave();accept(null);return
-  }
-  if(!h){
-    if(r)return rej('That name is already taken at this table. Enter your code, or pick another name.');
-    var gen=genCode();
-    sha(NET.code+':'+sl+':'+gen).then(function(hh){NET.reg[sl]={h:hh,name:name,pin:gen};scheduleSave();accept(gen)});
-    return
-  }
-  if(!r)return rej('That name is not registered at this table. Leave the code empty to get a new one.');
+  if(!h)return rej('Enter a password (at least 4 characters).');
+  if(!r&&np&&np===h){NET.reg[sl]={h:h,name:name,pin:'',own:1};scheduleSave();accept(null);return}
+  if(!r)return rej('Could not make that account. Try again.');
   var now=Date.now();NET.fails=NET.fails||{};var f=(NET.fails[sl]||[]).filter(function(t){return now-t<600000});
-  if(f.length>=5)return rej('Too many wrong codes. Wait 10 minutes, or ask the Operator.');
-  if(r.h!==h){f.push(now);NET.fails[sl]=f;return rej('That is not the right code for this name. Ask the Operator if you forgot it.')}
+  if(f.length>=5)return rej('Too many wrong passwords. Wait 10 minutes, or ask the Operator.');
+  if(r.h!==h){f.push(now);NET.fails[sl]=f;return rej('That is not the right password for this name. If the name is taken by someone else, pick another name. If you forgot it, ask the Operator to reset it.')}
   accept(null)
 }
 function onConn(conn){
@@ -1030,7 +1022,6 @@ function cdata(m){
   if(!m||typeof m!=='object')return;
   if(m.t==='welcome'){
     NET.pid=m.pid;NET.myId=m.id;local.load(m.data||{});applyPeers(m.list||[]);banner('');
-    if(NET.creds&&NET.creds.np){NET.creds.h=NET.creds.np;NET.creds.pin=NET.creds.own;NET.creds.np='';NET.creds.own=''}
     var cd=m.code||(NET.creds&&NET.creds.pin)||'';
     if(m.code){NET.creds.pin=m.code;sha(NET.code+':'+m.pid+':'+m.code).then(function(h){NET.creds.h=h})}
     try{localStorage.setItem('bt_me',JSON.stringify({room:NET.code,name:NET.name,pin:cd}))}catch(e){}
@@ -1057,7 +1048,7 @@ function clientStart(code,name,pin,own){
   NET.code=code;NET.name=name;
   local.writer(function(op){if(NET.hostConn&&NET.hostConn.open){NET.hostConn.send({t:'w',k:op.k,path:op.path,data:op.data});return Promise.resolve()}return Promise.reject({code:'unavailable'})});
   var go=function(h){
-    NET.creds={name:name,h:h&&h.np?null:h,pin:pin||'',np:h&&h.np?h.np:'',own:own||''};
+    NET.creds={name:name,h:h,pin:pin||'',np:h||'',own:''};
     var peer=NET.peer=new Peer({debug:0});
     peer.on('open',function(id){NET.myId=id;connect()});
     peer.on('error',function(e){
@@ -1067,7 +1058,7 @@ function clientStart(code,name,pin,own){
     });
     peer.on('disconnected',function(){try{peer.reconnect()}catch(e){}})
   };
-  if(pin)sha(code+':'+slug(name)+':'+pin).then(go);else if(own)sha(code+':'+slug(name)+':'+own).then(function(x){go({np:x})});else go(null)
+  if(pin)sha(code+':'+slug(name)+':'+pin).then(go);else go(null)
 }
 function roomInfo(host){
   var h=$('#roominfo');h.textContent='';
@@ -1135,25 +1126,25 @@ function setPlayer(name,pin){
   var sl=slug(name);if(!name||!pin||pin.length<3){toast('Enter a name and a code of at least 3 characters');return Promise.resolve(false)}
   return sha(NET.code+':'+sl+':'+pin).then(function(h){var old=NET.reg[sl];NET.reg[sl]={h:h,name:old&&old.name?old.name:name,pin:pin};scheduleSave();regUpsert(sl,NET.reg[sl].name,pin,false);renderPlayers();return true})
 }
-function loginText(r){return 'Border Table Online\nRoom code: '+NET.code+'\nLink: '+location.href.split('#')[0]+'#'+NET.code+'\nName: '+r.name+'\nPersonal code: '+(r.own&&!r.pin?'(the password you chose)':(r.pin||'(ask the Operator)'))}
+function loginText(r){return 'Border Table Online\nRoom code: '+NET.code+'\nLink: '+location.href.split('#')[0]+'#'+NET.code+'\nName: '+r.name+'\nPassword: make your own the first time you join'}
 function renderPlayers(){
   var host=$('#players');if(!host||!NET.host)return;
   var a=document.activeElement;if(a&&host.contains(a)&&a.tagName==='INPUT')return;
   host.textContent='';
   var on=onlineSlugs(),ks=Object.keys(NET.reg).sort();
-  if(!ks.length){host.appendChild(el('p','hint','Nobody has joined yet. Add a player below, or let them join with their own code.'));return}
+  if(!ks.length){host.appendChild(el('p','hint','Nobody has joined yet. Share the room code and link. Each player picks their own password the first time.'));return}
   ks.forEach(function(k){
     var r=NET.reg[k],c=el('div','insp');c.style.marginTop='6px';
     var top=el('div','row');top.style.justifyContent='space-between';
     var nm=el('b',null,r.name||k);top.appendChild(nm);
     if(on[k]){var o=el('span','hint','● online');o.style.color='var(--good)';top.appendChild(o)}
     c.appendChild(top);
-    var cd=el('div',null,r.own&&!r.pin?'Password: ':'Code: ');var v=el('b',null,r.own&&!r.pin?'chosen by the player (secret)':(r.pin||'unknown'));v.style.fontFamily='monospace';cd.appendChild(v);
-    if(!r.pin&&!r.own)cd.appendChild(el('span','hint',' (older player: make a new code)'));c.appendChild(cd);
+    var cd=el('div',null,r.pin?'Old code: ':'Password: ');var v=el('b',null,r.pin?r.pin:'chosen by the player (secret)');v.style.fontFamily='monospace';cd.appendChild(v);
+    c.appendChild(cd);
     var row=el('div','row');row.style.marginTop='6px';
-    var ch=el('button',null,'New code');var arm=false;
-    ch.addEventListener('click',function(){if(!arm){arm=true;ch.textContent='Tap again: replaces '+(r.name||k)+"'s code";setTimeout(function(){arm=false;ch.textContent='New code'},3000);return}
-      setPlayer(r.name||k,genCode()).then(function(ok){if(ok)toast('New code made. Tell '+(r.name||k)+'.')})});
+    var ch=el('button',null,'Reset password');var arm=false;
+    ch.addEventListener('click',function(){if(!arm){arm=true;ch.textContent='Tap again: '+(r.name||k)+' picks a new password';setTimeout(function(){arm=false;ch.textContent='Reset password'},3000);return}
+      delete NET.reg[k];scheduleSave();renderPlayers();toast((r.name||k)+' can join again and pick a new password.')});
     var cp=el('button',null,'Copy login info');
     cp.addEventListener('click',function(){var t=loginText(r);function fb(){toast('Could not copy. Code: '+(r.pin||'unknown'))}try{navigator.clipboard.writeText(t).then(function(){toast('Login info copied')},fb)}catch(e){fb()}});
     var rm=el('button','bad','Remove');var armed=false;
@@ -1162,10 +1153,6 @@ function renderPlayers(){
   })
 }
 function bindPlayers(){
-  $('#padd').addEventListener('click',function(){var n=$('#pname').value.trim();
-    if(!n){toast('Type a name first');return}
-    if(NET.reg[slug(n)]){toast('That name already exists. Use New code on it.');return}
-    setPlayer(n,genCode()).then(function(ok){if(ok)$('#pname').value=''})});
   renderPlayers()
 }
 
@@ -1274,17 +1261,15 @@ $('#hpw').addEventListener('keydown',function(e){if(e.key==='Enter')$('#hgo').cl
 $('#jgo').addEventListener('click',function(){
   var c=cleanCode($('#jcode').value),n=$('#jname').value.trim(),p=$('#jpin').value.trim().toUpperCase();
   if(c.length<4||!n){say('Fill in the room code and your name.');return}
-  if(p&&p.length<3){say('That code looks too short. Leave it empty if this is your first time.');return}
-  var own=$('#jown').value.trim().toUpperCase();
-  if(!p&&own&&own.length<4){say('Your own password needs at least 4 characters.');return}
-  say('Connecting…');saveLast();NET.stop=false;clientStart(c,n,p,p?'':own)
+  if(p.length<4){say('Type a password of at least 4 characters. First time: it becomes your password.');return}
+  say('Connecting…');saveLast();NET.stop=false;clientStart(c,n,p)
 });
 var pinAuto=false;
 function prefillMe(){try{var me=JSON.parse(localStorage.getItem('bt_me')||'null'),ok=me&&cleanCode($('#jcode').value)===me.room&&slug($('#jname').value)===slug(me.name);
   if(ok&&!$('#jpin').value){$('#jpin').value=me.pin||'';pinAuto=true}
   else if(!ok&&pinAuto){$('#jpin').value='';pinAuto=false}}catch(e){}}
 ['jname','jcode'].forEach(function(id){$('#'+id).addEventListener('input',prefillMe)});$('#jpin').addEventListener('input',function(){pinAuto=false});prefillMe();
-['jown','jpin','jname','jcode'].forEach(function(id){$('#'+id).addEventListener('keydown',function(e){if(e.key==='Enter')$('#jgo').click()})});
+['jpin','jname','jcode'].forEach(function(id){$('#'+id).addEventListener('keydown',function(e){if(e.key==='Enter')$('#jgo').click()})});
 })();
 </script>
 <a class="mm" href="https://vindfoxy-alt.github.io/world-trigger-ttrpg-fanmade/" title="Back to the main menu">&#8592; Main menu</a><script>(function(){var k='wt_dark';function ap(on){document.documentElement.classList.toggle('dk',on);var b=document.getElementById('dmbtn');if(b)b.textContent=on?'Light mode':'Dark mode'}
