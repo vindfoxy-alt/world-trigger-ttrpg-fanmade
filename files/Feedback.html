@@ -1,0 +1,50 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Feedback</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font:15px/1.5 system-ui,Segoe UI,Arial,sans-serif;color:#0d2a44;background:#e9f3fa;padding:16px}
+.w{max-width:620px;margin:0 auto}header{background:linear-gradient(135deg,#06182c,#0b3a63 55%,#12809f);color:#fff;padding:20px 24px;border-radius:16px 16px 0 0}
+header h1{margin:0;font-size:22px;letter-spacing:.04em}header p{margin:4px 0 0;color:#bfe6f2;font-size:13px}
+.body{background:#fff;padding:20px 24px;border-radius:0 0 16px 16px;border:1px solid #bcd9ea;box-shadow:0 8px 26px rgba(6,40,70,.2)}
+label{display:block;font-weight:700;color:#0b3a63;font-size:13px;text-transform:uppercase;letter-spacing:.03em;margin:14px 0 5px}
+label:first-of-type{margin-top:0}
+input,select,textarea{width:100%;padding:9px 11px;border-radius:9px;border:1px solid #bcd9ea;font:inherit;background:#f7fbfe;color:#0d2a44}
+textarea{min-height:140px;resize:vertical}
+button{margin-top:16px;background:linear-gradient(135deg,#0b3a63,#12809f);color:#fff;border:1px solid rgba(160,230,245,.6);padding:10px 22px;border-radius:999px;font:700 14px system-ui;cursor:pointer}
+button:disabled{opacity:.6;cursor:default}
+#ok{display:none;margin-top:16px;padding:12px 16px;border-radius:10px;background:#e6f7ec;border:1px solid #9bd8ae;color:#145c2c}
+#err{display:none;margin-top:16px;padding:12px 16px;border-radius:10px;background:#fdeaea;border:1px solid #f0a8a8;color:#8a1f1f}
+.btn{position:fixed;left:12px;bottom:12px;background:linear-gradient(135deg,#0b3a63,#12809f);color:#fff;font:700 13px system-ui;padding:9px 14px;border-radius:999px;text-decoration:none;border:1px solid rgba(160,230,245,.6)}
+@media print{.btn{display:none}}
+</style></head><body><div class="w">
+<header><h1>SEND FEEDBACK</h1><p>Found something confusing, broken, or unbalanced? Tell me directly.</p></header>
+<div class="body">
+<form id="fb">
+  <label for="name">Your name (optional)</label><input id="name" name="name" maxlength="60" placeholder="So I know who to ask follow-up questions">
+  <label for="about">What is this about?</label>
+  <select id="about" name="about">
+    <option>Player&rsquo;s Handbook</option><option>Operator Guide</option><option>Character maker</option>
+    <option>Border Table Online</option><option>Balance / numbers</option><option>Website</option><option>Something else</option>
+  </select>
+  <label for="msg">Your feedback</label><textarea id="msg" name="message" required placeholder="What happened, what you expected, or what you think should change"></textarea>
+  <button id="go" type="submit">Save feedback</button>
+  <div id="ok">Sent. Thank you &mdash; I read every one of these.</div>
+  <div id="err">Could not send that. Please try again in a moment.</div>
+</form>
+</div></div>
+<a class="btn" href="https://vindfoxy-alt.github.io/world-trigger-ttrpg-fanmade/">&larr; Main menu</a>
+<script>
+var ENDPOINT='REPLACE_FORMSPREE_ENDPOINT';
+document.getElementById('fb').addEventListener('submit',function(e){
+  e.preventDefault();
+  if(ENDPOINT==='REPLACE_FORMSPREE_ENDPOINT'){document.getElementById('err').style.display='block';document.getElementById('err').textContent='Not set up yet.';return}
+  var btn=document.getElementById('go');btn.disabled=true;btn.textContent='Sending...';
+  var f=document.getElementById('fb');
+  fetch(ENDPOINT,{method:'POST',headers:{'Accept':'application/json'},body:new FormData(f)})
+  .then(function(r){if(r.ok){document.getElementById('ok').style.display='block';document.getElementById('err').style.display='none';f.reset();btn.textContent='Save feedback';btn.disabled=false}
+    else{throw new Error('bad status')}})
+  .catch(function(){document.getElementById('err').style.display='block';document.getElementById('ok').style.display='none';btn.textContent='Save feedback';btn.disabled=false})
+});
+</script>
+<style>html.dk{filter:invert(.92) hue-rotate(180deg);background:#fff}html.dk img,html.dk video,html.dk canvas,html.dk svg,html.dk .hero,html.dk #dmbtn{filter:invert(1) hue-rotate(180deg)}#dmbtn{position:fixed;right:12px;top:12px;z-index:99999;font:700 12px system-ui,sans-serif;padding:6px 11px;border-radius:999px;border:1px solid #12809f;background:#fff;color:#0b3a63;cursor:pointer;opacity:.85}@media print{#dmbtn{display:none!important}html.dk{filter:none!important}}</style><script>(function(){var k='wt_dark';function ap(on){document.documentElement.classList.toggle('dk',on);var b=document.getElementById('dmbtn');if(b)b.textContent=on?'Light mode':'Dark mode'}
+var on=false;try{on=localStorage.getItem(k)==='1'}catch(e){}
+var b=document.createElement('button');b.id='dmbtn';b.type='button';b.onclick=function(){on=!on;try{localStorage.setItem(k,on?'1':'0')}catch(e){}ap(on)};
+function go(){document.body.appendChild(b);ap(on)}if(document.body)go();else document.addEventListener('DOMContentLoaded',go)})()</script><script src="https://vindfoxy-alt.github.io/world-trigger-ttrpg-fanmade/track.js"></script></body></html>
