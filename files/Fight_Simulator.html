@@ -461,8 +461,11 @@ function wound(F,u,part,sev,Lt){
 }
 function headHit(F,u,s){
   s=Math.min(s,6);
-  if(s===6){ L(F,'big',`The wound goes through to ${u.name}'s head: bail out!`); u.tr=0; bail(F,u); return; }
-  const n=s<=3?2:4; u.tr-=n; L(F,'hit',`Damaged part: the hit goes to ${u.name}'s head for ${n} wounds (${Math.max(u.tr,0)} Trion left).`);
+  const n=s<=3?2:s<=5?4:8;
+  u.w.head=(u.w.head||0)+n;
+  u.tr-=n;
+  L(F,'hit',`Damaged part: the hit goes to ${u.name}'s head for ${n} wounds (${Math.max(u.tr,0)} Trion left).`);
+  if(u.w.head>=lim(u,.2)){ L(F,'big',`${u.name}'s head is destroyed: bail out!`); u.tr=0; bail(F,u); return; }
   if(u.tr<=0) bail(F,u);
 }
 function applyHit(F,a,t,Lt){
