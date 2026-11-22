@@ -2,7 +2,7 @@
 function getCookie(n){var m=document.cookie.match('(?:^|; )'+n+'=([^;]*)');return m?decodeURIComponent(m[1]):null}
 function setCookie(n,v,d){var e=new Date();e.setTime(e.getTime()+d*864e5);document.cookie=n+'='+encodeURIComponent(v)+';expires='+e.toUTCString()+';path=/;SameSite=Lax'}
 function uuid(){return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,function(c){var r=Math.random()*16|0,v=c=='x'?r:(r&0x3|0x8);return v.toString(16)})}
-var PROJECT='REPLACE_WITH_FIREBASE_PROJECT_ID';
+var PROJECT='word-trigger';
 function fv(v){return {stringValue:String(v||'')}}
 function sendVisit(loc){
   if(PROJECT==='REPLACE_WITH_FIREBASE_PROJECT_ID')return;
