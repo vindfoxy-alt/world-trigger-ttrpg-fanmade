@@ -339,9 +339,10 @@ const BUILDS={
  Reghindetz:{st:[3,1,1,2,0,-1],w:['Thugater'],s:[],a:'Wall Breaker'},
  Koskero:{st:[3,1,2,1,0,-1],w:['Nikokyra'],s:[],a:'Pain Tolerance'}
 };
+const TRIG={Hyrein:'Alektor',Viza:'Organon',Gatlin:'Basilissa','Wen Sō':'Servitra',Ratarikov:'Despinis',Reghindetz:'Thugater',Koskero:'Nikokyra'};
 function premade(code,team,T){
   const bt=/\+BT$/.test(code),cls=code.replace(/\+BT$/,''),b=BUILDS[cls];
-  const o={custom:1,name:cls,cls,tier:T,str:b.st[0],dex:b.st[1],sta:b.st[2],tri:b.st[3],int:b.st[4],cha:b.st[5],weapons:b.w.slice(),subs:b.s.slice(),abl:b.a};
+  const o={custom:1,name:(TRIG[cls]||cls),cls,tier:T,str:b.st[0],dex:b.st[1],sta:b.st[2],tri:b.st[3],int:b.st[4],cha:b.st[5],weapons:b.w.slice(),subs:b.s.slice(),abl:b.a};
   const u=makeCustom(o,team,T);
   if(bt){ u.bt=true; u.burn=(u.burn||0)+2; u.leth+=1; u.block=Math.max(3,u.block); u.name+=' (BT)'; }
   return u;
@@ -351,7 +352,7 @@ function makeAgent(cls,team,label,T){
   const c=CLASSES[cls];
   T=T||1; const tb=tierBonus(T);
   let tr=c.trion-CFG.GEAR+(c.sig?Math.min(CFG.GEAR,2):0)+(TIER_TRION[cls]||4)*(T-1);
-  return {name:label||cls+(bt?' (BT)':''),cls,bt,burn:bt?2:0,mvb:0,tb,tier:T,team,agent:true,max:tr,tr,atk:c.atk+val(c.hit)+tb,leth:val(c.leth)+(bt?1:0),dex:c.dex,block:bt?Math.max(3,val(c.block)):val(c.block),cost:1,attacks:1,
+  return {name:label||(TRIG[cls]||cls)+(bt?' (BT)':''),cls,bt,burn:bt?2:0,mvb:0,tb,tier:T,team,agent:true,max:tr,tr,atk:c.atk+val(c.hit)+tb,leth:val(c.leth)+(bt?1:0),dex:c.dex,block:bt?Math.max(3,val(c.block)):val(c.block),cost:1,attacks:1,
     kind:c.kind,reach:c.reach,legpen:0,w:{},ba:false,dead:false,mods:0,slow:0,riposte:false,assist:0,armpen:0,destroyed:new Set(),nd:false,
     snipe:!!c.snipe,trap:!!c.trap,ambush:!!c.ambush,tac:!!c.tac,counter:!!c.counter,shot:!!c.shot,liq:!!c.liq,to:false,rshield:false,gas:false,gasr:false,liqused:false};
 }
@@ -1333,17 +1334,17 @@ try{CHARS=(JSON.parse(localStorage.getItem('wt_chars')||'[]')||[]).filter(c=>c&&
 function saveChars(){try{localStorage.setItem('wt_chars',JSON.stringify(CHARS));}catch(e){}}
 (function(){const s=$('tierSel');s.innerHTML=[1,2,3,4,5,6,7,8,9,10].map(n=>'<option value="'+n+'">Level '+n+' (Level Bonus +'+tierBonus(n)+')</option>').join('');s.onchange=()=>{TIER=+s.value;onchg();};})();
 const res=l=>l.map(x=>/^C:/.test(x)?CHARS[+x.slice(2)]:x).filter(Boolean);
-function myList(){$('myList').innerHTML=CHARS.map((c,i)=>'<span class="chip tag2">'+c.name.replace(/</g,'&lt;')+' · '+c.cls+' Lv '+c.tier+' <a href="#" data-rm="'+i+'" style="color:var(--hit);margin-left:6px" aria-label="Remove '+c.name.replace(/"/g,'')+'">remove</a></span>').join('')||'<span class="sm">No agents added yet.</span>';
+function myList(){$('myList').innerHTML=CHARS.map((c,i)=>'<span class="chip tag2">'+c.name.replace(/</g,'&lt;')+' · '+(TRIG[c.cls]||c.cls)+' Lv '+c.tier+' <a href="#" data-rm="'+i+'" style="color:var(--hit);margin-left:6px" aria-label="Remove '+c.name.replace(/"/g,'')+'">remove</a></span>').join('')||'<span class="sm">No agents added yet.</span>';
  $('myList').querySelectorAll('[data-rm]').forEach(a=>a.onclick=e=>{e.preventDefault();CHARS.splice(+a.dataset.rm,1);saveChars();myList();refreshSel();});}
 function refreshSel(){['selA','selB'].forEach(id=>{const host=$(id);host.querySelectorAll('select').forEach(s=>{const cur=s.value;s.querySelectorAll('option[data-c]').forEach(o=>o.remove());
-  if(!(id==='selB'&&mode==='pve')){CHARS.forEach((c,i)=>{const o=document.createElement('option');o.value='C:'+i;o.dataset.c=1;o.textContent='★ '+c.name+' ('+c.cls+', Level '+c.tier+')';s.insertBefore(o,s.firstChild);});}
+  if(!(id==='selB'&&mode==='pve')){CHARS.forEach((c,i)=>{const o=document.createElement('option');o.value='C:'+i;o.dataset.c=1;o.textContent='★ '+c.name+' ('+(TRIG[c.cls]||c.cls)+', Level '+c.tier+')';s.insertBefore(o,s.firstChild);});}
   s.value=[...s.options].some(o=>o.value===cur)?cur:s.options[s.options.length?0:0].value;});});}
 $('codeAdd').onclick=()=>{const c=parseCode($('codeIn').value);if(!c){$('codeMsg').textContent='That is not a character code. In the creator, press Copy character code and paste the whole line.';return;}
  if(CHARS.length>=6)CHARS.shift();CHARS.push(c);saveChars();$('codeIn').value='';TIER=c.tier;$('tierSel').value=String(TIER);
  $('codeMsg').textContent=c.name+' added. Fight level set to '+TIER+'. Pick '+c.name+' in a fighter list below (marked with a star).';myList();refreshSel();
  const a=$('selA').querySelectorAll('select')[0];if(a){a.value='C:'+(CHARS.length-1);}onchg();};
 myList();
-function sel(host,vals,n,onchg){host.innerHTML='';for(let i=0;i<n;i++){const s=document.createElement('select');s.setAttribute('aria-label','Fighter '+(i+1));CL.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c+(CLASSES[c].sig?' ('+NATION[c]+')':'');s.appendChild(o);});CL.forEach(c=>{const o=document.createElement('option');o.value=c+'+BT';o.textContent=c+' + Black Trigger';s.appendChild(o);});if(host.id==='selA'||mode==='pvp')CHARS.forEach((c,k)=>{const o=document.createElement('option');o.value='C:'+k;o.dataset.c=1;o.textContent='★ '+c.name+' ('+c.cls+', Level '+c.tier+')';s.insertBefore(o,s.firstChild);});s.value=vals[i];s.onchange=onchg;host.appendChild(s);}}
+function sel(host,vals,n,onchg){host.innerHTML='';for(let i=0;i<n;i++){const s=document.createElement('select');s.setAttribute('aria-label','Fighter '+(i+1));CL.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=(TRIG[c]||c)+(CLASSES[c].sig?' ('+NATION[c]+')':'');s.appendChild(o);});CL.forEach(c=>{const o=document.createElement('option');o.value=c+'+BT';o.textContent=(TRIG[c]||c)+' + Black Trigger';s.appendChild(o);});if(host.id==='selA'||mode==='pvp')CHARS.forEach((c,k)=>{const o=document.createElement('option');o.value='C:'+k;o.dataset.c=1;o.textContent='★ '+c.name+' ('+(TRIG[c.cls]||c.cls)+', Level '+c.tier+')';s.insertBefore(o,s.firstChild);});s.value=vals[i];s.onchange=onchg;host.appendChild(s);}}
 function encSel(host,onchg){host.innerHTML='';const s=document.createElement('select');s.setAttribute('aria-label','Enemy group');Object.keys(ENCOUNTERS).forEach(k=>{const o=document.createElement('option');o.value=k;o.textContent=k;s.appendChild(o);});s.onchange=onchg;host.appendChild(s);}
 const getA=()=>[...$('selA').querySelectorAll('select')].map(s=>s.value);
 const getB=()=>mode==='pvp'?[...$('selB').querySelectorAll('select')].map(s=>s.value):scaleEnc(ENCOUNTERS[$('selB').querySelector('select').value],TIER,$('selB').querySelector('select').value);
@@ -1371,7 +1372,7 @@ function card(u,col){const pct=Math.max(0,u.tr)/u.max*100;const c=u.dead?'out':'
  if(u.w.chest)chips.push('<span class="chip">Chest '+u.w.chest+' wounds</span>');
  const h=HUE[u.cls]??22;
  const tag=CLASSES[u.cls]?CLASSES[u.cls].note:'Enemy';
- return `<div class="card ${c}" style="--c:${col};--h:${h}"><div class="top"><b>${u.name}</b><span class="tag">${CLASSES[u.cls]?u.cls:ENEMIES[u.cls].label}</span></div><div class="tr"><i style="width:${pct}%;background:${pct>50?'var(--ok)':pct>25?'#d6a21f':'var(--hit)'}"></i></div><div class="trn"><span>${Math.max(0,u.tr)} / ${u.max} Trion</span><span>Evade ${10+u.dex+(u.tb||0)-(u.slow>0?2:0)} · Block +${u.block} · Move ${speed(F,u)*5} ft</span></div><div class="chips">${chips.join('')}</div></div>`;}
+ return `<div class="card ${c}" style="--c:${col};--h:${h}"><div class="top"><b>${u.name}</b><span class="tag">${CLASSES[u.cls]?(TRIG[u.cls]||u.cls):ENEMIES[u.cls].label}</span></div><div class="tr"><i style="width:${pct}%;background:${pct>50?'var(--ok)':pct>25?'#d6a21f':'var(--hit)'}"></i></div><div class="trn"><span>${Math.max(0,u.tr)} / ${u.max} Trion</span><span>Evade ${10+u.dex+(u.tb||0)-(u.slow>0?2:0)} · Block +${u.block} · Move ${speed(F,u)*5} ft</span></div><div class="chips">${chips.join('')}</div></div>`;}
 let FID=0;
 function render(){if(!F)return;if(F.id==null)F.id=++FID;renderUnits();$('cA').innerHTML=F.A.map(u=>card(u,'var(--a)')).join('');$('cB').innerHTML=F.B.map(u=>card(u,'var(--b)')).join('');}
 function appendLog(){const box=$('log');const L=F.log;let html='';for(;shown<L.length;shown++){const e=L[shown];html+=`<div class="ln ${e.kind}">${e.text}</div>`;}box.insertAdjacentHTML('beforeend',html);box.scrollTop=box.scrollHeight;}
