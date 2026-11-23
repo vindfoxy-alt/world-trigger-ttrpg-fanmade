@@ -296,6 +296,7 @@ var $=function(s,r){return (r||document).querySelector(s)};
 function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e}
 var CELL=40;
 var CLASSES=['Attacker','Gunner','Shooter','Sniper','Trapper','Assassin','Tactician','Counterstriker','Ranbanein','Hyuse','Enedora','Hyrein','Viza','Gatlin','Wen Sō','Ratarikov','Reghindetz','Koskero'];
+var TRIG={Hyrein:'Alektor',Viza:'Organon',Gatlin:'Basilissa','Wen Sō':'Servitra',Ratarikov:'Despinis',Reghindetz:'Thugater',Koskero:'Nikokyra'};
 var STATS=['STR','DEX','STA','TRION','INT','CHA'];
 var LOC=['Head','Chest','L Arm','R Arm','L Leg','R Leg'];
 var S={fit:true,assets:{},tokens:{},sheets:{},log:[],map:{bg:'grid',seed:7,cols:24,rows:16},turn:{id:null,round:1},sel:null,selSheet:null,tab:'chat',peers:[],over:{},zoom:1,canWrite:true,synced:false,me:{id:null,name:'',color:'#0a8fa3'},isAdmin:false};
@@ -580,7 +581,7 @@ function renderSheet(force){
   var nm=el('input');nm.value=sh.name||'';nm.style.flex='1';nm.setAttribute('aria-label','Character name');nm.addEventListener('input',function(){debounce('sn'+id,500,function(){P({name:nm.value.slice(0,30)})})});
   r.appendChild(nm);host.appendChild(r);
   r=el('div','row');
-  var cl=el('select');(CLASSES.indexOf(sh.cls)<0&&sh.cls?CLASSES.concat([sh.cls]):CLASSES).forEach(function(c){var o=el('option',null,c);o.value=c;cl.appendChild(o)});cl.value=sh.cls||'Attacker';cl.addEventListener('change',function(){P({cls:cl.value})});
+  var cl=el('select');(CLASSES.indexOf(sh.cls)<0&&sh.cls?CLASSES.concat([sh.cls]):CLASSES).forEach(function(c){var o=el('option',null,TRIG[c]||c);o.value=c;cl.appendChild(o)});cl.value=sh.cls||'Attacker';cl.addEventListener('change',function(){P({cls:cl.value})});
   var lv=el('select');for(var i=1;i<=10;i++){var o=el('option',null,'Level '+i);o.value=i;lv.appendChild(o)}lv.value=sh.lvl||1;lv.addEventListener('change',function(){P({lvl:+lv.value})});
   r.append(cl,lv);host.appendChild(r);
   host.appendChild(el('div','lbl','Stats (tap to roll d20 + stat)')).style.margin='10px 0 4px';
