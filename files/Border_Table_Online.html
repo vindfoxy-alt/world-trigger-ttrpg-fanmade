@@ -182,7 +182,7 @@ body.online #nick,body.online label:has(#nick){display:none}
       <details id="imp" style="margin-bottom:10px">
         <summary style="cursor:pointer;font-weight:600">Import from character code</summary>
         <p class="hint" style="margin:6px 0">No code yet? <a href="Character_Creator_Offline.html" target="_blank" rel="noopener">Open the Character Creator</a> (no account needed), build your agent, press <b>Copy character code</b>, then paste the whole line here.</p>
-        <textarea id="codein" rows="2" placeholder="WT1|Kenji Arashi|Aftokrator|1|3|1|2|1|0|-1|Lampyris Shard Guns,Scorpion||Super Strength"></textarea>
+        <textarea id="codein" rows="2" placeholder="WT1|Hyuse|Hyuse|1|0|2|1|2|1|0|Lampyris||Quick Reflexes"></textarea>
         <div class="row" style="margin-top:6px"><button id="impgo" class="pri">Import as new sheet</button><span id="impmsg" class="hint"></span></div>
       </details>
       <details id="vault" style="margin-bottom:10px">
@@ -295,7 +295,7 @@ body.online #nick,body.online label:has(#nick){display:none}
 var $=function(s,r){return (r||document).querySelector(s)};
 function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e}
 var CELL=40;
-var CLASSES=['Attacker','Gunner','Shooter','Sniper','Trapper','Assassin','Tactician','Counterstriker','Aftokrator'];
+var CLASSES=['Attacker','Gunner','Shooter','Sniper','Trapper','Assassin','Tactician','Counterstriker','Ranbanein','Hyuse','Enedora','Hyrein','Viza','Gatlin','Wen Sō','Ratarikov','Reghindetz','Koskero'];
 var STATS=['STR','DEX','STA','TRION','INT','CHA'];
 var LOC=['Head','Chest','L Arm','R Arm','L Leg','R Leg'];
 var S={fit:true,assets:{},tokens:{},sheets:{},log:[],map:{bg:'grid',seed:7,cols:24,rows:16},turn:{id:null,round:1},sel:null,selSheet:null,tab:'chat',peers:[],over:{},zoom:1,canWrite:true,synced:false,me:{id:null,name:'',color:'#0a8fa3'},isAdmin:false};
@@ -628,7 +628,7 @@ function renderSheet(force){
 }
 
 /* ---------- character code import (WT1|name|class|level|STR|DEX|STA|TRION|INT|CHA|weapons|subs|ability[|B]) ---------- */
-var CLASS_TRION={Attacker:5,Gunner:4,Shooter:4,Sniper:3,Trapper:5,Assassin:4,Tactician:4,Counterstriker:5,Aftokrator:4};
+var CLASS_TRION={Attacker:5,Gunner:4,Shooter:4,Sniper:3,Trapper:5,Assassin:4,Tactician:4,Counterstriker:5,Ranbanein:4,Hyuse:4,Enedora:4,Hyrein:4,Viza:4,Gatlin:4,'Wen Sō':4,Ratarikov:4,Reghindetz:4,Koskero:4};
 function parseCode(txt){
   var p=String(txt||'').trim().split('|');
   if(p[0]!=='WT1'||p.length<12)return null;
